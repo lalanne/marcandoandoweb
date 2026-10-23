@@ -64,6 +64,11 @@ CLAUDE.md
 
 The `ig*.png` screenshots are reference material, not final site images. When the site is built, put the final files in `index.html`, `css/`, `js/` and `assets/img/` (optimized).
 
+## Git remote
+
+`origin` uses the SSH alias `github-lalanne` (`git@github-lalanne:lalanne/marcandoandoweb.git`),
+configured in `~/.ssh/config`. Do not rewrite the remote URL to HTTPS.
+
 ## Development
 
 ```bash
