@@ -1,0 +1,56 @@
+name: Task
+description: A unit of work for a person or an agent to pick up (feature, fix, content, docs, chore)
+title: "<type>: <short description>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Write this so an agent with no other context could do it.
+        One issue is one change and one PR. Split it if it grows.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: Matches the branch prefix (`feat/12-...`, `fix/12-...`).
+      options:
+        - feat
+        - fix
+        - docs
+        - chore
+        - refactor
+        - test
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What is this and why does it matter? Who is it for? Include the customer-facing goal if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist that says when this is done. Each item must be something you can check.
+      placeholder: |
+        - [ ] The hero shows the logo and an "Order on WhatsApp" button
+        - [ ] The button opens https://w.app/VMJF8o
+        - [ ] It looks right at 360px wide
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What should NOT be changed in this issue.
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to a spec, design, screenshot, Instagram post, or related issues. Say which files matter if you know.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for the agent
+      description: Constraints, decisions already made, or things to ask before starting. Leave empty if none.
