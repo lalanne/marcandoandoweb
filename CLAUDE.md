@@ -22,6 +22,16 @@ Project-specific rules below override the plugin's defaults.
 
 Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-shirts, hoodies, mugs, bottles, socks, pencil cases, caps, aprons and Christmas ornaments. Customers ask for their own design, name, course or idea. Orders come in through WhatsApp (`https://w.app/VMJF8o`) or Instagram DM (`@marcando_ando`).
 
+## Requirements and specs
+
+- `docs/requirements.md` holds the client's requirements (her text, verbatim,
+  in Spanish) with an English summary and the open questions. It is the source
+  the specs are derived from. Do not edit her original text.
+- `specs/` holds the specs; `specs/README.md` has the rules, the lifecycle
+  (`draft → approved → implemented → verified`) and the index. This project is
+  spec-first: no feature code without an approved spec, and only the owner
+  approves a spec. Read `specs/README.md` before drafting or implementing one.
+
 ## Rules
 
 - **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"). Code, class names and file names are in English.
