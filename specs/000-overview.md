@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** draft
+**Status:** approved (by the owner, 2026-10-23)
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -34,7 +34,7 @@ out of scope until it does.
 
 | Who | What they do |
 |-----|--------------|
-| **Visitor / customer** | Browses on a phone (most arrive from Instagram), finds a product or an idea, asks for a quote on WhatsApp. |
+| **Visitor / customer** | Browses on a phone, tablet or computer, finds a product or an idea, asks for a quote on WhatsApp. |
 | **Parent or course representative** | A visitor with a specific goal: group gifts for a class, generation, graduation or farewell (Req §3E). The schools section is for them. |
 | **Admin (Javiera)** | Keeps the catalog, prices, photos and gallery up to date. Not technical. |
 
@@ -85,7 +85,11 @@ Every other spec inherits these.
 - **Privacy:** many existing photos show children and school crests. Nothing with
   a minor's face or a school crest goes live until Javiera confirms permission
   (Req open question 9).
-- **Mobile first:** the primary device is a phone.
+- **Responsive:** the site works on phones, tablets and computers (Req §4). The
+  public site is designed phone first as a **working assumption** (social-media
+  visitors are usually on phones), not a fact about this business: it is
+  checked against real traffic once the site is live. The admin is designed for
+  use on a computer, and works on a phone.
 - **Performance:** images are optimized; pages load fast (Req §4, §8). The source
   screenshots are about 5 MB each and are not production images.
 - **Accessibility:** semantic HTML, `lang="es"`, Spanish `alt` text, good contrast.
