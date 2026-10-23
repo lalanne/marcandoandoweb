@@ -92,12 +92,15 @@ related spec can be approved.
    uses a `w.app/VMJF8o` short link. Confirm which is the canonical one.
 4. **Price example.** "Botella metálica, 600 mil" is probably a typo
    (6.000?). Confirm real prices; all prices in CLP.
-5. **Cart.** She wants it "only if it is not complex". Decide whether it is in
-   the first release or a later one. The quote flow through WhatsApp is the
-   first-stage requirement.
+5. **Cart.** She wants it "only if it is not complex". ~~Decide whether it is in
+   the first release.~~ **Decided by the owner 2026-10-23:** not in v1; catalog
+   plus WhatsApp quotes only, cart revisited after launch (spec 000).
 6. **"Ofertas" menu item.** The menu lists offers, but nothing else describes
-   an offers section. What is it (discounted products, seasonal promotions)?
-7. **Admin users.** One admin (Javiera), or several people?
+   an offers section. **Working answer 2026-10-23 (owner):** a product flag
+   with old and new price, shown in a filtered view (spec 000). Still needs
+   Javiera to confirm what she means (discounted products, seasonal promotions).
+7. **Admin users.** ~~One admin (Javiera), or several people?~~ **Decided by the
+   owner 2026-10-23:** one admin role in v1.
 8. **Photos.** Real product photos are needed at good quality. The ones we
    have are Instagram screenshots. Who supplies them and how?
 9. **Photos of minors and school crests.** Many existing photos show children
