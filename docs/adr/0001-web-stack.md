@@ -163,7 +163,9 @@ quoting anything to the client:
   likely needs a paid plan (about US$20 a month).
 - Supabase's free plan pauses projects after a period of inactivity, which would take
   a quiet shop's site down; a paid plan avoids it (about US$25 a month).
-- A `.cl` domain is registered at NIC Chile, in the client's name.
+- The domain `marcandoando.cl` is registered at NIC Chile, in the client's name
+  (bought by Javiera, 2026-10). `.cl` domains expire and must be renewed; check
+  NIC Chile's current renewal period and price before quoting her.
 
 ## Action Items
 
@@ -177,3 +179,10 @@ quoting anything to the client:
        `AGENTS.md` when the app is scaffolded.
 6. [ ] Create the Supabase and Vercel accounts in the client's name (or a clear
        handover plan), as the requirements ask for ownership.
+7. [ ] Connect `marcandoando.cl` to Vercel. Decide where DNS lives (NIC Chile's
+       own DNS, or delegate the nameservers to Vercel as `duplaweb`'s README
+       suggests), and which email provider serves `@marcandoando.cl`. Keep the
+       website records and the email records separate, and do not change the
+       email records when editing the website's. The owner handles access to
+       the NIC Chile account; never put registrar credentials in the repo or
+       in chat.
