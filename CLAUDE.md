@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code when working in this repository.
+Guidance for Claude Code when working in this repository. See `README.md` for the project overview.
 
 ## Shared engineering practices
 
@@ -17,6 +17,58 @@ the marketplace's `main`. Use them on every change:
 - The branch-guard hook blocks commits and pushes to `main`.
 
 Project-specific rules below override the plugin's defaults.
+
+## Project
+
+Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-shirts, hoodies, mugs, bottles, socks, pencil cases, caps, aprons and Christmas ornaments. Customers ask for their own design, name, course or idea. Orders come in through WhatsApp (`https://w.app/VMJF8o`) or Instagram DM (`@marcando_ando`).
+
+## Rules
+
+- **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"). Code, class names and file names are in English.
+- **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
+- **Stack:** static HTML, CSS and JavaScript. Do not add frameworks or a build step without asking.
+- **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
+- **Mobile first:** most customers arrive from Instagram on a phone.
+- **Accessibility:** semantic HTML, `lang="es"`, Spanish `alt` text on every image, good contrast.
+- **Performance:** the images in `assets/` are about 5 MB each. Compress them or convert them to WebP/AVIF at a sensible size before using them. Use `loading="lazy"` except in the hero.
+- **Real data only:** do not invent prices, phone numbers, addresses or testimonials. Use only what is on Instagram or what the user confirms. If a fact is missing, leave a visible placeholder and say so.
+- **Privacy:** many photos show children and school crests. Do not publish photos with minors' faces or school crests until the client has confirmed they have permission.
+
+## Brand
+
+- **Logo:** `assets/logo.png`. A cream t-shirt with a pink "M" and a purple mug as the "d" of "ando", with colored spark strokes.
+- **Palette:**
+  - Pink `#E8647F`
+  - Yellow `#F0B242`
+  - Teal `#4FB0B0`
+  - Purple `#9565C4`
+  - Night blue `#141824`
+  - Cream `#FBF5E9`
+- **Style:** playful, rounded and hand-made. Use a chunky rounded typeface (for example Fredoka or Baloo from Google Fonts) and dark outlines like the logo's.
+- Define the colors as CSS variables on `:root`.
+
+## Reference content (Instagram)
+
+- Prices seen: t-shirts from $7.000; hoodies from $9.900; socks $7.000 a pair (quantity discount); bottles from $7.000; pencil cases from $5.500; adult t-shirts $7.900 (2 for $14.000).
+- Highlight categories: Pedidos, Calcetines, Poleras, Navidad, Etiquetas cole, Botellas.
+- Seasonal campaigns: Christmas (ornaments with names), Father's Day, World Cup 2026 (sticker cards), St. Patrick's.
+- School market: hoodies with the school crest, named bottles, labels, class-generation t-shirts with handprints, group "alianza" t-shirts.
+
+## Structure
+
+```
+assets/        logo.png and Instagram screenshots (ig0-ig4.png, reference only)
+README.md
+CLAUDE.md
+```
+
+The `ig*.png` screenshots are reference material, not final site images. When the site is built, put the final files in `index.html`, `css/`, `js/` and `assets/img/` (optimized).
+
+## Development
+
+```bash
+python3 -m http.server 8000   # serve on http://localhost:8000
+```
 
 ## Deploy
 
