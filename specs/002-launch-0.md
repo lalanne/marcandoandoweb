@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft
+**Status:** approved (by the owner, 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
