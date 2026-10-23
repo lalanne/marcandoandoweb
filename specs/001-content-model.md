@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** draft
+**Status:** approved (by the owner, 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -270,7 +270,7 @@ seed data (spec 000, privacy).
 
 ## Open design questions
 
-These need a decision by the owner, or Javiera's answer, before approval.
+The owner approved the spec on 2026-10-23 with the proposals below as the working answers. Questions 2, 4 and 6 still need Javiera's confirmation; changing an answer later is an amendment note under the affected section.
 
 1. **Categories versus themes.** Req §3B lists ten "categories" that mix product
    types (bottles, t-shirts) with occasions and audiences (school, gifts, special
