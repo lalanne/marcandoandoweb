@@ -34,7 +34,7 @@ Style: playful, rounded and hand-made, like the logo (chunky rounded letters, co
 
 ## Stack
 
-Static HTML, CSS and JavaScript, no build step. It is fast, cheap to host and easy for the team to edit.
+Next.js (App Router), React, TypeScript and Tailwind CSS, with Supabase (Postgres, Auth, Storage) as the backend and Vercel for hosting. It is the same web stack as `duplaweb`, so one set of tools covers all the projects. The client needs an editable catalog and an admin panel, which a static site cannot give. See [ADR-0001](docs/adr/0001-web-stack.md) for the decision and the alternatives that were considered.
 
 ## Structure
 
@@ -49,13 +49,7 @@ marcandoandoweb/
 
 ## Development
 
-To view the site locally, open `index.html` or serve the folder:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open <http://localhost:8000>.
+There is no app yet. Setup and run commands will be added when it is scaffolded. Work is planned in `specs/` and tracked as GitHub issues.
 
 ## Open items
 

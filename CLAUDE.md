@@ -36,7 +36,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 
 - **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"). Code, class names and file names are in English.
 - **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
-- **Stack:** static HTML, CSS and JavaScript. Do not add frameworks or a build step without asking.
+- **Stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, Storage, RLS) and Vercel, the same web stack as `duplaweb`. See `docs/adr/0001-web-stack.md`. Do not add other frameworks, services or providers without asking: the point is one stack across all projects.
 - **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
 - **Mobile first:** most customers arrive from Instagram on a phone.
 - **Accessibility:** semantic HTML, `lang="es"`, Spanish `alt` text on every image, good contrast.
@@ -113,12 +113,13 @@ API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assi
 
 ## Development
 
-```bash
-python3 -m http.server 8000   # serve on http://localhost:8000
-```
+There is no app yet, so there are no dev, build or test commands. They will be
+added here when the app is scaffolded (see the action items in
+`docs/adr/0001-web-stack.md`).
 
 ## Deploy
 
-No deploy is configured yet. When one is, state here what merging to `main`
-deploys and how `land-pr` should confirm it (for example: "Merging to `main`
-deploys production on Vercel; `land-pr` must confirm the deploy is Ready").
+No deploy is configured yet. The plan (ADR-0001) is Vercel, deploying on every
+merge to `main`. When it is set up, state here what merging deploys and how
+`land-pr` should confirm it (for example: "Merging to `main` deploys production
+on Vercel; `land-pr` must confirm the deploy is Ready").
