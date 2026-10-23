@@ -69,6 +69,14 @@ The `ig*.png` screenshots are reference material, not final site images. When th
 `origin` uses the SSH alias `github-lalanne` (`git@github-lalanne:lalanne/marcandoandoweb.git`),
 configured in `~/.ssh/config`. Do not rewrite the remote URL to HTTPS.
 
+## Pull requests
+
+Assign every pull request to the repo owner when it is opened
+(`gh pr create --assignee @me`). This applies to PRs opened by the
+`core-practices:coder` agent too. With gh 2.45, `gh pr edit --add-assignee`
+fails on the deprecated Projects (classic) GraphQL field; assign through the
+API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assignees[]=lalanne"`.
+
 ## Development
 
 ```bash
