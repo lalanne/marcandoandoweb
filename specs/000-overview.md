@@ -38,8 +38,8 @@ out of scope until it does.
 | **Parent or course representative** | A visitor with a specific goal: group gifts for a class, generation, graduation or farewell (Req §3E). The schools section is for them. |
 | **Admin (Javiera)** | Keeps the catalog, prices, photos and gallery up to date. Not technical. |
 
-Decision for v1 (interpretation): **one admin role**. Whether others need access
-is an open question (Req open question 7).
+Decision for v1 (owner, 2026-10-23): **one admin role** (Req open question 7).
+More roles can be added later if Javiera needs them.
 
 ## Platform and stack
 
@@ -61,11 +61,12 @@ and hosting are part of delivery (Req §4, §8).
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |
 | **Admin panel:** add, edit and delete products; prices, photos and descriptions; categories; highlighted products; designs in the gallery; available or temporarily unavailable (Req §7) | Roles beyond a single admin |
-| **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | Cart: see open decisions |
+| **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | **Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5) |
+| **Offers ("Ofertas"):** a product can be flagged "en oferta" with its old and new price, and appears in a filtered view reached from the menu (Req §3A; interpretation, see decisions) | |
 | **Delivery:** domain, hosting, forms, training for Javiera, handover of accounts and ownership, cost information (Req §8) | |
 
-Two items are deliberately **not decided** here and block approval; see below:
-the cart (Req §1, §5) and the "Ofertas" menu item (Req §3A).
+The cart and the "Ofertas" item are settled below; "Ofertas" still needs
+Javiera's confirmation.
 
 ## Cross-cutting constraints
 
@@ -99,6 +100,14 @@ Every other spec inherits these.
   RLS-first approach from `duplaweb`'s `TESTING.md` applies: the public reads the
   catalog, only the admin writes, and tests prove it against a real local
   Supabase.
+- **Local development:** the whole site, including the admin and the database,
+  runs on the developer's machine without going live: the Next.js dev server on
+  `localhost`, and Supabase (Postgres, Auth, Storage) running locally in Docker
+  from migrations and seed data. Production changes only when a PR is merged to
+  `main`; each PR may get a Vercel preview URL that is not production. This
+  needs a current Node version, which the developer's machine does not have yet
+  (it has Node 16); the exact minimum is to be checked against the Next.js
+  version chosen when the app is scaffolded.
 
 ## Proposed next specs
 
@@ -126,20 +135,26 @@ Likely build order: 001 → 002 → 003 → 005 → 004 → 006 → 007 → 008 
 model comes first because the database, the admin and every public page depend
 on it.
 
-## Open decisions (block approval)
+## Decisions and open items
 
 Carried from the open questions in `docs/requirements.md`. "Q" followed by a
 number refers to that document's numbering.
 
-1. **Cart (Q5).** Req §1 lists "Solicitar productos personalizados (Carrito)" but
-   Req §5 says the first stage is catalog plus quote, and a cart "only if it is not
-   complex". Proposed: **out of v1**; the quote flow through WhatsApp is the v1
-   ordering path, and a cart is revisited after launch. Needs the owner's call.
-2. **"Ofertas" (Q6).** The menu in Req §3A lists offers, but nothing else
-   describes it. Proposed: a simple highlight, such as a flag on a product ("en
-   oferta" with the old and new price), shown in a filtered view. Needs
-   Javiera's answer.
-3. **Admin users (Q7).** Proposed: one admin role in v1.
+**Decided by the owner, 2026-10-23**
+
+1. **Cart (Q5): out of v1.** Req §1 lists "Solicitar productos personalizados
+   (Carrito)", but Req §5 says the first stage is catalog plus quote and a cart
+   "only if it is not complex". The WhatsApp quote flow is the v1 ordering path;
+   a cart is revisited after launch.
+2. **"Ofertas" (Q6): a product flag.** The menu in Req §3A lists offers, but
+   nothing else describes it. A product can be flagged "en oferta" with its old
+   and new price, shown in a filtered view. This is an interpretation, so it is
+   **pending Javiera's confirmation**; spec 001 models it as an optional flag so
+   a different answer is cheap to change.
+3. **Admin users (Q7): one admin role** in v1.
+
+**Still open**
+
 4. **WhatsApp link (Q3), contact email (Q1), photos (Q8), minors' photos and
    school crests (Q9), costs and ownership (Q10).** These do not change the scope,
    but launch is blocked until they are answered.
