@@ -120,6 +120,8 @@ added here when the app is scaffolded (see the action items in
 ## Deploy
 
 No deploy is configured yet. The plan (ADR-0001) is Vercel, deploying on every
-merge to `main`. When it is set up, state here what merging deploys and how
+merge to `main`, on the domain `marcandoando.cl` (registered by the client at
+NIC Chile; the owner handles access to that account). Never put registrar,
+DNS or hosting credentials in the repo or in chat. When it is set up, state here what merging deploys and how
 `land-pr` should confirm it (for example: "Merging to `main` deploys production
 on Vercel; `land-pr` must confirm the deploy is Ready").

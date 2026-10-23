@@ -84,7 +84,10 @@ related spec can be approved.
 
 1. **Contact email.** She says she does not have one yet. Needed for the
    footer and the optional contact form.
-2. **Domain name.** Which one, and who registers it (it should be in her name).
+2. **Domain name.** ~~Which one, and who registers it?~~ **Resolved
+   2026-10-23:** Javiera registered `marcandoando.cl` at NIC Chile, in her
+   name. Still open: where its DNS is hosted and which email provider to use
+   (see ADR-0001, action item 7).
 3. **WhatsApp link.** The requirements give `wa.me/56982661835`; Instagram
    uses a `w.app/VMJF8o` short link. Confirm which is the canonical one.
 4. **Price example.** "Botella metálica, 600 mil" is probably a typo
