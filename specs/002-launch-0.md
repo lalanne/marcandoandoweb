@@ -2,141 +2,206 @@
 
 **Status:** draft
 
-Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
-("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Issue #15. Interpretations
-are labelled **(interpretation)**.
+Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
+[`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
+[ADR-0001](../docs/adr/0001-web-stack.md). Issue #15. Interpretations are labelled
+**(interpretation)**.
 
 ## Why this exists
 
-The owner wants something live on Sunday 2026-10-25: *useful, with fewer
-features, functional and without errors* (owner, 2026-10-23). The full v1 in spec
-000 (admin, database, catalog, gallery) does not fit in two days. Launch 0 is a
-small, static-content site that gets `marcandoando.cl` online and turns visitors
-into WhatsApp conversations. v1 replaces it later, spec by spec.
+The owner wants something live on Sunday 2026-10-25: *useful, with fewer features,
+functional and without errors* (owner, 2026-10-23). The owner's minimum is **a
+database and an admin account**, so Javiera can keep the site current herself
+(Req §7). Everything else in v1 is cut down to what that minimum needs.
+
+Launch 0 is the smallest slice of v1 that has those two things. It is built on the
+final stack and the final model, so v1 grows from it instead of replacing it.
 
 Spec numbering: this spec takes number 002, so the numbers proposed in spec 000's
-"Proposed next specs" table shift by one when those specs are drafted. That table
-is explicitly not committed.
+"Proposed next specs" table shift by one when those specs are drafted.
+
+## Risk
+
+Two days is very tight for a database, auth, row-level security, image upload, an
+admin and a public page, all tested and without errors. Reusing `duplaweb`'s auth,
+`/panel` pattern and Vercel flow is what makes it possible at all. If the admin is
+not verified by Sunday midday, the owner decides: move the date, or launch the
+public page with content loaded by the developer and the admin following. That
+decision is the owner's, not the agent's.
 
 ## Scope
 
-One page, in Chilean Spanish (informal "tú"), built with the stack of ADR-0001 but
-**without Supabase**: Next.js, TypeScript and Tailwind, deployed on Vercel. Content
-is fixed in the code. There is no admin, no database, no login.
+### Data: a subset of spec 001
+
+Spec 001 must be approved for the part launch 0 uses. Launch 0 implements only:
+
+- **Category**: seeded by migration with the ten categories of Req §3B; not
+  editable in the admin at launch.
+- **Product**: name, slug, description, `price_from_clp`, `is_available`,
+  `is_featured`, `is_published`, category.
+- **Design**: title, slug, description, `is_published`; the gallery's unit.
+- **Image**: alt text required, owner is a product or a design, position.
+- **Row-level security** exactly as in spec 001 for those tables: the public reads
+  published rows, only the admin writes.
+
+Deferred to later specs: variants, themes, design-to-product links, offers
+(`offer_price_clp`), minimum quantity, materials, sizes and colors, multiple
+categories per product.
+
+A product in launch 0 belongs to one category **(interpretation: the join table
+comes with the multi-category work)**.
+
+### Admin: `/panel`
+
+- **Sign-in** with email and password (Supabase Auth). One admin account, created
+  by the developer and handed to Javiera. No sign-up page.
+- **Products:** list, create, edit, delete; set price, availability, highlighted,
+  published; choose the category; upload and order photos with alt text.
+- **Designs:** list, create, edit, delete; upload photos with alt text.
+- Designed for a computer, usable on a phone.
+- Out: roles, category editing, password reset flow beyond what Supabase gives by
+  default, bulk actions, search.
+
+### Public site
+
+One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
 | **Header** | Logo and links that scroll to the sections |
-| **Hero** | Logo or main collage image, the tagline "Marcamos tus ideas", a short line saying what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
-| **What we personalize** | The product types as simple cards: poleras, polerones, botellas, estuches, calcetines, regalos, productos escolares, adornos navideños. Each card has a photo, a name and, only where the owner confirms it, a "desde" price. Each card links to WhatsApp with a message naming that product |
-| **Real work** | A gallery of 8–12 real photos with Spanish `alt` text. Only photos approved for publication (see Privacy) |
+| **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
+| **Products** | Published products grouped by category: cover photo, name, "desde" price if set, and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it |
+| **Real work** | Published designs with their photos |
 | **How to order** | Three short steps: tell us your idea, we send you a quote, we make it |
 | **Schools and groups** | A short block for courses, generations and teams, with a WhatsApp button (Req §3E, reduced) |
 | **Footer** | WhatsApp, Instagram `@marcando_ando`, and the email only if the owner confirms one |
-| **Floating button** | A WhatsApp button always visible on the page (Req §6) |
+| **Floating button** | A WhatsApp button always visible (Req §6) |
 
-Not in launch 0: admin panel, catalog or product pages, gallery by theme, search
-and filters, offers, contact form, cart, analytics beyond what Vercel provides.
+There are no separate product pages, search or filters at launch.
 
 ## Constraints
 
-Inherited from spec 000 and `CLAUDE.md`, and restated where they bite:
+Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
 
-- **Real data only.** Prices are shown only if they are on the owner's Instagram
-  and the owner confirms they are current. Nothing is invented. A missing fact is
-  left out of the live page, not shown as a placeholder.
-- **Privacy.** No photo showing a minor's face or a school crest. The owner chooses
-  the photos and confirms that none of them does.
-- **WhatsApp link.** `https://wa.me/56982661835`, confirmed by the owner on
-  2026-10-23. Every ordering button uses it, with a pre-filled message.
-- **Performance.** Images are compressed (WebP or AVIF, sensible dimensions), not
-  the ~5 MB screenshots. Lazy loading except in the hero.
-- **Accessibility.** Semantic HTML, `lang="es"`, Spanish `alt` on every image,
-  good contrast, buttons reachable by keyboard.
-- **Responsive.** Works on phone, tablet and computer. The layout is phone first as
-  a working assumption (spec 000).
+- **Real data only.** Prices appear only if the owner confirms them. A missing fact
+  is left out of the live page, not shown as a placeholder. Seed data is for local
+  development and tests only and never reaches production.
+- **Privacy.** No photo showing a minor's face or a school crest goes live. The
+  owner chooses the photos and confirms it.
+- **WhatsApp link.** `https://wa.me/56982661835` (confirmed 2026-10-23). Every
+  ordering button uses it, with a pre-filled Spanish message.
+- **Security.** The admin area and every write are protected by the admin check and
+  by row-level security, and both are tested. The service-role key is never sent to
+  the browser. No credentials in the repo.
+- **Performance.** Uploaded images are limited in size and served optimized
+  (WebP/AVIF, sensible dimensions); lazy loading except in the hero.
+- **Accessibility.** Semantic HTML, `lang="es"`, Spanish `alt` on every image (the
+  admin cannot save an image without it), good contrast, keyboard access.
+- **Responsive.** Phone, tablet, computer.
 - **Brand.** Logo and palette from `CLAUDE.md`, colors as CSS variables on `:root`.
-- **Ownership.** The Vercel project is under the owner's existing account for now;
-  the handover to Javiera is part of v1 (spec 000). No credentials in the repo.
+- **Local development.** Runs entirely on the developer machine with local Supabase
+  in Docker, migrations from day one (spec 000).
+- **Ownership.** Accounts start under the owner's; handover to Javiera is part of v1.
 
 ## Acceptance criteria
 
-**Content**
+**Data and security** (these are spec 001's criteria for the tables above)
 
-1. Given the page loads, when the visitor looks at the top of it, then the logo, the
-   tagline and a "Cotizar por WhatsApp" button are visible without scrolling on a
-   360 px wide screen.
-2. Given the page, when it is read, then every section in the Scope table is present
-   and in the stated order, and all visible text is Spanish.
-3. Given any ordering button or the floating button, when it is activated, then it
-   opens `https://wa.me/56982661835` with a pre-filled Spanish message.
-4. Given a product card, when its button is activated, then the pre-filled message
-   names that product type.
-5. Given the Instagram link, when it is activated, then it opens
-   `https://www.instagram.com/marcando_ando`.
-6. Given the footer, when the owner has not confirmed an email, then no email or
-   placeholder appears.
-7. Given any price on the page, when it is checked against the owner's confirmation
-   list, then it matches; a price not on the list is a defect.
+1. Spec 001's criteria 1, 3, 5, 6, 8, 13, 15, 16, 18, 19 and 20, restricted to
+   Category, Product, Design and Image, pass against local Supabase.
+2. Given production, when the database is inspected, then it holds only real
+   content: no seed rows.
 
-**Quality**
+**Admin**
 
-8. Given every image, when the page is checked, then it has non-empty Spanish `alt`
-   text, and none is larger than 300 KB.
-9. Given the page on a mobile connection profile, when it is measured, then the
-   largest content is shown in under 2.5 s and the layout does not shift visibly.
-10. Given the page, when it is opened at 360, 768 and 1280 px, then there is no
-    horizontal scroll and nothing overlaps the floating button's tap target.
-11. Given the page, when navigated with the keyboard only, then every link and
-    button can be reached and shows a visible focus.
-12. Given the page, when an automated accessibility check runs, then it reports no
-    serious or critical violations.
-13. Given the page, when it loads in production, then the browser console shows no
+3. Given a visitor who is not signed in, when they open `/panel` or any panel route,
+   then they are sent to the sign-in page and see no data.
+4. Given the admin's correct email and password, when they sign in, then they reach
+   the panel; given a wrong password, then they see a clear Spanish error and stay
+   signed out.
+5. Given a signed-in user who is not the admin, when they open the panel or try to
+   write, then they are refused.
+6. Given the admin, when they create a product with name, price, category and a
+   photo with alt text and publish it, then it appears on the public page without a
+   deploy.
+7. Given a published product, when the admin changes its price, then the public page
+   shows the new price; when they mark it unavailable, then it shows the notice and
+   no WhatsApp button; when they unpublish or delete it, then it disappears.
+8. Given the admin, when they try to save an image without alt text or above the size
+   limit, then it is refused with a clear message.
+9. Given the admin, when they create, edit and delete a design with photos, then the
+   "Real work" section reflects it.
+10. Given the admin signs out, when they press the browser's back button, then the
+    panel does not show data.
+
+**Public page**
+
+11. Given the page loads, when the visitor looks at the top, then the logo, the
+    tagline and a "Cotizar por WhatsApp" button are visible without scrolling on a
+    360 px wide screen.
+12. Given the page, when it is read, then every section in the table is present in
+    order, and all visible text is Spanish; a section with no content (for example no
+    designs yet) is hidden instead of shown empty.
+13. Given any ordering or floating button, when activated, then it opens
+    `https://wa.me/56982661835` with a pre-filled Spanish message, and a product's
+    message names that product.
+14. Given the Instagram link, when activated, then it opens
+    `https://www.instagram.com/marcando_ando`.
+15. Given the footer, when no email is confirmed, then no email or placeholder
+    appears.
+16. Given every image, when checked, then it has Spanish `alt` text.
+
+**Quality and delivery**
+
+17. Given the page at 360, 768 and 1280 px, when opened, then there is no horizontal
+    scroll and the floating button covers no content that cannot be reached.
+18. Given the page, when navigated with the keyboard only, then every link and button
+    can be reached with a visible focus.
+19. Given the page and the panel, when an automated accessibility check runs, then it
+    reports no serious or critical violations.
+20. Given production, when the page and the panel are used, then the console shows no
     errors and no request fails.
-
-**Delivery**
-
-14. Given `marcandoando.cl` and `www.marcandoando.cl`, when opened, then both serve
-    the page over HTTPS with a valid certificate, and `www` redirects to the apex
-    (or the reverse, one canonical address).
-15. Given the page's head, when inspected, then it has a title, a description, Open
+21. Given a mobile connection profile, when the page is measured, then the largest
+    content shows in under 2.5 s with no visible layout shift.
+22. Given `marcandoando.cl` and `www.marcandoando.cl`, when opened, then both serve
+    the site over HTTPS with a valid certificate, and one redirects to the other.
+23. Given the page's head, when inspected, then it has a title, a description, Open
     Graph tags with a preview image, a favicon and `lang="es"`.
-16. Given a merge to `main`, when the deploy finishes, then production is updated and
-    the check in `land-pr` can confirm it is Ready.
+24. Given a merge to `main`, when the deploy finishes, then production is updated, and
+    migrations have been applied to the production database (the exact step is
+    decided in the deployment work and recorded in `CLAUDE.md`).
 
 ## Verification plan
 
-Layers follow `tdd-change` and `duplaweb`'s `TESTING.md`; there is no database, so
-no Supabase tests.
-
 | # | Criterion | Layer |
 |---|-----------|-------|
-| 3, 4 | WhatsApp link and message builder | Unit (Vitest): a pure function that builds the URL and the encoded message |
-| 1, 2, 5, 6, 10, 11, 13 | Content, layout, keyboard, console | End to end (Playwright) at 360, 768 and 1280 px |
-| 7 | Prices match the confirmation list | Unit: prices come from one data file; test compares against the list the owner approved |
-| 8 | Images | Script check in CI: alt text present, file size under 300 KB |
-| 9, 12 | Performance, accessibility | Lighthouse and axe, run on the preview deploy |
-| 14, 15, 16 | DNS, SSL, metadata, deploy | Manual checklist on the live site, plus the Vercel deploy status |
+| 1, 5, 8 (size) | Constraints, RLS, non-admin refused | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin |
+| 13 | WhatsApp URL and message builder | Unit (Vitest), pure function |
+| 3, 4, 6, 7, 9, 10 | Admin flows | End to end (Playwright) against local Supabase |
+| 11, 12, 14–18 | Public page, layout, keyboard | End to end (Playwright) at 360, 768 and 1280 px |
+| 19, 21 | Accessibility, performance | axe and Lighthouse on the preview deploy |
+| 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
-Final manual check before announcing: open the live site on a real phone, tap every
-button, and send one real WhatsApp message to the business number.
+Final check before announcing: on a real phone, sign in as the admin, add a product
+with a photo, see it on the public page, tap every button, and send one real WhatsApp
+message to the business number. Then delete the test product.
 
 ## Dependencies and blockers
 
-Code is not the critical path; these are:
-
 | Item | Who | Needed by |
 |------|-----|-----------|
-| Node upgrade on the developer machine (Node 16 is too old for current Next.js) | Owner | Before scaffolding |
-| Photos chosen for the gallery (8–12), without minors' faces or crests, clean files rather than Instagram screenshots | Owner and Javiera | Saturday |
-| Prices to show (or none), confirmed current | Javiera | Saturday |
-| Contact email, or decision to omit | Javiera | Saturday |
-| Vercel plan: confirm that the account used for `duplaweb` may host a business site, and its terms (ADR-0001, "to verify") | Owner | Saturday |
-| DNS: point `marcandoando.cl` and `www` to Vercel at NIC Chile, keeping any email records untouched (ADR-0001 action 7) | Owner | Saturday night, DNS can take hours to propagate |
+| Approval of this spec and of spec 001's launch subset | Owner | Friday night |
+| Node upgrade on the developer machine (Node 16 is too old) and the Supabase CLI | Owner | Friday night |
+| Supabase project for production, and its plan: the free plan pauses an idle project, so a paid plan is likely needed for a live business site (ADR-0001, "to verify") | Owner | Saturday |
+| Vercel plan: confirm the account used for `duplaweb` may host a business site (ADR-0001, "to verify") | Owner | Saturday |
+| Photos for the first products and designs, clean files without minors' faces or crests | Owner and Javiera | Saturday |
+| Prices to show, confirmed current; contact email or decision to omit | Javiera | Saturday |
+| DNS: point `marcandoando.cl` and `www` to Vercel at NIC Chile, leaving email records alone | Owner | Saturday night |
 
 ## Decisions the owner confirmed (2026-10-23)
 
 - "Live" means useful and without errors, with fewer features.
+- Database and admin account are the minimum for launch.
 - WhatsApp is `https://wa.me/56982661835`.
 - Real photos without children's faces or school crests may be used.
 - The Vercel account used for `duplaweb` hosts this site.
@@ -144,19 +209,9 @@ Code is not the critical path; these are:
 
 ## Open questions
 
-1. Which photos? The owner picks 8–12; I can prepare them (resize, convert, write
-   `alt` text) once the files are in a folder.
-2. Show "desde" prices on the cards, or none at launch? The Instagram prices are
-   t-shirts from $7.000, hoodies from $9.900, bottles from $7.000, pencil cases from
-   $5.500, socks $7.000; they appear in `CLAUDE.md` as seen, not as confirmed.
-3. Is a preview image for social sharing (Open Graph) the logo, or a collage?
-4. Does the "Cotizar" message ask the visitor anything (name, product, quantity), or
-   is it a fixed greeting? Proposed: a fixed greeting that names the product and
-   asks them to tell their idea.
-
-## Handover to v1
-
-When v1 is ready, this page is replaced, not extended: the home page of spec 006
-takes its place, and the content here moves into the database through the admin.
-Nothing in launch 0 should make that harder; its copy and images are kept in
-single data files for that reason.
+1. Is one category per product enough at launch, or is the join table needed now?
+2. Show "desde" prices from the start, or leave price off until Javiera confirms?
+3. The social-sharing preview image: the logo or a collage?
+4. The pre-filled WhatsApp message: a fixed greeting naming the product, asking them
+   to tell their idea. Proposed; confirm.
+5. Does Javiera sign in with an email she owns? Which one?
