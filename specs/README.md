@@ -16,6 +16,7 @@ The client's own words live in [`../docs/requirements.md`](../docs/requirements.
 | # | Spec | Status |
 |---|------|--------|
 | 000 | [Product overview & v1 scope](000-overview.md) | approved |
+| 001 | [Content model](001-content-model.md) | approved |
 | 002 | [Launch 0: first public release](002-launch-0.md) | approved |
 
 Status values: `draft` → `approved` → `implemented` → `verified`.
