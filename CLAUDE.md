@@ -246,11 +246,56 @@ because they become required checks (spec 003). Run each locally before opening 
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.
 
+
 ## Deploy
 
-No deploy is configured yet. The plan (ADR-0001) is Vercel, deploying on every
-merge to `main`, on the domain `marcandoando.cl` (registered by the client at
-NIC Chile; the owner handles access to that account). Never put registrar,
-DNS or hosting credentials in the repo or in chat. When it is set up, state here what merging deploys and how
-`land-pr` should confirm it (for example: "Merging to `main` deploys production
-on Vercel; `land-pr` must confirm the deploy is Ready").
+Specified in `specs/004-deployment.md`. Nothing reaches production until the
+owner accepts it. "Production" is the cloud Supabase project (migrations) and the
+Vercel site, changed together by `.github/workflows/deploy.yml`.
+
+**What merging does.** A merge to `main` runs CI. When CI succeeds, the `Deploy`
+workflow checks out that exact commit and decides whether it changes anything that
+runs in production (`scripts/deploy-needed.mjs`). Docs, specs, assets, `*.md` and
+issue templates alone do not; anything else does. For those, the `deploy` job stops
+at the `production` environment as "waiting for review". Nothing in production has
+changed at that point. Vercel's own production deploy for `main` is off
+(`vercel.json`); pull requests still get Vercel previews.
+
+**Accepting or rejecting.** The owner gets a notification. In GitHub (web or mobile
+app) open the run, choose "Review deployments", tick `production`, and "Approve and
+deploy" or "Reject". Rejecting ends the run and changes nothing. Self-approval is
+allowed. Only one deployment is pending at a time: a newer merge replaces an older
+pending one, and a running deploy is never cancelled. A commit that was replaced or
+rejected is not lost: the next run compares with the last successful deploy and
+includes it.
+
+**After acceptance** the job runs `supabase link` and `supabase db push` (pending
+migrations from `supabase/migrations/`, no seed data), and only if that succeeds
+`vercel pull`, `vercel build --prod` and `vercel deploy --prebuilt --prod` for the
+same commit. The production URL and commit are written to the run summary.
+`land-pr` confirms a deploy by reading that summary (`gh run list --workflow
+deploy.yml`) and checking the run is green; a waiting run is not a failure, tell
+the owner it needs their acceptance.
+
+**Migration rule.** Migrations are forward-only and run before the new code, and the
+old code keeps serving if the deploy fails afterwards. So each migration must work
+with both the previous and the new code: add first, remove in a later release
+("expand then contract"). Never edit the production schema from the dashboard.
+
+**Rollback.** Redeploy the previous successful deployment from the Vercel dashboard
+(Deployments, "Promote to Production") or with `vercel rollback`. A bad migration is
+fixed with a new migration that goes through this same pipeline.
+
+**Setup the owner does once** (never put values in the repo or in chat):
+- GitHub Environment `production` with the owner as required reviewer; its secrets
+  `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `SUPABASE_ACCESS_TOKEN`,
+  `SUPABASE_DB_PASSWORD` and variable `SUPABASE_PROJECT_REF`. Rotate them by
+  changing the secret; no code change.
+- In Vercel (project settings, Environment Variables, Production) add
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` with the production
+  Supabase project's URL and public (anon) key **before the first accepted deploy**.
+  `vercel pull` brings them into the build.
+
+The domain `marcandoando.cl` is registered by the client at NIC Chile; the owner
+handles access to that account. Never put registrar, DNS or hosting credentials in
+the repo or in chat.
