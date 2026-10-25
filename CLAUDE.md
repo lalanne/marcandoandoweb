@@ -157,7 +157,33 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | Typecheck | `npm run typecheck` |
 | Unit tests (Vitest, `tests/unit/`) | `npm test` |
 | End-to-end tests (Playwright, `tests/e2e/`; starts the dev server itself) | `npm run test:e2e` |
+| Integration tests (Vitest against local Supabase, `tests/integration/`) | `npm run test:integration` |
 | Supabase CLI (devDependency) | `npx supabase` |
+
+### Local Supabase
+
+Needs Docker running. All commands run from the repo root.
+
+| Task | Command |
+|------|---------|
+| Start (first run downloads images; applies migrations and seed) | `npx supabase start` (add `-x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor` for the light stack CI uses) |
+| Reset from migrations and seed | `npx supabase db reset` |
+| Reset from the migrations alone (what `migrations` checks) | `npx supabase db reset --no-seed` |
+| Show URLs and keys | `npx supabase status` |
+| Stop | `npx supabase stop` |
+| New migration | `npx supabase migration new <name>`, then write the SQL; never edit a merged migration |
+
+- Schema lives in `supabase/migrations/`. `supabase/seed.sql` is fake data for
+  local development and tests only; it runs on `db reset` and is never applied to
+  production. The ten categories are in a migration because they are real data.
+- The tests read the URL and the anon key at run time from `npx supabase status -o env`,
+  or from `SUPABASE_URL` and `SUPABASE_ANON_KEY` when set. These are the public local
+  demo keys; never commit keys, and never point the tests at a real project.
+- Seeded local users: `admin@marcandoando.test` (the admin) and
+  `cliente@marcandoando.test` (a signed-in non-admin); passwords are in
+  `tests/integration/helpers.ts` and are valid only on a local database.
+- The admin is the user whose token has `app_metadata.role = 'admin'`
+  (`public.is_admin()`). Set it with the service role only, never from the client.
 
 ### CI (`.github/workflows/ci.yml`)
 
@@ -169,9 +195,11 @@ because they become required checks (spec 003). Run each locally before opening 
 | `static` | Lint, typecheck, production build | `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout) |
 | `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
 | `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
+| `integration` | Start local Supabase, reset from migrations and seed, run `tests/integration/` | `npx supabase start && npx supabase db reset && npm run test:integration` |
+| `migrations` | A clean reset works from the migrations alone, and leaves the ten categories and no seed rows | `npx supabase db reset --no-seed` |
 | `tests-with-changes` | A PR that changes `app/`, `src/` or `supabase/migrations/` also changes a test file, unless it has the label `no-test-needed` (the owner adds it) | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" LABELS='[]' node scripts/tests-with-changes.mjs` |
 
-`integration`, `e2e` and `migrations` are added by later issues (spec 003, Rollout).
+`e2e` is added by a later issue (spec 003, Rollout).
 
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.

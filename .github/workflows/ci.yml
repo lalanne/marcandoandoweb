@@ -72,3 +72,46 @@ jobs:
           CHANGED_FILES="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
           export CHANGED_FILES
           node scripts/tests-with-changes.mjs
+
+  # Spec 003. Local Supabase in Docker (the CLI is a devDependency). Only the
+  # services the tests need are started, to keep the job fast.
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
+      - name: Reset from migrations and seed
+        run: npx supabase db reset
+      - name: Integration tests
+        run: npm run test:integration
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
+
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
+      - name: Clean reset from the migrations alone (no seed)
+        run: npx supabase db reset --no-seed
+      - name: The migrations leave the ten categories and no seed rows
+        run: |
+          docker exec supabase_db_marcandoandoweb psql -U postgres -tA -c \
+            "select (select count(*) from public.category) || ',' || (select count(*) from public.product) || ',' || (select count(*) from auth.users)" \
+            | tee /dev/stderr | grep -qx '10,0,0'
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
