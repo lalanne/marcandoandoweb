@@ -169,6 +169,11 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | Integration tests (Vitest against local Supabase, `tests/integration/`) | `npm run test:integration` |
 | Supabase CLI (devDependency) | `npx supabase` |
 
+The public page needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+(copy `.env.example` to the gitignored `.env.local`; local values come from
+`npx supabase status`). The page reads the database at request time inside
+`<Suspense>`, so database changes show without a redeploy.
+
 ### Local Supabase
 
 Needs Docker running. All commands run from the repo root.
