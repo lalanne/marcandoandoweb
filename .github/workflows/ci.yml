@@ -115,3 +115,44 @@ jobs:
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
+
+  # Spec 003. Production build started against local Supabase, Playwright at
+  # 360 and 1280 px (see playwright.config.ts), axe checks inside the tests.
+  # The owner must add `e2e` to the required checks after this merges.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
+      - name: Reset from migrations and seed
+        run: npx supabase db reset
+      - name: Read the local URL and public anon key
+        # Public demo keys of the local stack; they are not secrets.
+        run: |
+          eval "$(npx supabase status -o env | sed -n 's/^\(API_URL\|ANON_KEY\)=/export LOCAL_\1=/p')"
+          echo "NEXT_PUBLIC_SUPABASE_URL=${LOCAL_API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${LOCAL_ANON_KEY}" >> "$GITHUB_ENV"
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Production build
+        run: npm run build
+      - name: Playwright (starts the production server)
+        run: npm run test:e2e
+      - name: Upload traces and report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
