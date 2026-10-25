@@ -19,6 +19,7 @@ The client's own words live in [`../docs/requirements.md`](../docs/requirements.
 | 001 | [Content model](001-content-model.md) | approved |
 | 002 | [Launch 0: first public release](002-launch-0.md) | approved |
 | 003 | [CI and testing policy](003-ci-and-testing.md) | approved |
+| 004 | [Deployment pipeline](004-deployment.md) | draft |
 
 Status values: `draft` → `approved` → `implemented` → `verified`.
 

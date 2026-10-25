@@ -167,9 +167,13 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
     the site over HTTPS with a valid certificate, and one redirects to the other.
 23. Given the page's head, when inspected, then it has a title, a description, Open
     Graph tags with a preview image, a favicon and `lang="es"`.
-24. Given a merge to `main`, when the deploy finishes, then production is updated, and
-    migrations have been applied to the production database (the exact step is
-    decided in the deployment work and recorded in `CLAUDE.md`).
+24. Given a merge to `main` that changes the app and the owner has accepted the
+    deployment (spec 004), when the deploy finishes, then production is updated, and
+    migrations have been applied to the production database.
+
+    **2026-10-25 amendment.** This criterion first said production updates on every
+    merge. The owner decided that nothing reaches production before they accept it;
+    the pipeline is specified in [spec 004](004-deployment.md).
 
 ## Verification plan
 
