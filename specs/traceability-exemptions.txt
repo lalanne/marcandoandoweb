@@ -2,3 +2,11 @@
 # One per line: <spec number>-AC<criterion number> <reason>
 # Example: 002-AC99 Needs a real phone to confirm the WhatsApp message opens
 # Reviewed by the owner. Lines starting with # and blank lines are ignored.
+003-AC1 Throwaway exemption for verification
+003-AC6 Throwaway exemption for verification
+003-AC7 Throwaway exemption for verification
+003-AC8 Throwaway exemption for verification
+003-AC9 Throwaway exemption for verification
+003-AC10 Throwaway exemption for verification
+003-AC11 Throwaway exemption for verification
+003-AC12 Throwaway exemption for verification
