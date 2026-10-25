@@ -93,7 +93,7 @@ empty suite. `static`, `unit`, `traceability` and `tests-with-changes` come firs
 5. No required approvals: the owner is the only reviewer. The owner merges by
    telling the agent to (`land-pr`).
 6. The rules apply to repository admins too, so the owner cannot bypass a red check
-   by accident. **Pending the owner's decision; proposed: yes.**
+   by accident (decided by the owner, 2026-10-25).
 
 The existing local hook that blocks commits and pushes to `main` stays.
 
@@ -153,10 +153,9 @@ The CI is verified by trying to break it, on a throwaway branch, once per check:
 
 ## Decisions and open questions
 
-1. Rule 6 (apply to admins too): proposed yes, owner to decide.
-2. Coverage: report only, with no threshold, until there is enough code to pick a
+1. Coverage: report only, with no threshold, until there is enough code to pick a
    meaningful one **(interpretation)**.
-3. Test data: only fake data in the seed; no real child photo or school crest in
+2. Test data: only fake data in the seed; no real child photo or school crest in
    any fixture (spec 000, privacy).
-4. Secrets: the CI uses only local Supabase and its published demo keys, so it
+3. Secrets: the CI uses only local Supabase and its published demo keys, so it
    needs no repository secrets at first.
