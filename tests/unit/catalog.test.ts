@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatClp } from "@/lib/catalog/format";
 import { groupByCategory } from "@/lib/catalog/group";
-import { publicImageUrl } from "@/lib/catalog/images";
+import { imagePathFromSegments, imageUrl } from "@/lib/catalog/images";
 
 const cat = (slug: string, position: number) => ({
   id: `c-${slug}`,
@@ -59,10 +59,28 @@ describe("groupByCategory", () => {
   });
 });
 
-describe("publicImageUrl", () => {
-  it("[002-AC16] builds the public storage URL of an image", () => {
-    expect(publicImageUrl("http://x.test/", "demo/botella.webp")).toBe(
-      "http://x.test/storage/v1/object/public/images/demo/botella.webp",
+describe("imageUrl", () => {
+  it("[002-AC26] builds the same-origin URL of an image, never a storage URL", () => {
+    expect(imageUrl("demo/botella.webp")).toBe("/img/demo/botella.webp");
+  });
+
+  it("[002-AC26] encodes each path segment", () => {
+    expect(imageUrl("demo/mi foto.webp")).toBe("/img/demo/mi%20foto.webp");
+  });
+});
+
+describe("imagePathFromSegments", () => {
+  it("[002-AC26] joins the route segments into a storage path", () => {
+    expect(imagePathFromSegments(["demo", "botella.webp"])).toBe(
+      "demo/botella.webp",
     );
+  });
+
+  it("[002-AC25] refuses empty paths and path traversal", () => {
+    expect(imagePathFromSegments([])).toBeNull();
+    expect(imagePathFromSegments(["demo", ".."])).toBeNull();
+    expect(imagePathFromSegments(["."])).toBeNull();
+    expect(imagePathFromSegments(["a", ""])).toBeNull();
+    expect(imagePathFromSegments(["a\\b"])).toBeNull();
   });
 });

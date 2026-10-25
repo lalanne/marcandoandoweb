@@ -1,17 +1,15 @@
 import Image from "next/image";
 import { formatClp } from "@/lib/catalog/format";
-import { publicImageUrl } from "@/lib/catalog/images";
+import { imageUrl } from "@/lib/catalog/images";
 import { loadCatalog } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { buttonClass } from "./Hero";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-
 function Photo({ image }: { image: CatalogImage }) {
   return (
     <Image
-      src={publicImageUrl(SUPABASE_URL, image.storagePath)}
+      src={imageUrl(image.storagePath)}
       alt={image.altText}
       width={600}
       height={450}
