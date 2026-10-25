@@ -56,9 +56,18 @@ the existing tests untouched or strengthened, never weakened.
 - A test that proves a criterion carries its ID in its name: `[002-AC7]`, meaning
   criterion 7 of the spec numbered 002. Criteria are numbered in each spec
   already.
-- A script in CI reads every spec with status `approved` or `implemented` and
-  fails if a criterion has no test carrying its ID, or if a test names an ID that
-  does not exist.
+- A script in CI reads every spec with status `implemented` or `verified` and
+  fails if a criterion has no test carrying its ID. It also fails, for every spec
+  including drafts, if a test names an ID that does not exist. Specs still
+  `draft` or `approved` are not enforced for missing tests, because a spec being
+  built would otherwise turn CI red until its last criterion is done.
+
+  **2026-10-25 amendment - enforce implemented specs only.** This section first
+  said `approved` or `implemented`. CI v1 (PR #33) enforces `implemented` or
+  `verified`, and the owner chose that on 2026-10-25: with every spec approved and
+  none built, enforcing `approved` specs fails every PR. The missing-test check
+  therefore runs when a spec is marked `implemented`, so its tests must exist
+  before that status change.
 - A criterion that cannot be an automated test (DNS, a real phone check) is listed
   with its reason in `specs/traceability-exemptions.txt`, reviewed by the owner.
 
