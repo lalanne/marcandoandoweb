@@ -113,9 +113,22 @@ API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assi
 
 ## Development
 
-There is no app yet, so there are no dev, build or test commands. They will be
-added here when the app is scaffolded (see the action items in
-`docs/adr/0001-web-stack.md`).
+Node 22 is required (`.nvmrc`); the default shell Node may be older. Run
+`source ~/.nvm/nvm.sh && nvm use` before any node/npm command, then `npm install`.
+Before the first Playwright run, install the browser once: `npx playwright install chromium`.
+
+| Task | Command |
+|------|---------|
+| Dev server (http://localhost:3000) | `npm run dev` |
+| Production build | `npm run build` |
+| Lint | `npm run lint` |
+| Typecheck | `npm run typecheck` |
+| Unit tests (Vitest, `tests/unit/`) | `npm test` |
+| End-to-end tests (Playwright, `tests/e2e/`; starts the dev server itself) | `npm run test:e2e` |
+| Supabase CLI (devDependency) | `npx supabase` |
+
+`AGENTS.md` tells agents to read the bundled Next.js docs in
+`node_modules/next/dist/docs/` before writing code.
 
 ## Deploy
 
