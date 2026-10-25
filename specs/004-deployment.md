@@ -1,6 +1,6 @@
 # 004 — Deployment Pipeline
 
-**Status:** draft
+**Status:** approved (by the owner, 2026-10-25)
 
 Sources: [spec 002](002-launch-0.md) (criteria 20 and 24),
 [spec 003](003-ci-and-testing.md), [ADR-0001](../docs/adr/0001-web-stack.md). Issue
@@ -116,6 +116,8 @@ acceptance, not on merge. See criteria 1 to 3 here. The criterion in spec 002 is
 changed in this PR.
 
 ## Open questions
+
+The owner approved the spec on 2026-10-25 with the proposals below as the working answers.
 
 1. A second, staging environment (own Supabase project) before production: not now
    **(interpretation)**; the demo is the only cloud environment.
