@@ -1,6 +1,6 @@
 # 003 — CI and Testing Policy
 
-**Status:** approved (by the owner, 2026-10-25)
+**Status:** implemented (throwaway)
 
 Sources: [spec 000](000-overview.md) (testing constraint), [spec 002](002-launch-0.md),
 [ADR-0001](../docs/adr/0001-web-stack.md), the `core-practices` skills `tdd-change`,
