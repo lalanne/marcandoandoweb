@@ -43,7 +43,8 @@ create table public.product (
   slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   name text not null check (length(btrim(name)) > 0),
   description text,
-  price_from_clp integer not null check (price_from_clp >= 0),
+  -- Optional: prices are unconfirmed (spec 001 amendment 2026-10-25). A null check passes.
+  price_from_clp integer check (price_from_clp >= 0),
   -- Launch 0: one category per product (spec 002). The join table comes later.
   category_id uuid not null references public.category (id) on delete restrict,
   is_featured boolean not null default false,

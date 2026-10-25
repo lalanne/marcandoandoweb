@@ -121,6 +121,19 @@ describe("constraints", () => {
     expect(zero.price_from_clp).toBe(0);
   });
 
+  it("[001-AC1] allows a product with no price, and still rejects a negative one", async () => {
+    const noPrice = await newProduct({ price_from_clp: null, is_published: true });
+    expect(noPrice.price_from_clp).toBeNull();
+    const seen = ok(await anon.from("product").select("id, price_from_clp").eq("id", noPrice.id));
+    expect(seen).toEqual([{ id: noPrice.id, price_from_clp: null }]);
+
+    const { error } = await admin
+      .from("product")
+      .update({ price_from_clp: -5 })
+      .eq("id", noPrice.id);
+    expect(error).not.toBeNull();
+  });
+
   it("[001-AC3] rejects a second row with the same slug in product, category and design", async () => {
     const p = await newProduct();
     const dupProduct = await admin.from("product").insert({
