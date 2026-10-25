@@ -38,7 +38,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 - **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
 - **Stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, Storage, RLS) and Vercel, the same web stack as `duplaweb`. See `docs/adr/0001-web-stack.md`. Do not add other frameworks, services or providers without asking: the point is one stack across all projects.
 - **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
-- **Mobile first:** most customers arrive from Instagram on a phone.
+- **Responsive, designed phone first** as a working assumption (see `specs/000-overview.md`).
 - **Accessibility:** semantic HTML, `lang="es"`, Spanish `alt` text on every image, good contrast.
 - **Performance:** the images in `assets/` are about 5 MB each. Compress them or convert them to WebP/AVIF at a sensible size before using them. Use `loading="lazy"` except in the hero.
 - **Real data only:** do not invent prices, phone numbers, addresses or testimonials. Use only what is on Instagram or what the user confirms. If a fact is missing, leave a visible placeholder and say so.
@@ -67,12 +67,17 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 ## Structure
 
 ```
+app/           Next.js App Router (layout, pages, globals.css)
+tests/unit/    Vitest tests
+tests/e2e/     Playwright tests
+specs/         specs (see specs/README.md)
+docs/          requirements and ADRs
 assets/        logo.png and Instagram screenshots (ig0-ig4.png, reference only)
-README.md
-CLAUDE.md
+public/img/    optimized images served by the site (create it when the first one is added)
+AGENTS.md, README.md, CLAUDE.md
 ```
 
-The `ig*.png` screenshots are reference material, not final site images. When the site is built, put the final files in `index.html`, `css/`, `js/` and `assets/img/` (optimized).
+The `ig*.png` screenshots are reference material, not final site images. Put the final, optimized images (WebP/AVIF) in `public/img/`.
 
 ## Git remote
 

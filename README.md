@@ -40,16 +40,31 @@ Next.js (App Router), React, TypeScript and Tailwind CSS, with Supabase (Postgre
 
 ```
 marcandoandoweb/
+├── app/           # Next.js App Router (layout, pages, globals.css)
+├── tests/unit/    # Vitest tests
+├── tests/e2e/     # Playwright tests
+├── specs/         # specs, see specs/README.md
+├── docs/          # requirements and ADRs
 ├── assets/        # logo and images (the originals are Instagram screenshots)
+├── AGENTS.md
 ├── README.md
 └── CLAUDE.md
 ```
 
-`index.html`, `css/` and `js/` will be added when the site is built.
-
 ## Development
 
-There is no app yet. Setup and run commands will be added when it is scaffolded. Work is planned in `specs/` and tracked as GitHub issues.
+Requires Node 22 (pinned in `.nvmrc`).
+
+```
+source ~/.nvm/nvm.sh && nvm use   # Node 22
+npm install
+npx playwright install chromium   # once, for the end-to-end tests
+npm run dev                       # http://localhost:3000
+npm test                          # unit tests (Vitest)
+npm run test:e2e                  # end-to-end tests (Playwright)
+```
+
+Also `npm run build`, `npm run lint` and `npm run typecheck`. Work is planned in `specs/` and tracked as GitHub issues.
 
 ## Open items
 
