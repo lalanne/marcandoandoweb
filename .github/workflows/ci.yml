@@ -3,7 +3,7 @@ name: CI
 # Spec 003. Job names are stable on purpose: they become required checks.
 on:
   pull_request:
-    branches: [main]
+    branches: [main, "tmp/30-base"]
     # labeled/unlabeled so the owner's `no-test-needed` waiver re-runs the check.
     types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
