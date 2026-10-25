@@ -38,7 +38,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 - **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
 - **Stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, Storage, RLS) and Vercel, the same web stack as `duplaweb`. See `docs/adr/0001-web-stack.md`. Do not add other frameworks, services or providers without asking: the point is one stack across all projects.
 - **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
-- **Mobile first:** most customers arrive from Instagram on a phone.
+- **Responsive, designed phone first** as a working assumption (see `specs/000-overview.md`).
 - **Accessibility:** semantic HTML, `lang="es"`, Spanish `alt` text on every image, good contrast.
 - **Performance:** the images in `assets/` are about 5 MB each. Compress them or convert them to WebP/AVIF at a sensible size before using them. Use `loading="lazy"` except in the hero.
 - **Real data only:** do not invent prices, phone numbers, addresses or testimonials. Use only what is on Instagram or what the user confirms. If a fact is missing, leave a visible placeholder and say so.
@@ -67,12 +67,17 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 ## Structure
 
 ```
+app/           Next.js App Router (layout, pages, globals.css)
+tests/unit/    Vitest tests
+tests/e2e/     Playwright tests
+specs/         specs (see specs/README.md)
+docs/          requirements and ADRs
 assets/        logo.png and Instagram screenshots (ig0-ig4.png, reference only)
-README.md
-CLAUDE.md
+public/img/    optimized images served by the site (create it when the first one is added)
+AGENTS.md, README.md, CLAUDE.md
 ```
 
-The `ig*.png` screenshots are reference material, not final site images. When the site is built, put the final files in `index.html`, `css/`, `js/` and `assets/img/` (optimized).
+The `ig*.png` screenshots are reference material, not final site images. Put the final, optimized images (WebP/AVIF) in `public/img/`.
 
 ## Git remote
 
@@ -113,9 +118,22 @@ API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assi
 
 ## Development
 
-There is no app yet, so there are no dev, build or test commands. They will be
-added here when the app is scaffolded (see the action items in
-`docs/adr/0001-web-stack.md`).
+Node 22 is required (`.nvmrc`); the default shell Node may be older. Run
+`source ~/.nvm/nvm.sh && nvm use` before any node/npm command, then `npm install`.
+Before the first Playwright run, install the browser once: `npx playwright install chromium`.
+
+| Task | Command |
+|------|---------|
+| Dev server (http://localhost:3000) | `npm run dev` |
+| Production build | `npm run build` |
+| Lint | `npm run lint` |
+| Typecheck | `npm run typecheck` |
+| Unit tests (Vitest, `tests/unit/`) | `npm test` |
+| End-to-end tests (Playwright, `tests/e2e/`; starts the dev server itself) | `npm run test:e2e` |
+| Supabase CLI (devDependency) | `npx supabase` |
+
+`AGENTS.md` tells agents to read the bundled Next.js docs in
+`node_modules/next/dist/docs/` before writing code.
 
 ## Deploy
 
