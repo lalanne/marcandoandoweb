@@ -74,6 +74,27 @@ CLAUDE.md
 
 The `ig*.png` screenshots are reference material, not final site images. When the site is built, put the final files in `index.html`, `css/`, `js/` and `assets/img/` (optimized).
 
+## Testing
+
+Specified in `specs/003-ci-and-testing.md`; these rules override the plugin's
+defaults. Tests are written first, always (`tdd-change`), and CI runs them on
+every PR.
+
+- **Layers:** unit (Vitest), integration (Vitest against local Supabase: database
+  constraints and row-level security), acceptance (one test per Given/When/Then
+  criterion of an approved spec, with its ID in the test name, for example
+  `[002-AC7]`), end to end (Playwright at 360 and 1280 px).
+- **Feature:** every acceptance criterion has a test; every user-visible flow has an
+  end-to-end test; pure logic has unit tests.
+- **Bug fix:** a failing test at the lowest layer that reproduces it, plus an
+  end-to-end test if a user can see it; do the revert check and report it.
+- **Improvement or refactor:** existing tests stay green and are never weakened; new
+  behavior follows the feature rule.
+- **Cosmetic change:** a test where the change is observable; no filler tests.
+- Never mock the database. Seed and fixtures use fake data only.
+- The PR template checklist is filled in honestly. CI cannot prove test-first;
+  state in the PR which test failed first and why.
+
 ## Git remote
 
 `origin` uses the SSH alias `github-lalanne` (`git@github-lalanne:lalanne/marcandoandoweb.git`),
