@@ -67,7 +67,10 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 ## Structure
 
 ```
-app/           Next.js App Router (layout, pages, globals.css)
+app/           Next.js App Router (layout, pages, globals.css, /entrar, /panel, /salir)
+lib/           Shared code (lib/auth, lib/supabase)
+proxy.ts       Guards /panel (Next 16 name for middleware)
+scripts/       Node scripts (traceability, tests-with-changes, create-admin)
 tests/unit/    Vitest tests
 tests/e2e/     Playwright tests
 specs/         specs (see specs/README.md)
@@ -139,7 +142,13 @@ task in writing.
 
 Assign every pull request to the repo owner when it is opened
 (`gh pr create --assignee @me`). This applies to PRs opened by the
-`core-practices:coder` agent too. With gh 2.45, `gh pr edit --add-assignee`
+`core-practices:coder` agent too.
+
+Open the PR early, as a draft: right after the first push of a branch, run
+`gh pr create --draft --assignee @me` with `Closes #<n>` in the body, so the
+project board moves the issue to In Progress. Mark it ready with `gh pr ready <n>`
+when the work is done and the checks pass. The `coder` agent does the same. A
+draft PR is never merged. With gh 2.45, `gh pr edit --add-assignee`
 fails on the deprecated Projects (classic) GraphQL field; assign through the
 API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assignees[]=lalanne"`.
 
@@ -156,7 +165,7 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | Lint | `npm run lint` |
 | Typecheck | `npm run typecheck` |
 | Unit tests (Vitest, `tests/unit/`) | `npm test` |
-| End-to-end tests (Playwright, `tests/e2e/`; starts the dev server itself) | `npm run test:e2e` |
+| End-to-end tests (Playwright at 360 and 1280 px, `tests/e2e/`; needs local Supabase running; starts the dev server itself, or the production server when `CI=1`) | `npm run test:e2e` |
 | Integration tests (Vitest against local Supabase, `tests/integration/`) | `npm run test:integration` |
 | Supabase CLI (devDependency) | `npx supabase` |
 
@@ -190,6 +199,45 @@ Needs Docker running. All commands run from the repo root.
 - The admin is the user whose token has `app_metadata.role = 'admin'`
   (`public.is_admin()`). Set it with the service role only, never from the client.
 
+### Admin sign-in (`/entrar`, `/panel`)
+
+- The app reads `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` at
+  run time from the environment or a gitignored `.env.local`. Copy `.env.example`
+  and fill in the values of `npx supabase status -o env` (`API_URL`, `ANON_KEY`).
+  The Playwright config reads them from `supabase status` itself when they are unset.
+- `proxy.ts` guards `/panel` and `/panel/*`: no session goes to `/entrar`, a session
+  that is not the admin goes to `/entrar?error=sin-acceso`. The panel layout checks
+  again. Sign-out is a form POST to `/salir`, which ends with a full page load.
+- The service-role key is used only by `scripts/create-admin.mjs`. App code never
+  reads it (a unit test enforces it), and it never goes in `.env*` files or the repo.
+- **Create the admin locally** (with local Supabase running; the seeded
+  `admin@marcandoando.test` already exists after `db reset`, so this is only for an
+  account of your own):
+
+  ```
+  npx supabase status -o env     # shows API_URL and SERVICE_ROLE_KEY
+  SUPABASE_URL=<API_URL> SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY> \
+    ADMIN_EMAIL=tu@correo.test ADMIN_PASSWORD='una-clave-local' node scripts/create-admin.mjs
+  ```
+
+  Run again with the same email to reset the password.
+- **Create the admin in production (the owner does this once, from their machine):**
+  1. In the Supabase dashboard, open the production project, Project Settings, API,
+     and copy the Project URL and the `service_role` key. Never paste the key into
+     chat, a file in the repo, an issue or a PR.
+  2. In a terminal, set the values for this one command only (a leading space keeps
+     them out of shell history in most shells):
+
+     ```
+      SUPABASE_URL='https://<project>.supabase.co' SUPABASE_SERVICE_ROLE_KEY='<service_role key>' \
+        ADMIN_EMAIL='<email Javiera owns>' ADMIN_PASSWORD='<strong password>' node scripts/create-admin.mjs
+     ```
+  3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the public
+     anon key) in the Vercel project's environment variables. The service-role key
+     is not set in Vercel.
+  4. Sign in at `/entrar` with that email, then give Javiera the password through a
+     private channel and ask her to change it.
+
 ### CI (`.github/workflows/ci.yml`)
 
 Runs on every PR to `main` and every push to `main`. The job names are stable
@@ -204,16 +252,61 @@ because they become required checks (spec 003). Run each locally before opening 
 | `migrations` | A clean reset works from the migrations alone, and leaves the ten categories and no seed rows | `npx supabase db reset --no-seed` |
 | `tests-with-changes` | A PR that changes `app/`, `src/` or `supabase/migrations/` also changes a test file, unless it has the label `no-test-needed` (the owner adds it) | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" LABELS='[]' node scripts/tests-with-changes.mjs` |
 
-`e2e` is added by a later issue (spec 003, Rollout).
+| `e2e` | Production build started against local Supabase, Playwright at 360 and 1280 px with axe checks; traces uploaded on failure. **The owner must add `e2e` to the required checks of `main` after the PR that introduced it merges** | `npx supabase start && npx supabase db reset && npm run build && CI=1 npm run test:e2e` |
 
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.
 
+
 ## Deploy
 
-No deploy is configured yet. The plan (ADR-0001) is Vercel, deploying on every
-merge to `main`, on the domain `marcandoando.cl` (registered by the client at
-NIC Chile; the owner handles access to that account). Never put registrar,
-DNS or hosting credentials in the repo or in chat. When it is set up, state here what merging deploys and how
-`land-pr` should confirm it (for example: "Merging to `main` deploys production
-on Vercel; `land-pr` must confirm the deploy is Ready").
+Specified in `specs/004-deployment.md`. Nothing reaches production until the
+owner accepts it. "Production" is the cloud Supabase project (migrations) and the
+Vercel site, changed together by `.github/workflows/deploy.yml`.
+
+**What merging does.** A merge to `main` runs CI. When CI succeeds, the `Deploy`
+workflow checks out that exact commit and decides whether it changes anything that
+runs in production (`scripts/deploy-needed.mjs`). Docs, specs, assets, `*.md` and
+issue templates alone do not; anything else does. For those, the `deploy` job stops
+at the `production` environment as "waiting for review". Nothing in production has
+changed at that point. Vercel's own production deploy for `main` is off
+(`vercel.json`); pull requests still get Vercel previews.
+
+**Accepting or rejecting.** The owner gets a notification. In GitHub (web or mobile
+app) open the run, choose "Review deployments", tick `production`, and "Approve and
+deploy" or "Reject". Rejecting ends the run and changes nothing. Self-approval is
+allowed. Only one deployment is pending at a time: a newer merge replaces an older
+pending one, and a running deploy is never cancelled. A commit that was replaced or
+rejected is not lost: the next run compares with the last successful deploy and
+includes it.
+
+**After acceptance** the job runs `supabase link` and `supabase db push` (pending
+migrations from `supabase/migrations/`, no seed data), and only if that succeeds
+`vercel pull`, `vercel build --prod` and `vercel deploy --prebuilt --prod` for the
+same commit. The production URL and commit are written to the run summary.
+`land-pr` confirms a deploy by reading that summary (`gh run list --workflow
+deploy.yml`) and checking the run is green; a waiting run is not a failure, tell
+the owner it needs their acceptance.
+
+**Migration rule.** Migrations are forward-only and run before the new code, and the
+old code keeps serving if the deploy fails afterwards. So each migration must work
+with both the previous and the new code: add first, remove in a later release
+("expand then contract"). Never edit the production schema from the dashboard.
+
+**Rollback.** Redeploy the previous successful deployment from the Vercel dashboard
+(Deployments, "Promote to Production") or with `vercel rollback`. A bad migration is
+fixed with a new migration that goes through this same pipeline.
+
+**Setup the owner does once** (never put values in the repo or in chat):
+- GitHub Environment `production` with the owner as required reviewer; its secrets
+  `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `SUPABASE_ACCESS_TOKEN`,
+  `SUPABASE_DB_PASSWORD` and variable `SUPABASE_PROJECT_REF`. Rotate them by
+  changing the secret; no code change.
+- In Vercel (project settings, Environment Variables, Production) add
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` with the production
+  Supabase project's URL and public (anon) key **before the first accepted deploy**.
+  `vercel pull` brings them into the build.
+
+The domain `marcandoando.cl` is registered by the client at NIC Chile; the owner
+handles access to that account. Never put registrar, DNS or hosting credentials in
+the repo or in chat.

@@ -1,3 +1,4 @@
+import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 // Spec 002, "Public page" (criteria 11 to 18 and 23). The page reads the fake
@@ -237,4 +238,15 @@ test("[002-AC23] has title, description, Open Graph tags with image, favicon and
   // Fetch it from the running server (the absolute URL may name the live domain).
   const response = await page.request.get(new URL(image ?? "").pathname);
   expect(response.ok()).toBe(true);
+});
+
+test("the public page has no serious or critical accessibility violations", async ({
+  page,
+}) => {
+  await open(page);
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  const bad = violations.filter(
+    (v) => v.impact === "serious" || v.impact === "critical",
+  );
+  expect(bad.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
 });
