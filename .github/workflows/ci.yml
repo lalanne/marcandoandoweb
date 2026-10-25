@@ -1,0 +1,74 @@
+name: CI
+
+# Spec 003. Job names are stable on purpose: they become required checks.
+on:
+  pull_request:
+    branches: [main]
+    # labeled/unlabeled so the owner's `no-test-needed` waiver re-runs the check.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # Build before typecheck: Next generates the global LayoutProps type
+      # (.next/types) during the build, and a clean checkout does not have it.
+      - run: npm run build
+      - run: npm run typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:coverage
+
+  traceability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: node scripts/traceability.mjs
+
+  tests-with-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check that code changes come with tests
+        # Only meaningful on pull requests; on pushes to main it is a no-op.
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          CHANGED_FILES="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+          export CHANGED_FILES
+          node scripts/tests-with-changes.mjs

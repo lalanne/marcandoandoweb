@@ -159,6 +159,20 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | End-to-end tests (Playwright, `tests/e2e/`; starts the dev server itself) | `npm run test:e2e` |
 | Supabase CLI (devDependency) | `npx supabase` |
 
+### CI (`.github/workflows/ci.yml`)
+
+Runs on every PR to `main` and every push to `main`. The job names are stable
+because they become required checks (spec 003). Run each locally before opening a PR:
+
+| Job | What it checks | Locally |
+|-----|----------------|---------|
+| `static` | Lint, typecheck, production build | `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout) |
+| `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
+| `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
+| `tests-with-changes` | A PR that changes `app/`, `src/` or `supabase/migrations/` also changes a test file, unless it has the label `no-test-needed` (the owner adds it) | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" LABELS='[]' node scripts/tests-with-changes.mjs` |
+
+`integration`, `e2e` and `migrations` are added by later issues (spec 003, Rollout).
+
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.
 

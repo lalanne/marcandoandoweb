@@ -1,0 +1,4 @@
+# Criteria that cannot be an automated test (spec 003, "Traceability").
+# One per line: <spec number>-AC<criterion number> <reason>
+# Example: 002-AC99 Needs a real phone to confirm the WhatsApp message opens
+# Reviewed by the owner. Lines starting with # and blank lines are ignored.
