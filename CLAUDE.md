@@ -139,7 +139,13 @@ task in writing.
 
 Assign every pull request to the repo owner when it is opened
 (`gh pr create --assignee @me`). This applies to PRs opened by the
-`core-practices:coder` agent too. With gh 2.45, `gh pr edit --add-assignee`
+`core-practices:coder` agent too.
+
+Open the PR early, as a draft: right after the first push of a branch, run
+`gh pr create --draft --assignee @me` with `Closes #<n>` in the body, so the
+project board moves the issue to In Progress. Mark it ready with `gh pr ready <n>`
+when the work is done and the checks pass. The `coder` agent does the same. A
+draft PR is never merged. With gh 2.45, `gh pr edit --add-assignee`
 fails on the deprecated Projects (classic) GraphQL field; assign through the
 API instead: `gh api repos/lalanne/marcandoandoweb/issues/<n>/assignees -f "assignees[]=lalanne"`.
 
