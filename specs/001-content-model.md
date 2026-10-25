@@ -69,7 +69,7 @@ A thing Marcando Ando can personalize and quote.
 |-------|-------|
 | `slug`, `name` | required |
 | `description` | detailed description (Req §3C) |
-| `price_from_clp` | integer, whole pesos, `>= 0`; shown as a "from" or reference price, not a firm quote (Req §3B) |
+| `price_from_clp` | optional integer, whole pesos, `>= 0` when set; shown as a "from" or reference price, not a firm quote (Req §3B). See the 2026-10-25 amendment below |
 | `offer_price_clp` | optional integer; when set it must be lower than `price_from_clp`; this *is* the offer: a product is "on offer" exactly when it is set **(interpretation of "Ofertas", pending Javiera)** |
 | `personalization` | text: what can be personalized and how, such as print size and "tu logo o tu diseño aquí" (Req §3B, §3C) |
 | `materials`, `sizes`, `colors` | optional text, filled "when it applies" (Req §3B) **(interpretation: plain text, not structured)** |
@@ -77,6 +77,14 @@ A thing Marcando Ando can personalize and quote.
 | `is_featured` | highlighted on the site (Req §7) |
 | `is_available` | default true; false means "temporarily unavailable" (Req §7) |
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
+
+**2026-10-25 amendment - price is optional.** The owner decided that
+`price_from_clp` is optional, because the client has not confirmed prices and a
+required column would force invented numbers (`CLAUDE.md`: real data only). A
+product without a price is valid, can be published, and the public reads it; the
+site shows no price for it. When a price is set, criterion 1 still applies (whole
+pesos, `>= 0`). It used to be required. `offer_price_clp` only makes sense with a
+price: the offer rule (criterion 2) applies when `price_from_clp` is set.
 
 A product belongs to **one or more categories** (a school bottle sits in both
 "Botellas" and "Productos escolares") and may carry **themes**. Both through join
