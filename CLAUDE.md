@@ -117,6 +117,12 @@ task in writing.
 - **Exempt:** trivial edits the owner makes directly (a typo, one line of copy).
   If you are unsure, it is not trivial: open an issue.
 - **One issue is one change and one PR.** Split an issue that grows.
+- **Every issue goes on the project board,** "Marcando Ando"
+  (https://github.com/users/lalanne/projects/3). Add it right after creating it:
+  `gh project item-add 3 --owner lalanne --url <issue url>`. With gh 2.45,
+  `gh issue create --project` fails on the deprecated Projects (classic) field,
+  so use `item-add`. Status (Todo / In Progress / Done) is set by the project's
+  built-in workflows; do not set it by hand.
 - **When given an issue number,** read the issue (`gh issue view <n>`) and treat
   it as the spec. If the context or acceptance criteria are missing or
   ambiguous, comment on the issue with your question and stop instead of guessing.
