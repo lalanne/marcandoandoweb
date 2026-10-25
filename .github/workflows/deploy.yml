@@ -1,0 +1,140 @@
+name: Deploy
+
+# Spec 004. Production changes only after the owner accepts the deployment in the
+# `production` GitHub Environment (required reviewer). Production means the cloud
+# Supabase database (migrations) and the Vercel site, in that order.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Decides whether the commit changes anything that runs in production.
+  plan:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # list earlier Deploy runs
+    outputs:
+      needed: ${{ steps.decide.outputs.needed }}
+    steps:
+      # The exact commit CI passed on, never the branch tip.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Decide whether a deployment is needed
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          # Compare with the last commit this workflow finished successfully on,
+          # so a superseded or rejected app change is not lost behind a docs merge.
+          # With no earlier success (first run), everything counts as changed.
+          BASE="$(gh run list --workflow deploy.yml --branch main --status success \
+            --limit 1 --json headSha --jq '.[0].headSha // ""')"
+          if [ -n "$BASE" ] && git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            CHANGED_FILES="$(git diff --name-only "$BASE" "$HEAD_SHA")"
+          else
+            echo "No earlier successful deploy run: treating every file as changed."
+            CHANGED_FILES="$(git ls-tree -r --name-only "$HEAD_SHA")"
+          fi
+          export CHANGED_FILES
+          node scripts/deploy-needed.mjs
+
+  deploy:
+    needs: plan
+    if: needs.plan.outputs.needed == 'true'
+    runs-on: ubuntu-latest
+    # Pauses here until the owner accepts or rejects. Secrets of the environment
+    # are only available to the steps below after acceptance.
+    environment: production
+    permissions:
+      contents: read
+    # Only the newest pending deployment stays; one that is running is never cancelled.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # Migrations first. If this step fails the Vercel steps are skipped and the
+      # run fails with the CLI's error. Credentials come from the environment,
+      # never from the command line. `db push` does not apply seed data.
+      - name: Link the production Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Apply pending migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: npx supabase db push
+
+      - name: Pull Vercel production settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel pull --yes --environment=production
+      - name: Build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel build --prod
+      - name: Deploy to Vercel production
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # The CLI prints the deployment URL on stdout and progress on stderr.
+          URL="$(npx vercel deploy --prebuilt --prod)"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Report
+        if: success()
+        env:
+          URL: ${{ steps.vercel.outputs.url }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          {
+            echo "## Production deployed"
+            echo
+            echo "- URL: $URL"
+            echo "- Commit: \`$SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Report failure
+        if: failure()
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "## Production deployment failed"
+            echo
+            echo "- Commit: \`$SHA\`"
+            echo "- Logs: $RUN_URL"
+            echo "- Production keeps serving the previous code. If the migrations step"
+            echo "  succeeded, they are already applied: fix forward with a new migration."
+          } >> "$GITHUB_STEP_SUMMARY"
