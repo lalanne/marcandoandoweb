@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { isAdminUser } from "@/lib/auth/admin";
@@ -33,7 +34,15 @@ async function AdminOnly({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between gap-4 border-b-2 border-brand-night bg-white px-6 py-3">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b-2 border-brand-night bg-white px-6 py-3">
+        <nav aria-label="Panel" className="flex items-center gap-4 font-semibold">
+          <Link href="/panel" className="underline">
+            Inicio
+          </Link>
+          <Link href="/panel/productos" className="underline">
+            Productos
+          </Link>
+        </nav>
         <p className="font-semibold">{user.email}</p>
         <form action="/salir" method="post">
           <button
