@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Never cache panel pages, so the back button after sign-out shows nothing.
-  response.headers.set("Cache-Control", "no-store");
+  response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
 

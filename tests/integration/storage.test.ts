@@ -8,7 +8,7 @@ import {
 } from "./helpers";
 
 // Spec 002 (Data and constraints): a storage bucket for images. Only the admin
-// writes; the files are public to read. Spec 005 refines the upload flow.
+// writes; reads follow the owner's published state (see image-privacy.test.ts). Spec 005 refines the upload flow.
 
 // 1x1 transparent PNG.
 const PNG = Uint8Array.from(
@@ -19,7 +19,7 @@ const PNG = Uint8Array.from(
 );
 
 describe("storage bucket images", () => {
-  it("accepts an upload from the admin and serves it to the public", async () => {
+  it("accepts an upload from the admin and lets the admin read it back", async () => {
     const admin = await signedInClient(ADMIN);
     const path = `test/${uniqueSlug("f")}.png`;
     const up = await admin.storage
@@ -27,7 +27,7 @@ describe("storage bucket images", () => {
       .upload(path, PNG, { contentType: "image/png" });
     expect(up.error).toBeNull();
 
-    const down = await anonClient().storage.from("images").download(path);
+    const down = await admin.storage.from("images").download(path);
     expect(down.error).toBeNull();
 
     const rm = await admin.storage.from("images").remove([path]);

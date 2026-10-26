@@ -88,6 +88,20 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
   development and tests only and never reaches production.
 - **Privacy.** No photo showing a minor's face or a school crest goes live. The
   owner chooses the photos and confirms it.
+
+  **2026-10-25 amendment - private image storage (issue #45).** The `images`
+  bucket was public and its read policy let anyone fetch or list every file, so a
+  photo of an unpublished product or design (for example one waiting for the
+  owner's permission) was readable by anyone who listed the bucket or knew the
+  path. Now the bucket is private and storage reads follow the owner's published
+  state: an object is readable only by the admin, or by anyone when an `image`
+  row with that `storage_path` belongs to a published product or design. The site
+  serves published images from its own origin at `/img/<storage_path>` (read with
+  the anonymous client, so row-level security decides; short public cache), and
+  the admin previews any image at `/panel/img/<storage_path>` (`private,
+  no-store`). A CDN may keep serving an image for up to the cache window (5
+  minutes) after the owner unpublishes it. Before this, the spec was silent on
+  storage reads.
 - **WhatsApp link.** `https://wa.me/56982661835` (confirmed 2026-10-23). Every
   ordering button uses it, with a pre-filled Spanish message.
 - **Security.** The admin area and every write are protected by the admin check and
@@ -175,6 +189,17 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
     merge. The owner decided that nothing reaches production before they accept it;
     the pipeline is specified in [spec 004](004-deployment.md).
 
+**Image privacy** (added 2026-10-25, issue #45)
+
+25. Given an image whose product or design is not published, when the public (not
+    signed in, or signed in but not the admin) tries to read it by listing the
+    bucket, by its direct storage URL or at `/img/<path>`, then it is refused (not
+    listed, not downloadable, 404).
+26. Given the admin, when they open `/panel/img/<path>` for any image, then they
+    get it, uncached; and given an image of a published product or design, when a
+    visitor opens `/img/<path>`, then it is served with a short public cache
+    header.
+
 ## Verification plan
 
 | # | Criterion | Layer |
@@ -184,6 +209,8 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
 | 3, 4, 6, 7, 9, 10 | Admin flows | End to end (Playwright) against local Supabase |
 | 11, 12, 14–18 | Public page, layout, keyboard | End to end (Playwright) at 360, 768 and 1280 px |
 | 19, 21 | Accessibility, performance | axe and Lighthouse on the preview deploy |
+| 25 | Storage read policy: unpublished images not readable or listable | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin; end to end for `/img/...` |
+| 26 | `/panel/img/...` for the admin, `/img/...` with cache headers | Unit (URL helper), integration (storage), end to end (Playwright) |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
