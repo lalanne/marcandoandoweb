@@ -2,3 +2,4 @@
 # One per line: <spec number>-AC<criterion number> <reason>
 # Example: 002-AC99 Needs a real phone to confirm the WhatsApp message opens
 # Reviewed by the owner. Lines starting with # and blank lines are ignored.
+005-AC3 Needs a real Google account and the real Supabase project: the owner signs in with the admin's Google account on production once, lands on /panel, then a second Google account is refused (spec 005, verification plan). CI cannot talk to Google; the decision after the code exchange is unit tested and the session-to-panel path is covered by the existing sign-in tests.

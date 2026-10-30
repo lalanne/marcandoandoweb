@@ -112,20 +112,68 @@ jobs:
           URL="$(npx vercel deploy --prebuilt --prod)"
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
+      # Spec 004, criteria 12 to 18. Read-only check of the live site: GET requests
+      # only, no credentials. Traffic is already on the new version, so a failure
+      # fails the run (the owner sees it) but rolls nothing back. The smoke step
+      # gets the production URL and nothing else: no secrets.
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Smoke test the live site
+        id: smoke
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          if [ -z "$PRODUCTION_URL" ]; then
+            echo "::error::PRODUCTION_URL is not set. Add it as a variable of the production environment (Settings > Environments > production), for example https://marcandoandoweb.vercel.app."
+            exit 1
+          fi
+          npm run test:smoke
+
       - name: Report
         if: success()
         env:
           URL: ${{ steps.vercel.outputs.url }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           {
             echo "## Production deployed"
             echo
-            echo "- URL: $URL"
+            echo "- Smoke test: passed"
+            echo "- Production URL: $PRODUCTION_URL"
+            echo "- Deployment: $URL"
             echo "- Commit: \`$SHA\`"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Report smoke test failure
+        if: failure() && steps.vercel.outcome == 'success'
+        env:
+          URL: ${{ steps.vercel.outputs.url }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "## Production deployed, but the smoke test failed"
+            echo
+            echo "- Production URL: ${PRODUCTION_URL:-not set}"
+            echo "- Deployment: $URL"
+            echo "- Commit: \`$SHA\`"
+            echo "- Logs: $RUN_URL"
+            echo
+            echo "**Production is serving the new version.** Nothing was rolled back."
+            echo "If the site is broken, follow the Rollback section of CLAUDE.md"
+            echo "(redeploy the previous successful deployment in Vercel)."
+            echo
+            if [ -f smoke-results.json ]; then
+              echo "Failed checks:"
+              jq -r '.. | objects | select(has("specs")) | .specs[] | select(.ok == false) | "- " + .title' smoke-results.json
+            else
+              echo "The smoke test did not run to the end (for example PRODUCTION_URL is not"
+              echo "set or the browser did not install). Read the logs."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Report failure
-        if: failure()
+        if: failure() && steps.vercel.outcome != 'success'
         env:
           SHA: ${{ github.event.workflow_run.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

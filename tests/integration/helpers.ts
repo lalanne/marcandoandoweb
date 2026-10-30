@@ -23,10 +23,17 @@ function localConfig(): { url: string; anonKey: string } {
 
 const config = localConfig();
 
+/** The local URL and anon key, for tests that build their own client. */
+export const localSupabase = config;
+
 // Fake local users created by supabase/seed.sql. Local only, never production.
 export const ADMIN = {
   email: "admin@marcandoando.test",
   password: "local-only-admin-pass",
+};
+export const ADMIN_TWO = {
+  email: "admin2@marcandoando.test",
+  password: "local-only-admin2-pass",
 };
 export const NON_ADMIN = {
   email: "cliente@marcandoando.test",

@@ -15,6 +15,8 @@
 /test-results/
 /playwright-report/
 /blob-report/
+/smoke-results.json
+/test-results-smoke/
 /playwright/.cache/
 
 # next.js

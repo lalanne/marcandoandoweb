@@ -167,6 +167,7 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | Unit tests (Vitest, `tests/unit/`) | `npm test` |
 | End-to-end tests (Playwright at 360 and 1280 px, `tests/e2e/`; needs local Supabase running; starts the dev server itself, or the production server when `CI=1`) | `npm run test:e2e` |
 | Integration tests (Vitest against local Supabase, `tests/integration/`) | `npm run test:integration` |
+| Smoke test of a live site (`tests/smoke/`, read-only; base URL from `PRODUCTION_URL` or `SMOKE_BASE_URL`; see Deploy) | `npm run test:smoke` |
 | Supabase CLI (devDependency) | `npx supabase` |
 
 The public page needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -176,7 +177,10 @@ The public page needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_
 
 ### Local Supabase
 
-Needs Docker running. All commands run from the repo root.
+Needs Docker running. All commands run from the repo root. Before the first
+`start`, copy the fake Google values: `cp supabase/.env.example supabase/.env`
+(gitignored; `config.toml` enables the Google provider and reads them, see
+"Google sign-in" below).
 
 | Task | Command |
 |------|---------|
@@ -193,8 +197,8 @@ Needs Docker running. All commands run from the repo root.
 - The tests read the URL and the anon key at run time from `npx supabase status -o env`,
   or from `SUPABASE_URL` and `SUPABASE_ANON_KEY` when set. These are the public local
   demo keys; never commit keys, and never point the tests at a real project.
-- Seeded local users: `admin@marcandoando.test` (the admin) and
-  `cliente@marcandoando.test` (a signed-in non-admin); passwords are in
+- Seeded local users: `admin@marcandoando.test` and `admin2@marcandoando.test`
+  (two admins) and `cliente@marcandoando.test` (a signed-in non-admin); passwords are in
   `tests/integration/helpers.ts` and are valid only on a local database.
 - The admin is the user whose token has `app_metadata.role = 'admin'`
   (`public.is_admin()`). Set it with the service role only, never from the client.
@@ -210,7 +214,9 @@ Needs Docker running. All commands run from the repo root.
   again. Sign-out is a form POST to `/salir`, which ends with a full page load.
 - The service-role key is used only by `scripts/create-admin.mjs`. App code never
   reads it (a unit test enforces it), and it never goes in `.env*` files or the repo.
-- **Create the admin locally** (with local Supabase running; the seeded
+- **Any number of admins can exist** (spec 005). Create one per person, one run of
+  the script each, with the email that person will also use for Google.
+- **Create an admin locally** (with local Supabase running; the seeded
   `admin@marcandoando.test` already exists after `db reset`, so this is only for an
   account of your own):
 
@@ -221,7 +227,7 @@ Needs Docker running. All commands run from the repo root.
   ```
 
   Run again with the same email to reset the password.
-- **Create the admin in production (the owner does this once, from their machine):**
+- **Create an admin in production (the owner does this from their machine, once per admin):**
   1. In the Supabase dashboard, open the production project, Project Settings, API,
      and copy the Project URL and the `service_role` key. Never paste the key into
      chat, a file in the repo, an issue or a PR.
@@ -237,6 +243,57 @@ Needs Docker running. All commands run from the repo root.
      is not set in Vercel.
   4. Sign in at `/entrar` with that email, then give Javiera the password through a
      private channel and ask her to change it.
+
+### Google sign-in (`/entrar`, spec 005)
+
+For the admin only, as a second way into `/panel`; there are no customer accounts.
+Supabase runs the OAuth flow (PKCE); the app only starts it and handles the return.
+
+- **Start:** the "Continuar con Google" button is a form POST to `app/auth/google/route.ts`
+  (a route handler, a full-page navigation that needs no JavaScript). It calls
+  `signInWithOAuth` server-side with `skipBrowserRedirect`, then asks the authorize URL
+  without following the redirect (`providerAnswers`): a 4xx/5xx means the provider is
+  disabled or misconfigured and the visitor gets `/entrar?error=google` instead of raw
+  JSON. Otherwise the answer is a 303 to the Supabase authorize URL.
+- **Return:** `app/auth/callback/route.ts` (not guarded by `proxy.ts`, which guards only
+  `/panel`). Error params, no code or a failed exchange go to `/entrar?error=google`; an
+  admin (`isAdminUser`, same rule as `public.is_admin()`) goes to a safe `next` path or
+  `/panel`; anyone else is signed out and sent to `/entrar?error=sin-acceso`. The pure
+  decisions live in `lib/auth/google.ts` (unit tested, including open-redirect cases).
+- **Return address:** `NEXT_PUBLIC_SITE_URL` when set (an origin such as
+  `https://marcandoando.cl`; inlined at build time, so set it in Vercel before a
+  deploy), otherwise the request's origin. Supabase's redirect allowlist is the second
+  line of defence.
+- **Local and CI:** `supabase/config.toml` enables the Google provider with
+  `client_id` and `secret` read from the environment. Copy `supabase/.env.example` to
+  `supabase/.env` (gitignored) before `npx supabase start`; CI does the same in the
+  `integration`, `migrations` and `e2e` jobs. The values are fake: nothing local or in
+  CI talks to Google, and no real credentials go in the repo. Restart the local stack
+  after changing `config.toml` or `supabase/.env`. Public sign-ups stay off.
+- **Google config lives in the Supabase dashboard, not in migrations,** so a deploy
+  does not change it. The real client ID and secret are only in the dashboard.
+- **How to test:** `tests/unit/google-sign-in.test.ts` (decisions),
+  `tests/e2e/google-sign-in.spec.ts` (button, the redirect to the authorize URL read
+  without following it, callback failure paths, axe at 360 and 1280 px) and
+  `tests/integration/google-sign-in.test.ts` (two admins, role removed, role not
+  settable from the client). To try the button by hand locally, run the app and click
+  it: the browser ends on a Google page that says the (fake) OAuth client was not found,
+  which proves the redirect; it cannot complete.
+- **Only the owner can verify** the real round trip (spec 005 criterion 3, listed in
+  `specs/traceability-exemptions.txt`): sign in with the admin's Google account on
+  production and land on `/panel`, then check a second Google account is refused.
+- **Owner's one-time setup (never put values in the repo or in chat):**
+  1. Google Cloud: create an OAuth client (type: Web application) and add
+     `https://<project-ref>.supabase.co/auth/v1/callback` as an authorized redirect URI.
+     Keep the consent screen in "Testing" with the admins' accounts as test users.
+  2. Supabase dashboard (production), Authentication, Sign In / Providers: enable
+     Google with the client ID and secret.
+  3. Supabase dashboard, URL configuration: set the site URL and allow the redirect
+     URLs `<site>/auth/callback` for production, `http://localhost:3000/auth/callback`
+     and Vercel previews, and `marcandoando.cl` when it is connected.
+  4. Create each admin with `scripts/create-admin.mjs` using the Google email that
+     person signs in with, so Supabase links the Google identity to that user.
+  Until this is done the site works as before and the button shows the Spanish error.
 
 ### CI (`.github/workflows/ci.yml`)
 
@@ -283,10 +340,40 @@ includes it.
 **After acceptance** the job runs `supabase link` and `supabase db push` (pending
 migrations from `supabase/migrations/`, no seed data), and only if that succeeds
 `vercel pull`, `vercel build --prod` and `vercel deploy --prebuilt --prod` for the
-same commit. The production URL and commit are written to the run summary.
-`land-pr` confirms a deploy by reading that summary (`gh run list --workflow
-deploy.yml`) and checking the run is green; a waiting run is not a failure, tell
-the owner it needs their acceptance.
+same commit. Then, in the same job, the smoke test runs against the live site (see
+below). The production URL, the commit and the smoke result are written to the run
+summary. `land-pr` confirms a deploy by reading that summary (`gh run list
+--workflow deploy.yml`) and checking the run is green; a waiting run is not a
+failure, tell the owner it needs their acceptance.
+
+**Smoke test (spec 004, criteria 12 to 18).** After the Vercel step, `deploy.yml`
+installs Chromium and runs `npm run test:smoke` (`tests/smoke/`,
+`playwright.smoke.config.ts`) against the **`PRODUCTION_URL`** variable of the
+`production` environment. It checks that `/` answers 200 with the hero and the
+"Cotizar por WhatsApp" button, shows no "Reload to try again" or "A server error
+occurred", has no console errors or failed requests; that `/panel` signed out goes
+to `/entrar`; and that `/api/health` answers `{"status":"ok"}` (it reads the
+categories with the public client; 503 `{"status":"error"}` and nothing else
+otherwise). It only sends GET requests and uses no credentials or secrets. Each
+check retries for up to 60 seconds while the new deployment goes live.
+- **The owner sets `PRODUCTION_URL`** once as a variable of the `production`
+  environment: `https://marcandoandoweb.vercel.app` today, `https://marcandoando.cl`
+  when the domain is connected (#24). Not a secret. If it is missing, the smoke step
+  fails with that message.
+- **Run it locally against any URL:** `PRODUCTION_URL=https://marcandoandoweb.vercel.app
+  npm run test:smoke` (or `SMOKE_BASE_URL=http://localhost:3000` against a running
+  local server; `SMOKE_RETRY_SECONDS=0` to try once). It needs the browser
+  (`npx playwright install chromium`) and is not part of `npm run test:e2e`.
+  CI also runs it, healthy and deliberately broken, inside the `e2e` job
+  (`tests/e2e/smoke-spec.spec.ts`).
+- **Reading a failure.** The run is red, but **production is already serving the new
+  version**: nothing is rolled back automatically. The run summary lists each failed
+  check and the production URL and commit. Open the log of the "Smoke test the live
+  site" step for the reason ("error text ... on the page" or a console error means
+  the page crashed, often a wrong `NEXT_PUBLIC_SUPABASE_*` in Vercel; `health status`
+  503 means the site cannot read the database; `/panel` not going to `/entrar`
+  means the sign-in guard is off). Fix forward, or use the Rollback below if the
+  site is broken for visitors.
 
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work

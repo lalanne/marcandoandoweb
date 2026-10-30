@@ -61,10 +61,36 @@ export async function createTestAdmin(label: string): Promise<{
   };
 }
 
+// Puts a tiny file at the path of the seeded demo photo (the seed has the row but
+// no file), so the public page loads without a 404. Local test database only.
+const PIXEL = Buffer.from(
+  "UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==",
+  "base64",
+);
+export async function withDemoPhotoFile(path: string): Promise<() => Promise<void>> {
+  const { url } = supabaseEnv();
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? localStatus().SERVICE_ROLE_KEY;
+  const service = createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { error } = await service.storage
+    .from("images")
+    .upload(path, PIXEL, { contentType: "image/webp", upsert: true });
+  if (error) throw new Error(error.message);
+  return async () => {
+    await service.storage.from("images").remove([path]);
+  };
+}
+
 // Fake local users created by supabase/seed.sql. Local only, never production.
 export const ADMIN = {
   email: "admin@marcandoando.test",
   password: "local-only-admin-pass",
+};
+export const ADMIN_TWO = {
+  email: "admin2@marcandoando.test",
+  password: "local-only-admin2-pass",
 };
 export const NON_ADMIN = {
   email: "cliente@marcandoando.test",
