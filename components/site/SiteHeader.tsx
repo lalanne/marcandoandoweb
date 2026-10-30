@@ -1,6 +1,12 @@
 import Image from "next/image";
 import { Suspense } from "react";
+import {
+  DEFAULT_HEADER_LINK,
+  headerLinkFor,
+  type HeaderLink,
+} from "@/lib/auth/header-link";
 import { loadCatalog } from "@/lib/catalog/load";
+import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
 
 const linkClass =
@@ -30,6 +36,38 @@ async function CatalogLinks() {
   );
 }
 
+// Same box for both labels (fixed width, same classes), so the header does not
+// shift when "Entrar" turns into "Mi panel".
+const accountLinkClass =
+  "inline-block w-24 rounded-full border-2 border-brand-night bg-brand-yellow px-3 py-1 text-center text-sm font-semibold hover:bg-brand-yellow/70";
+
+function AccountLink({ link }: { link: HeaderLink }) {
+  return (
+    <a className={accountLinkClass} href={link.href}>
+      {link.label}
+    </a>
+  );
+}
+
+// Reads the session at request time (getUser asks the auth server, so a forged
+// token does not count). Any failure shows "Entrar". Only this part is dynamic;
+// the rest of the header stays prerendered.
+async function SessionLink() {
+  // Outside the try: it opts the component into request time, and a catch must
+  // not swallow that signal.
+  const supabase = await createClient();
+  let link = DEFAULT_HEADER_LINK;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    link = headerLinkFor(user);
+  } catch {
+    // Unreadable session: keep the visitor link.
+  }
+  return <AccountLink link={link} />;
+}
+
 export function SiteHeader() {
   return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
@@ -57,6 +95,11 @@ export function SiteHeader() {
               <a className={linkClass} href="#colegios">
                 Colegios y grupos
               </a>
+            </li>
+            <li className="ml-1">
+              <Suspense fallback={<AccountLink link={DEFAULT_HEADER_LINK} />}>
+                <SessionLink />
+              </Suspense>
             </li>
           </ul>
         </nav>
