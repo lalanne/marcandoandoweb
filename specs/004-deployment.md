@@ -45,6 +45,9 @@ meet the requirement).
    must work with both the previous and the new code (add first, remove in a later
    release) **(interpretation: forward-only, "expand then contract")**.
 
+7. After the Vercel step succeeds, a read-only smoke test checks the live site
+   (see the 2026-10-29 amendment below). A failing smoke test fails the run.
+
 Only one production deployment is pending or running at a time; a newer merge
 supersedes an older pending one.
 
@@ -85,6 +88,29 @@ supersedes an older pending one.
 10. Given any run, when its logs are read, then no secret value appears.
 11. Given the repository, when read, then `CLAUDE.md` (Deploy) says what merging does,
     how to accept a deployment, and how to roll back.
+12. Given an accepted deployment whose Vercel step succeeded, when the deploy job
+    continues, then a smoke test runs against the production URL taken from the
+    `PRODUCTION_URL` variable of the `production` environment, retrying for up to
+    60 seconds while the new deployment becomes live.
+13. Given the production home page, when the smoke test loads it in a real browser,
+    then the response is 200, the hero and the "Cotizar por WhatsApp" button are
+    visible, none of the known error texts ("Reload to try again", "A server error
+    occurred") appear, the console has no errors, and no request fails.
+14. Given a visitor who is not signed in, when the smoke test requests `/panel`, then
+    it is redirected to `/entrar`.
+15. Given `GET /api/health` with a working database connection and correct Supabase
+    settings, when it is called, then it reads the categories with the public
+    client and answers 200 with `{"status":"ok"}`; given a missing or wrong URL or
+    key or a failed read, then it answers 503 with `{"status":"error"}` and no
+    detail, secret or error message; in both cases `Cache-Control: no-store`.
+16. Given the smoke test, when it runs, then it only sends GET requests and uses no
+    credentials: it never writes to the database or signs in.
+17. Given a failing smoke test, when the run ends, then the run is marked failed, the
+    summary names each failed check and says that production is serving the new
+    version and how to roll back (the Rollback section); nothing is rolled back
+    automatically.
+18. Given a passing smoke test, when the run ends, then the summary says so, next to
+    the production URL and the commit.
 
 ## Verification plan
 
@@ -99,6 +125,9 @@ Run on the demo project (free plans), not on a customer's production.
 | 8 | Previews | Open a PR and read the Vercel preview check |
 | 10 | No secrets in logs | Read the logs of the runs above |
 | 11 | Docs | Read `CLAUDE.md` |
+| 15 | Health route | Integration tests against local Supabase: 200 with correct settings; 503 and no detail with a wrong URL and with a wrong key; headers |
+| 12, 13, 14, 16 | Smoke test behavior | A Playwright smoke spec with a configurable base URL, run in CI against the local production build, including a failing case (misconfigured Supabase URL) that must fail with the page-crash text; the spec sends only GET requests (asserted in the spec) |
+| 17, 18 | Run result | The first real accepted deploy after the build, plus one deliberately failing run against a throwaway deployment where the smoke test is pointed at a broken URL |
 
 The workflow's shell logic that can be tested without GitHub (the path filter that
 decides whether a deploy is needed) gets unit tests first, per spec 003.
@@ -115,6 +144,28 @@ through this same pipeline.
 acceptance, not on merge. See criteria 1 to 3 here. The criterion in spec 002 is
 changed in this PR.
 
+## Amendment: post-deploy smoke test
+
+**2026-10-29 amendment - smoke test and health route (issue #55).** The pipeline
+checked that the deployment finished, not that the site worked. A wrong Supabase
+URL in Vercel crashed the public page in production while every CI check was
+green, because CI cannot see the real Vercel and Supabase settings. Criteria 12 to
+18 add a read-only check after each accepted deploy: a smoke test in a real
+browser and a small health route.
+
+- The test targets the **production URL** (the `PRODUCTION_URL` variable, set by the
+  owner on the `production` environment), not the deployment-specific Vercel URL,
+  which Vercel's deployment protection may block **(interpretation)**.
+- It is **read-only on purpose**: creating a product in production would write to
+  the real database and show a test product to visitors for a few seconds.
+  Writing flows stay covered by the CI end-to-end tests against local Supabase.
+  A write-based production check would need a staging environment, deferred in the
+  open questions.
+- A failure **cannot undo** the deploy: Vercel has already switched traffic. It
+  fails the run so the owner sees it, and rollback stays manual.
+- `/api/health` is public and returns only `ok` or `error`, so it reveals nothing
+  an attacker could use.
+
 ## Open questions
 
 The owner approved the spec on 2026-10-25 with the proposals below as the working answers.
@@ -126,3 +177,9 @@ The owner approved the spec on 2026-10-25 with the proposals below as the workin
 3. The first deploy needs the production Supabase project and the Vercel project to
    exist and be linked; creating them is part of the implementation issue, using the
    owner's accounts.
+4. `PRODUCTION_URL` is `https://marcandoandoweb.vercel.app` today and becomes
+   `https://marcandoando.cl` when the domain is connected (#24). The owner updates
+   the variable then.
+5. Automatic rollback when the smoke test fails: not now **(interpretation)**; with
+   one deployment pending at a time and a person accepting each one, a manual
+   rollback is acceptable.
