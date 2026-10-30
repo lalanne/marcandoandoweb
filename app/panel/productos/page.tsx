@@ -3,7 +3,7 @@ import Link from "next/link";
 import { listProducts } from "@/lib/admin/products";
 import { formatClp } from "@/lib/catalog/format";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, primaryButton } from "./ui";
+import { Notice, primaryButton } from "../ui";
 
 export const metadata: Metadata = { title: "Productos | Panel | Marcando Ando" };
 

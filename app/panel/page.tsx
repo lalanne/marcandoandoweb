@@ -7,12 +7,20 @@ export default function PanelPage() {
         Panel de administración
       </h1>
       <p>Hola. Desde acá manejas lo que se ve en el sitio.</p>
-      <Link
-        href="/panel/productos"
-        className="self-start rounded-xl border-2 border-brand-night bg-brand-yellow px-4 py-2 font-semibold text-brand-night"
-      >
-        Productos
-      </Link>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/panel/productos"
+          className="rounded-xl border-2 border-brand-night bg-brand-yellow px-4 py-2 font-semibold text-brand-night"
+        >
+          Productos
+        </Link>
+        <Link
+          href="/panel/disenos"
+          className="rounded-xl border-2 border-brand-night bg-brand-yellow px-4 py-2 font-semibold text-brand-night"
+        >
+          Diseños
+        </Link>
+      </div>
     </main>
   );
 }

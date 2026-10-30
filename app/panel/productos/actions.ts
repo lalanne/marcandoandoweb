@@ -1,46 +1,23 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isAdminUser } from "@/lib/auth/admin";
+import {
+  adminClient,
+  formText as text,
+  imageKindOf as kindOf,
+  type PhotoFormState,
+} from "@/lib/admin/action-helpers";
 import {
   validateAltText,
   validateImageFile,
 } from "@/lib/admin/image-upload";
+import { addImage, deleteImage, moveImage, updateImage } from "@/lib/admin/images";
 import { parseProductForm, type ProductField } from "@/lib/admin/product-input";
-import {
-  addProductImage,
-  createProduct,
-  deleteProduct,
-  deleteProductImage,
-  moveProductImage,
-  updateProduct,
-  updateProductImage,
-  type ImageKind,
-} from "@/lib/admin/products";
-import { createClient } from "@/lib/supabase/server";
+import { createProduct, deleteProduct, updateProduct } from "@/lib/admin/products";
 
 // Server Actions behind /panel/productos. Each one checks the admin again and
 // then acts with the admin's own session, so row-level security and the storage
 // policies decide too. The service-role key is never used here.
-
-async function adminClient() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
-  if (!isAdminUser(user)) redirect("/entrar?error=sin-acceso");
-  return supabase;
-}
-
-function text(data: FormData, key: string): string {
-  const value = data.get(key);
-  return typeof value === "string" ? value : "";
-}
-
-function kindOf(data: FormData): ImageKind {
-  return text(data, "kind") === "graphic" ? "graphic" : "photo";
-}
 
 const editPath = (id: string) => `/panel/productos/${encodeURIComponent(id)}`;
 
@@ -108,14 +85,12 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   redirect("/panel/productos?aviso=eliminado");
 }
 
-export type PhotoFormState = { error: string | null };
-
 export async function uploadPhoto(
   _previous: PhotoFormState,
   formData: FormData,
 ): Promise<PhotoFormState> {
   const supabase = await adminClient();
-  const productId = text(formData, "product_id");
+  const productId = text(formData, "owner_id");
   const altText = text(formData, "alt_text");
   const file = formData.get("file");
 
@@ -125,8 +100,8 @@ export async function uploadPhoto(
   const fileProblem = validateImageFile(file);
   if (fileProblem) return { error: fileProblem };
 
-  const result = await addProductImage(supabase, {
-    productId,
+  const result = await addImage(supabase, {
+    owner: { kind: "product", id: productId },
     file: { type: file.type, size: file.size, body: file },
     altText,
     kind: kindOf(formData),
@@ -140,26 +115,26 @@ export async function savePhoto(
   formData: FormData,
 ): Promise<PhotoFormState> {
   const supabase = await adminClient();
-  const result = await updateProductImage(supabase, text(formData, "image_id"), {
+  const result = await updateImage(supabase, text(formData, "image_id"), {
     altText: text(formData, "alt_text"),
     kind: kindOf(formData),
   });
   if (!result.ok) return { error: result.error };
-  redirect(`${editPath(text(formData, "product_id"))}?aviso=foto-guardada`);
+  redirect(`${editPath(text(formData, "owner_id"))}?aviso=foto-guardada`);
 }
 
 export async function movePhoto(formData: FormData): Promise<void> {
   const supabase = await adminClient();
   const direction = text(formData, "direction") === "up" ? "up" : "down";
-  await moveProductImage(supabase, text(formData, "image_id"), direction);
-  redirect(editPath(text(formData, "product_id")));
+  await moveImage(supabase, text(formData, "image_id"), direction);
+  redirect(editPath(text(formData, "owner_id")));
 }
 
 export async function deletePhoto(formData: FormData): Promise<void> {
   const supabase = await adminClient();
-  const result = await deleteProductImage(supabase, text(formData, "image_id"));
+  const result = await deleteImage(supabase, text(formData, "image_id"));
   redirect(
-    `${editPath(text(formData, "product_id"))}?aviso=${
+    `${editPath(text(formData, "owner_id"))}?aviso=${
       result.ok ? "foto-eliminada" : "foto-no-eliminada"
     }`,
   );

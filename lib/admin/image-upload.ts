@@ -32,13 +32,31 @@ export function validateAltText(altText: string): string | null {
   return altText.trim() === "" ? ALT_TEXT_ERROR : null;
 }
 
+function buildImagePath(
+  folder: "product" | "design",
+  ownerId: string,
+  mimeType: string,
+  uuid: string,
+): string {
+  const ext = EXTENSIONS[mimeType];
+  if (!ext) throw new Error(`Unsupported image type: ${mimeType}`);
+  return `${folder}/${ownerId}/${uuid}.${ext}`;
+}
+
 /** Storage path of a product photo: `product/<product_id>/<uuid>.<ext>`. */
 export function buildProductImagePath(
   productId: string,
   mimeType: string,
   uuid: string,
 ): string {
-  const ext = EXTENSIONS[mimeType];
-  if (!ext) throw new Error(`Unsupported image type: ${mimeType}`);
-  return `product/${productId}/${uuid}.${ext}`;
+  return buildImagePath("product", productId, mimeType, uuid);
+}
+
+/** Storage path of a design photo: `design/<design_id>/<uuid>.<ext>`. */
+export function buildDesignImagePath(
+  designId: string,
+  mimeType: string,
+  uuid: string,
+): string {
+  return buildImagePath("design", designId, mimeType, uuid);
 }
