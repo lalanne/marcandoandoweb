@@ -68,7 +68,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
-| **Header** | Logo and links that scroll to the sections |
+| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
 | **Products** | Published products grouped by category: cover photo, name, "desde" price if set, and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it |
 | **Real work** | Published designs with their photos |
@@ -200,6 +200,28 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
     visitor opens `/img/<path>`, then it is served with a short public cache
     header.
 
+**Sign-in link in the header** (added 2026-10-29, issue #57)
+
+**2026-10-29 amendment - visible sign-in link.** The only way into the admin was to
+type `/entrar`, because nothing on the home page linked to it. The owner asked for a
+visible entry in the header, labelled "Entrar", and "Mi panel" when the admin is
+signed in. Hiding the address was never the protection: the login and the database
+rules are, and they do not change. The link is shown to everyone, including
+customers.
+
+27. Given a visitor who is not signed in, when the home page loads, then the header
+    shows a link labelled "Entrar" that goes to `/entrar`, visible without scrolling
+    at 360 px and at 1280 px, reachable with the keyboard with a visible focus.
+28. Given the admin signed in, when the home page loads, then the header link reads
+    "Mi panel" and goes to `/panel`.
+29. Given a user who is signed in but is not the admin, when the home page loads,
+    then the header link reads "Entrar", and nothing reveals who is signed in.
+30. Given the admin who signs out through `/salir`, when they return to the home
+    page, then the link reads "Entrar" again.
+31. Given the home page, when the session cannot be read or takes long, then the link
+    shows "Entrar", the hero and the other sections are not delayed or broken, and
+    the header does not shift the layout when the label changes to "Mi panel".
+
 ## Verification plan
 
 | # | Criterion | Layer |
@@ -211,6 +233,8 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
 | 19, 21 | Accessibility, performance | axe and Lighthouse on the preview deploy |
 | 25 | Storage read policy: unpublished images not readable or listable | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin; end to end for `/img/...` |
 | 26 | `/panel/img/...` for the admin, `/img/...` with cache headers | Unit (URL helper), integration (storage), end to end (Playwright) |
+| 27, 31 | Link visible and stable at 360 and 1280 px, keyboard, no layout shift, fallback label | End to end (Playwright) with axe |
+| 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
