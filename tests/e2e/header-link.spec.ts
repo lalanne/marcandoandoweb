@@ -100,6 +100,11 @@ test("[002-AC27] the header link is reachable with the keyboard with a visible f
   page,
 }) => {
   await page.goto("/");
+  // Wait for the streamed parts, which replace the fallback link and would
+  // drop the focus.
+  await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
+    timeout: 20_000,
+  });
   const link = headerLink(page);
   await expect(link).toHaveText("Entrar");
   await page.keyboard.press("Tab");
@@ -206,12 +211,25 @@ test("[002-AC31] the header does not shift when the label changes to Mi panel", 
   browser,
   baseURL,
 }) => {
+  // Measured once the catalog links (Productos, Trabajos) have streamed in, so
+  // only the account link can account for a difference.
   const box = async (p: Page) => {
-    const link = headerLink(p);
-    await expect(link).toBeVisible();
-    const b = (await link.boundingBox())!;
-    const header = (await p.locator("header").boundingBox())!;
-    return { x: b.x, y: b.y, width: b.width, height: b.height, header: header.height };
+    await expect(
+      p.locator("header").getByRole("link", { name: "Trabajos" }),
+    ).toBeVisible({ timeout: 20_000 });
+    return p.evaluate(() => {
+      const header = document.querySelector("header")!.getBoundingClientRect();
+      const link = [...document.querySelectorAll("header a")]
+        .find((a) => /^(Entrar|Mi panel)$/.test(a.textContent ?? ""))!
+        .getBoundingClientRect();
+      return {
+        x: link.x,
+        y: link.y,
+        width: link.width,
+        height: link.height,
+        header: header.height,
+      };
+    });
   };
   await page.goto("/");
   await expect(headerLink(page)).toHaveText("Entrar");
