@@ -7,13 +7,7 @@ import {
   validateImageFile,
 } from "@/lib/admin/image-upload";
 import { panelImageUrl } from "@/lib/catalog/images";
-import {
-  deletePhoto,
-  movePhoto,
-  savePhoto,
-  uploadPhoto,
-  type PhotoFormState,
-} from "./actions";
+import type { PhotoFormState } from "@/lib/admin/action-helpers";
 import {
   dangerButton,
   errorClass,
@@ -22,6 +16,15 @@ import {
   primaryButton,
   secondaryButton,
 } from "./ui";
+
+// The photo forms are shared by products and designs. The screen passes the
+// Server Actions of its owner; each reads `owner_id` and `image_id`.
+export type PhotoActions = {
+  upload: (previous: PhotoFormState, formData: FormData) => Promise<PhotoFormState>;
+  save: (previous: PhotoFormState, formData: FormData) => Promise<PhotoFormState>;
+  move: (formData: FormData) => Promise<void>;
+  remove: (formData: FormData) => Promise<void>;
+};
 
 type Problems = { file?: string; alt?: string };
 
@@ -37,9 +40,15 @@ const KINDS = (
  * Spanish, so a refused photo never leaves the phone; the Server Action and the
  * bucket check them again.
  */
-export function UploadPhotoForm({ productId }: { productId: string }) {
+export function UploadPhotoForm({
+  ownerId,
+  upload,
+}: {
+  ownerId: string;
+  upload: PhotoActions["upload"];
+}) {
   const [state, action, pending] = useActionState<PhotoFormState, FormData>(
-    uploadPhoto,
+    upload,
     { error: null },
   );
   const [problems, setProblems] = useState<Problems>({});
@@ -66,7 +75,7 @@ export function UploadPhotoForm({ productId }: { productId: string }) {
       noValidate
       className="flex flex-col gap-4 rounded-2xl border-2 border-brand-night bg-white p-4"
     >
-      <input type="hidden" name="product_id" value={productId} />
+      <input type="hidden" name="owner_id" value={ownerId} />
       <div className={fieldClass}>
         <label htmlFor="new-photo-file" className="font-medium">
           Archivo de imagen
@@ -133,7 +142,8 @@ export function UploadPhotoForm({ productId }: { productId: string }) {
 }
 
 export type PhotoRowProps = {
-  productId: string;
+  ownerId: string;
+  actions: Pick<PhotoActions, "save" | "move" | "remove">;
   image: { id: string; storage_path: string; alt_text: string; kind: "photo" | "graphic" };
   /** 1-based position in the list, used in the labels. */
   number: number;
@@ -142,9 +152,9 @@ export type PhotoRowProps = {
 };
 
 /** One photo: preview, alt text and type, order buttons and delete. */
-export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRowProps) {
+export function PhotoRow({ ownerId, actions, image, number, isFirst, isLast }: PhotoRowProps) {
   const [state, action, pending] = useActionState<PhotoFormState, FormData>(
-    savePhoto,
+    actions.save,
     { error: null },
   );
   const [alt, setAlt] = useState(image.alt_text);
@@ -164,7 +174,7 @@ export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRow
       />
       <div className="flex flex-1 flex-col gap-3">
         <form action={action} noValidate className="flex flex-col gap-3">
-          <input type="hidden" name="product_id" value={productId} />
+          <input type="hidden" name="owner_id" value={ownerId} />
           <input type="hidden" name="image_id" value={image.id} />
           <div className={fieldClass}>
             <label htmlFor={altId} className="font-medium">
@@ -207,8 +217,8 @@ export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRow
         </form>
         <div className="flex flex-wrap gap-2">
           <PhotoButton
-            action={movePhoto}
-            productId={productId}
+            action={actions.move}
+            ownerId={ownerId}
             imageId={image.id}
             direction="up"
             disabled={isFirst}
@@ -217,8 +227,8 @@ export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRow
             {`Mover la foto ${number} hacia arriba`}
           </PhotoButton>
           <PhotoButton
-            action={movePhoto}
-            productId={productId}
+            action={actions.move}
+            ownerId={ownerId}
             imageId={image.id}
             direction="down"
             disabled={isLast}
@@ -227,8 +237,8 @@ export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRow
             {`Mover la foto ${number} hacia abajo`}
           </PhotoButton>
           <PhotoButton
-            action={deletePhoto}
-            productId={productId}
+            action={actions.remove}
+            ownerId={ownerId}
             imageId={image.id}
             className={dangerButton}
           >
@@ -242,7 +252,7 @@ export function PhotoRow({ productId, image, number, isFirst, isLast }: PhotoRow
 
 function PhotoButton({
   action,
-  productId,
+  ownerId,
   imageId,
   direction,
   disabled,
@@ -250,7 +260,7 @@ function PhotoButton({
   children,
 }: {
   action: (formData: FormData) => Promise<void>;
-  productId: string;
+  ownerId: string;
   imageId: string;
   direction?: "up" | "down";
   disabled?: boolean;
@@ -259,7 +269,7 @@ function PhotoButton({
 }) {
   return (
     <form action={action}>
-      <input type="hidden" name="product_id" value={productId} />
+      <input type="hidden" name="owner_id" value={ownerId} />
       <input type="hidden" name="image_id" value={imageId} />
       {direction ? <input type="hidden" name="direction" value={direction} /> : null}
       <button type="submit" disabled={disabled} className={className}>

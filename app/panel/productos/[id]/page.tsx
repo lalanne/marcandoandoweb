@@ -4,10 +4,16 @@ import { notFound } from "next/navigation";
 import { formatPriceInput } from "@/lib/admin/price";
 import { getProduct, listCategories } from "@/lib/admin/products";
 import { createClient } from "@/lib/supabase/server";
-import { deleteProductAction } from "../actions";
-import { PhotoRow, UploadPhotoForm } from "../photo-forms";
+import {
+  deletePhoto,
+  deleteProductAction,
+  movePhoto,
+  savePhoto,
+  uploadPhoto,
+} from "../actions";
+import { PhotoRow, UploadPhotoForm } from "../../photo-forms";
 import { ProductForm } from "../product-form";
-import { Notice, dangerButton } from "../ui";
+import { Notice, dangerButton } from "../../ui";
 
 export const metadata: Metadata = { title: "Editar producto | Panel | Marcando Ando" };
 
@@ -67,7 +73,8 @@ export default async function EditProductPage({
             {product.images.map((image, index) => (
               <PhotoRow
                 key={`${image.id}:${image.alt_text}:${image.kind}`}
-                productId={product.id}
+                ownerId={product.id}
+                actions={{ save: savePhoto, move: movePhoto, remove: deletePhoto }}
                 image={image}
                 number={index + 1}
                 isFirst={index === 0}
@@ -76,7 +83,11 @@ export default async function EditProductPage({
             ))}
           </ul>
         )}
-        <UploadPhotoForm key={product.images.length} productId={product.id} />
+        <UploadPhotoForm
+          key={product.images.length}
+          ownerId={product.id}
+          upload={uploadPhoto}
+        />
       </section>
 
       <details className="rounded-2xl border-2 border-red-800 bg-white p-4">

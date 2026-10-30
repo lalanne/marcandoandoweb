@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { formatPriceInput, parsePriceClp } from "@/lib/admin/price";
 import { slugify } from "@/lib/admin/slug";
 import { saveProduct, type ProductFormState, type RawProduct } from "./actions";
-import { errorClass, fieldClass, inputClass, primaryButton } from "./ui";
+import { errorClass, fieldClass, inputClass, primaryButton } from "../ui";
 
 type Props = {
   /** Present when editing; its id is sent along so the action updates it. */

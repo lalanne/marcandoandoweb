@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   MAX_IMAGE_BYTES,
+  buildDesignImagePath,
   buildProductImagePath,
   validateAltText,
   validateImageFile,
@@ -41,6 +42,17 @@ describe("validateImageFile", () => {
     expect(validateImageFile({ type: "image/gif", size: 10 })).toMatch(/JPG, PNG, WebP o AVIF/);
     expect(validateImageFile({ type: "application/pdf", size: 10 })).not.toBeNull();
     expect(validateImageFile({ type: "image/png", size: 0 })).toMatch(/elige/i);
+  });
+});
+
+describe("buildDesignImagePath", () => {
+  it("builds design/<design_id>/<uuid>.<ext> from the file type", () => {
+    expect(buildDesignImagePath(ID, "image/png", UUID)).toBe(`design/${ID}/${UUID}.png`);
+    expect(buildDesignImagePath(ID, "image/jpeg", UUID)).toBe(`design/${ID}/${UUID}.jpg`);
+  });
+
+  it("refuses a type the bucket does not allow", () => {
+    expect(() => buildDesignImagePath(ID, "image/gif", UUID)).toThrow();
   });
 });
 
