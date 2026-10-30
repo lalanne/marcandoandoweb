@@ -1,4 +1,6 @@
-// Creates (or resets) the one admin account. Run by the developer or the owner,
+// Creates (or resets) an admin account. Any number of admins can exist: run it
+// once per person, with the email that person signs in with (also their Google
+// email, which links to this user). Run by the developer or the owner,
 // never by the app: it needs the service-role key, which must never be imported
 // by app code or reach the browser.
 //

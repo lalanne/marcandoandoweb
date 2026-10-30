@@ -84,6 +84,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Fake Google provider values (spec 005, never real credentials)
+        run: cp supabase/.env.example supabase/.env
       - name: Start local Supabase
         run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
       - name: Reset from migrations and seed
@@ -103,6 +105,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Fake Google provider values (spec 005, never real credentials)
+        run: cp supabase/.env.example supabase/.env
       - name: Start local Supabase
         run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
       - name: Clean reset from the migrations alone (no seed)
@@ -128,6 +132,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Fake Google provider values (spec 005, never real credentials)
+        run: cp supabase/.env.example supabase/.env
       - name: Start local Supabase
         run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
       - name: Reset from migrations and seed

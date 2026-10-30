@@ -3,7 +3,8 @@
 -- production migrations never do. Everything here is fake: no real child photo,
 -- no school crest, no real price or person.
 
--- Two fake users. The admin is identified by app_metadata.role = 'admin' (see
+-- Three fake users: two admins and one signed-in non-admin (any number of admins
+-- is allowed, spec 005). An admin is identified by app_metadata.role = 'admin' (see
 -- public.is_admin(), which reads the signed token). app_metadata can only be
 -- written with the service role, never by a user.
 insert into auth.users (
@@ -15,6 +16,11 @@ insert into auth.users (
   ('00000000-0000-0000-0000-000000000000', '11111111-1111-1111-1111-111111111111',
    'authenticated', 'authenticated', 'admin@marcandoando.test',
    crypt('local-only-admin-pass', gen_salt('bf')), now(),
+   '{"provider":"email","providers":["email"],"role":"admin"}', '{}', now(), now(),
+   '', '', '', '', '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '33333333-3333-3333-3333-333333333333',
+   'authenticated', 'authenticated', 'admin2@marcandoando.test',
+   crypt('local-only-admin2-pass', gen_salt('bf')), now(),
    '{"provider":"email","providers":["email"],"role":"admin"}', '{}', now(), now(),
    '', '', '', '', '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '22222222-2222-2222-2222-222222222222',
@@ -30,7 +36,7 @@ select u.id, u.id, u.id::text, 'email',
        jsonb_build_object('sub', u.id::text, 'email', u.email, 'email_verified', true),
        now(), now(), now()
 from auth.users u
-where u.email in ('admin@marcandoando.test', 'cliente@marcandoando.test');
+where u.email in ('admin@marcandoando.test', 'admin2@marcandoando.test', 'cliente@marcandoando.test');
 
 -- Fake sample catalog. Prices and names are obviously invented.
 insert into public.product (slug, name, description, price_from_clp, category_id, is_featured, is_available, is_published)
