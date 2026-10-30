@@ -1,4 +1,4 @@
-// Shared look of the products screens: big touch targets for the phone, the
+// Shared look of the panel screens (products and designs): big touch targets for the phone, the
 // brand's dark outlines, and the notices that follow an action.
 
 export const inputClass =
@@ -18,6 +18,13 @@ const NOTICES: Record<string, { text: string; kind: "ok" | "error" }> = {
   eliminado: { text: "Producto eliminado.", kind: "ok" },
   "no-eliminado": {
     text: "No se pudo eliminar el producto. Intenta de nuevo.",
+    kind: "error",
+  },
+  "diseno-creado": { text: "Diseño creado. Ya puedes agregar fotos.", kind: "ok" },
+  "diseno-guardado": { text: "Diseño guardado.", kind: "ok" },
+  "diseno-eliminado": { text: "Diseño eliminado.", kind: "ok" },
+  "diseno-no-eliminado": {
+    text: "No se pudo eliminar el diseño. Intenta de nuevo.",
     kind: "error",
   },
   "foto-subida": { text: "Foto subida.", kind: "ok" },
