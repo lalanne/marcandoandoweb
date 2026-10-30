@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatClp } from "@/lib/catalog/format";
 import { groupByCategory } from "@/lib/catalog/group";
-import { imagePathFromSegments, imageUrl } from "@/lib/catalog/images";
+import { imagePathFromSegments, imageUrl, panelImageUrl } from "@/lib/catalog/images";
 
 const cat = (slug: string, position: number) => ({
   id: `c-${slug}`,
@@ -66,6 +66,14 @@ describe("imageUrl", () => {
 
   it("[002-AC26] encodes each path segment", () => {
     expect(imageUrl("demo/mi foto.webp")).toBe("/img/demo/mi%20foto.webp");
+  });
+});
+
+describe("panelImageUrl", () => {
+  it("[002-AC26] builds the admin preview URL under /panel/img, encoding each segment", () => {
+    expect(panelImageUrl("product/abc/mi foto.png")).toBe(
+      "/panel/img/product/abc/mi%20foto.png",
+    );
   });
 });
 

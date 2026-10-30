@@ -7,6 +7,11 @@ export function imageUrl(storagePath: string): string {
   return `/img/${storagePath.split("/").map(encodeURIComponent).join("/")}`;
 }
 
+/** Admin preview of any image, published or not: `/panel/img/<storage_path>`. */
+export function panelImageUrl(storagePath: string): string {
+  return `/panel${imageUrl(storagePath)}`;
+}
+
 /**
  * Storage path from the segments of an `/img/[...path]` route, or null when it
  * is empty or tries to leave the folder (`.`, `..`, empty segment, backslash).
