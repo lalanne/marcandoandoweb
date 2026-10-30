@@ -167,6 +167,7 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 | Unit tests (Vitest, `tests/unit/`) | `npm test` |
 | End-to-end tests (Playwright at 360 and 1280 px, `tests/e2e/`; needs local Supabase running; starts the dev server itself, or the production server when `CI=1`) | `npm run test:e2e` |
 | Integration tests (Vitest against local Supabase, `tests/integration/`) | `npm run test:integration` |
+| Smoke test of a live site (`tests/smoke/`, read-only; base URL from `PRODUCTION_URL` or `SMOKE_BASE_URL`; see Deploy) | `npm run test:smoke` |
 | Supabase CLI (devDependency) | `npx supabase` |
 
 The public page needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -283,10 +284,40 @@ includes it.
 **After acceptance** the job runs `supabase link` and `supabase db push` (pending
 migrations from `supabase/migrations/`, no seed data), and only if that succeeds
 `vercel pull`, `vercel build --prod` and `vercel deploy --prebuilt --prod` for the
-same commit. The production URL and commit are written to the run summary.
-`land-pr` confirms a deploy by reading that summary (`gh run list --workflow
-deploy.yml`) and checking the run is green; a waiting run is not a failure, tell
-the owner it needs their acceptance.
+same commit. Then, in the same job, the smoke test runs against the live site (see
+below). The production URL, the commit and the smoke result are written to the run
+summary. `land-pr` confirms a deploy by reading that summary (`gh run list
+--workflow deploy.yml`) and checking the run is green; a waiting run is not a
+failure, tell the owner it needs their acceptance.
+
+**Smoke test (spec 004, criteria 12 to 18).** After the Vercel step, `deploy.yml`
+installs Chromium and runs `npm run test:smoke` (`tests/smoke/`,
+`playwright.smoke.config.ts`) against the **`PRODUCTION_URL`** variable of the
+`production` environment. It checks that `/` answers 200 with the hero and the
+"Cotizar por WhatsApp" button, shows no "Reload to try again" or "A server error
+occurred", has no console errors or failed requests; that `/panel` signed out goes
+to `/entrar`; and that `/api/health` answers `{"status":"ok"}` (it reads the
+categories with the public client; 503 `{"status":"error"}` and nothing else
+otherwise). It only sends GET requests and uses no credentials or secrets. Each
+check retries for up to 60 seconds while the new deployment goes live.
+- **The owner sets `PRODUCTION_URL`** once as a variable of the `production`
+  environment: `https://marcandoandoweb.vercel.app` today, `https://marcandoando.cl`
+  when the domain is connected (#24). Not a secret. If it is missing, the smoke step
+  fails with that message.
+- **Run it locally against any URL:** `PRODUCTION_URL=https://marcandoandoweb.vercel.app
+  npm run test:smoke` (or `SMOKE_BASE_URL=http://localhost:3000` against a running
+  local server; `SMOKE_RETRY_SECONDS=0` to try once). It needs the browser
+  (`npx playwright install chromium`) and is not part of `npm run test:e2e`.
+  CI also runs it, healthy and deliberately broken, inside the `e2e` job
+  (`tests/e2e/smoke-spec.spec.ts`).
+- **Reading a failure.** The run is red, but **production is already serving the new
+  version**: nothing is rolled back automatically. The run summary lists each failed
+  check and the production URL and commit. Open the log of the "Smoke test the live
+  site" step for the reason ("error text ... on the page" or a console error means
+  the page crashed, often a wrong `NEXT_PUBLIC_SUPABASE_*` in Vercel; `health status`
+  503 means the site cannot read the database; `/panel` not going to `/entrar`
+  means the sign-in guard is off). Fix forward, or use the Rollback below if the
+  site is broken for visitors.
 
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work
