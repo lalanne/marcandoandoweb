@@ -31,6 +31,10 @@ export const ADMIN = {
   email: "admin@marcandoando.test",
   password: "local-only-admin-pass",
 };
+export const ADMIN_TWO = {
+  email: "admin2@marcandoando.test",
+  password: "local-only-admin2-pass",
+};
 export const NON_ADMIN = {
   email: "cliente@marcandoando.test",
   password: "local-only-cliente-pass",

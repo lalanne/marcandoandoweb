@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const ERROR_TEXTS: Record<string, string> = {
+  "sin-acceso": "Esta cuenta no tiene acceso al panel.",
+  google:
+    "No pudimos entrar con Google. Inténtalo de nuevo o usa tu correo y contraseña.",
+};
+
 export default function SignInPage({
   searchParams,
 }: {
@@ -42,10 +48,23 @@ async function SignInContent({
   if (isAdminUser(user)) redirect("/panel");
 
   return (
-    <SignInForm
-      initialError={
-        error === "sin-acceso" ? "Esta cuenta no tiene acceso al panel." : null
-      }
-    />
+    <>
+      <SignInForm initialError={ERROR_TEXTS[error ?? ""] ?? null} />
+      <div className="my-5 flex items-center gap-3 text-brand-night">
+        <hr className="flex-1 border-brand-night/30" />
+        <span>o</span>
+        <hr className="flex-1 border-brand-night/30" />
+      </div>
+      {/* A plain form POST: a full-page navigation that works without JavaScript
+          and cannot be started by a link prefetch. */}
+      <form method="post" action="/auth/google">
+        <button
+          type="submit"
+          className="w-full rounded-xl border-2 border-brand-night bg-white px-4 py-2 font-semibold text-brand-night"
+        >
+          Continuar con Google
+        </button>
+      </form>
+    </>
   );
 }
