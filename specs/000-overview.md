@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69; first approved by the owner on 2026-10-23)
+**Status:** draft (the 2026-10-31 amendment for issue #85 waits for the owner's approval; approved: by the owner, 2026-10-31, with the amendments of that date: issues #63, #69; first approved by the owner on 2026-10-23)
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -77,6 +77,9 @@ Every other spec inherits these.
 - **Currency:** Chilean pesos (CLP) only. Prices are shown with a dot as
   thousands separator (`$7.000`). CLP has no minor unit, so amounts are whole
   numbers. Prices are reference or "from" prices, not firm quotes (Req §3B).
+  Amended 2026-10-31 (issue #85): on the site they read as a price per unit
+  ("$7.000 c/u"), without "desde", with a note that wholesale has another price
+  (spec 002).
 - **Brand:** the official logo and the brand colors pink, teal, yellow, purple
   and navy; light or white backgrounds so products stand out; cheerful, modern,
   tidy (Req §2). Palette values and typography belong to the design system spec.

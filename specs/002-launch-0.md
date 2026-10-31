@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft (the 2026-10-31 amendment for issue #82 waits for the owner's approval; approved by the owner on 2026-10-31 with the amendments of that date for issues #63, #69, #72 and #79, and first on 2026-10-23)
+**Status:** draft (the 2026-10-31 amendments for issues #82 and #85 wait for the owner's approval; approved by the owner on 2026-10-31 with the amendments of that date for issues #63, #69, #72 and #79, and first on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -148,7 +148,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 |---------|---------|
 | **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
-| **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, "desde" price if set, and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
+| **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, price if set (amended 2026-10-31: "$7.000 c/u", no longer "desde $7.000"), and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
 | **Packs** | Added 2026-10-31. Published products of type "Pack", shown and ordered exactly like the Products section. Section heading "Packs", anchor `#packs` |
 | **Real work** | Published designs with their photos |
 | **How to order** | Three short steps: tell us your idea, we send you a quote, we make it |
@@ -178,6 +178,23 @@ all of them, and chose option 1 of the design canvas
   availability, "Cotizar") does not change.
 
 A separate product page stays out of launch 0 (issue #87 covers a detail view).
+
+**2026-10-31 amendment - prices without "desde", and a wholesale note (issue #85).**
+The owner asked to drop "desde" from the prices and to tell visitors that "al por
+mayor es otro precio". From the options on the design canvas
+(https://claude.ai/artifact/Wb1cYC8HEbMGHuEpgCnFvU) this amendment takes **B with the
+"c/u" of D (proposed; the owner confirms or picks another option when approving)**:
+
+- A card's price reads "$7.000 c/u" (per unit), in place of "desde $7.000". A product
+  with no price still shows none, and no "c/u" either.
+- One note, under the heading of the "Productos" section and of the "Packs" section:
+  "Precios por unidad. Al por mayor es otro precio: cotiza por WhatsApp." It shows
+  once per section, not on every card.
+- In the admin form, the label "Precio desde (CLP)" becomes "Precio (CLP)". The
+  stored value (`price_from_clp`) and how it is typed do not change.
+- The WhatsApp messages do not change.
+
+Before this amendment the cards read "desde $7.000" (the Products row above).
 
 ## Constraints
 
@@ -418,6 +435,23 @@ customers.
 51. Given a product that is not published, when a visitor asks for any of its photos
     at `/img/<path>`, then they are refused as in criterion 25.
 
+**Prices without "desde", and the wholesale note** (added 2026-10-31, issue #85)
+
+52. Given a published product with price 7000, when the home page loads, then its card
+    shows "$7.000 c/u", with a dot as thousands separator; the word "desde" appears
+    nowhere on the public page; and a product without a price shows no price and no
+    "c/u".
+53. Given the "Productos" or "Packs" section is shown, when the visitor reads it, then
+    right under its heading there is, once, the note "Precios por unidad. Al por mayor
+    es otro precio: cotiza por WhatsApp.", with a text contrast of at least 4.5:1 and
+    no horizontal scroll at 360 px.
+54. Given the admin creating or editing a product, when they look at the price field,
+    then its label reads "Precio (CLP)" and not "Precio desde (CLP)", and a price typed
+    as "7.000" is still saved as 7000.
+55. Given a product card's "Cotizar" button and the floating WhatsApp button, when
+    they are followed, then the pre-filled messages are the same as before this
+    amendment.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -440,6 +474,9 @@ customers.
 | 49 | Lazy loading, alt text, no layout shift | End to end: the network requests on load name only each card's first photo; alt text per photo; the card's box keeps its size when the photo changes |
 | 50 | Keyboard, focus, 44 px targets, no horizontal scroll | End to end (Playwright) at 360 and 1280 px with axe |
 | 51 | Unpublished photos stay private | Covered by the criterion 25 tests, extended to a product's second and later photos |
+| 52, 53 | Price "$7.000 c/u", no "desde", the note once per section | Unit test for the price label helper; end to end (Playwright) at 360 and 1280 px with axe |
+| 54 | Admin price label | End to end (Playwright); the existing price parser unit tests stay |
+| 55 | WhatsApp messages unchanged | The existing unit tests of the message builder stay green |
 | 43, 44, 45 | "Salir" ends on the home page, "Ver sitio", "Volver al sitio" | End to end (Playwright) at 360 and 1280 px against local Supabase, as a throwaway admin (signing out ends every session of that user); criterion 10 and spec 005 criterion 9 keep their tests |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
