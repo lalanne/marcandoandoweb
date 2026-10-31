@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft (the second 2026-10-31 amendment, issue #69, waits for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
+**Status:** draft (the second and third 2026-10-31 amendments, issues #69 and #72, wait for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -78,7 +78,29 @@ dropped once #64 is in production).
   by the developer and handed to Javiera. No sign-up page.
 - **Products:** list, create, edit, delete; set price, availability, highlighted,
   published; choose the ~~category~~ type, "Producto" or "Pack" (amended
-  2026-10-31); upload and order photos with alt text.
+  2026-10-31); upload and order photos with alt text. In the product list, packs
+  carry a "Pack" badge and filters by type sit above it (amendment below,
+  criteria 38 to 42).
+
+**2026-10-31 amendment - telling packs apart in the panel (issue #72).** In the
+product list a pack looked like any other product. The owner chose two of the
+options on the design canvas (https://claude.ai/artifact/CxNPWpt77vxogi4pFHSPwW),
+"A" and "D":
+
+- **A, a "Pack" badge:** each pack carries a "Pack" badge, first in its row of
+  badges (before "Publicado" or "Sin publicar"), a filled pill in the brand purple
+  with a small stacked-layers icon and white text. A product carries no type
+  badge.
+- **D, filters with counts:** above the list, "Todos (n)", "Productos (n)" and
+  "Packs (n)", counting every product of that type, published or not. Choosing one
+  lists only that type. The choice lives in the address (`?tipo=producto` or
+  `?tipo=pack`; none, or any other value, is "Todos"), so it works without
+  JavaScript and survives a reload. Under "Todos" the list is split under the
+  headings "Productos" and "Packs", in that order; a group with no items is not
+  shown.
+
+Before this amendment the list showed each product's type as text only
+(criterion 32).
 - ~~**Designs:** list, create, edit, delete; upload photos with alt text.~~
   Postponed 2026-10-31 (amendment below).
 
@@ -301,6 +323,27 @@ customers.
     design, then they get the "not found" page and no design data; a visitor who is
     not signed in is still sent to the sign-in page from those addresses.
 
+**Packs in the panel list** (added 2026-10-31, issue #72)
+
+38. Given products of both types, when the admin opens the product list, then each
+    pack shows a "Pack" badge first in its row of badges and no product shows one;
+    the badge's text has a contrast of at least 4.5:1 and its icon is hidden from
+    screen readers.
+39. Given 3 products and 2 packs, published or not, when the admin opens the product
+    list, then the filters read "Todos (5)", "Productos (3)" and "Packs (2)".
+40. Given the product list, when the admin chooses "Packs" (or "Productos"), then the
+    address ends in `?tipo=pack` (or `?tipo=producto`), only that type is listed, and
+    a reload keeps the choice; when the address has no `tipo` or an unknown value,
+    then "Todos" is chosen.
+41. Given "Todos", when the list shows, then the items are grouped under the headings
+    "Productos" and then "Packs", and a group with no items has no heading; given a
+    chosen type with no items, then the list says so in Spanish instead of showing
+    nothing (for example "Todavía no hay packs.").
+42. Given the filters, when they are used with the keyboard only, then each can be
+    reached and chosen with a visible focus, the chosen one is announced as current
+    (`aria-current="page"`), and at 360 px the filters wrap with no horizontal
+    scroll.
+
 ## Verification plan
 
 | # | Criterion | Layer |
@@ -317,6 +360,8 @@ customers.
 | 33, 34 | Two sections by type, empty type hidden | Unit test for the pure grouping function; end to end (Playwright) at 360 and 1280 px with axe |
 | 35 | Header links | End to end (Playwright) at 360 and 1280 px with axe |
 | 37 | No "Diseños" in the panel, its addresses answer 404 | End to end (Playwright) at 360 and 1280 px, as the admin and as a visitor |
+| 39, 40, 41 | Counting, reading the filter from the address, grouping | Unit test for the pure function that counts, filters and groups the list; end to end for the address and the reload |
+| 38, 41, 42 | Badge, headings, empty message, keyboard, no horizontal scroll | End to end (Playwright) at 360 and 1280 px against local Supabase, with axe |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
