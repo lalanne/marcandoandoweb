@@ -1,10 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { groupByKind } from "./group";
 import { isProductKind } from "./kind";
+import { photosInOrder } from "./photos";
 import type {
   Catalog,
   CatalogDesign,
-  CatalogImage,
   CatalogProduct,
 } from "./types";
 
@@ -13,14 +13,6 @@ type ImageRow = {
   alt_text: string;
   position: number;
 };
-
-function toImage(row: ImageRow): CatalogImage {
-  return { storagePath: row.storage_path, altText: row.alt_text };
-}
-
-function byPosition(a: ImageRow, b: ImageRow): number {
-  return a.position - b.position;
-}
 
 /**
  * Everything the public page shows, read with an anonymous client. Row-level
@@ -52,7 +44,6 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
   // The database only allows the two types; anything else is not shown.
   const rows = (products.data ?? []).filter((p) => isProductKind(p.kind));
   const productList: CatalogProduct[] = rows.map((p) => {
-    const images = ([...(p.image ?? [])] as ImageRow[]).sort(byPosition);
     return {
       id: p.id,
       slug: p.slug,
@@ -62,7 +53,7 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
       kind: p.kind,
       isFeatured: p.is_featured,
       isAvailable: p.is_available,
-      coverImage: images[0] ? toImage(images[0]) : null,
+      images: photosInOrder(p.image as ImageRow[]),
     };
   });
 
@@ -71,7 +62,7 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
     slug: d.slug,
     title: d.title,
     description: d.description,
-    images: ([...(d.image ?? [])] as ImageRow[]).sort(byPosition).map(toImage),
+    images: photosInOrder(d.image as ImageRow[]),
   }));
 
   return {

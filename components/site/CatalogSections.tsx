@@ -6,6 +6,7 @@ import { loadCatalog } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { buttonClass } from "./Hero";
+import { ProductPhotos } from "./ProductPhotos";
 
 function Photo({ image }: { image: CatalogImage }) {
   return (
@@ -24,14 +25,7 @@ function Photo({ image }: { image: CatalogImage }) {
 function ProductCard({ product }: { product: CatalogProduct }) {
   return (
     <article className="flex flex-col gap-3 rounded-3xl border-2 border-brand-night bg-white p-3">
-      {product.coverImage ? (
-        <Photo image={product.coverImage} />
-      ) : (
-        <div
-          aria-hidden="true"
-          className="aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30"
-        />
-      )}
+      <ProductPhotos images={product.images} name={product.name} />
       <h3 className="text-lg font-semibold">{product.name}</h3>
       {product.priceFromClp !== null && (
         <p className="font-medium">{priceLabel(product.priceFromClp)}</p>
