@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69 and #72; first approved by the owner on 2026-10-23)
+**Status:** draft (the fourth 2026-10-31 amendment, issue #79, waits for the owner's approval; approved by the owner on 2026-10-31 with the amendments of that date for issues #63, #69 and #72, and first on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -76,6 +76,23 @@ dropped once #64 is in production).
 
 - **Sign-in** with email and password (Supabase Auth). One admin account, created
   by the developer and handed to Javiera. No sign-up page.
+
+**2026-10-31 amendment - back to the public site (issue #79).** After "Salir" the
+admin landed on `/entrar`, which had no link to the site, and the panel header had
+none either: the owner had to type the site address again. The owner asked for all
+three of these (2026-10-31):
+
+- **"Salir" ends on the home page.** Sign-out stays a form POST to `/salir` and a
+  full page load, but it now lands on `/` (it landed on `/entrar`), where the header
+  link reads "Entrar" (criterion 43).
+- **"Ver sitio" in the panel header**, next to the panel's own links: it opens the
+  home page and the admin stays signed in, so the header link there reads "Mi
+  panel" (criterion 44).
+- **"Volver al sitio" on `/entrar`**, above the sign-in form: it opens the home
+  page (criterion 45).
+
+Unchanged: after signing out, the browser's back button shows no panel data
+(criterion 10), and a Google session also ends (spec 005, criterion 9).
 - **Products:** list, create, edit, delete; set price, availability, highlighted,
   published; choose the ~~category~~ type, "Producto" or "Pack" (amended
   2026-10-31); upload and order photos with alt text. In the product list, packs
@@ -344,6 +361,19 @@ customers.
     (`aria-current="page"`), and at 360 px the filters wrap with no horizontal
     scroll.
 
+**Back to the public site** (added 2026-10-31, issue #79)
+
+43. Given the admin signed in, when they press "Salir" in the panel, then they land
+    on the home page (`/`) after a full page load, signed out: the header link reads
+    "Entrar", and opening `/panel` sends them to `/entrar`.
+44. Given the admin signed in, when they open the panel at 360 px or 1280 px, then
+    its header has a link "Ver sitio" that can be reached with the keyboard; when
+    they follow it, then they reach the home page still signed in, and its header
+    link reads "Mi panel".
+45. Given a visitor on `/entrar`, signed in or not, when the page shows, then a link
+    "Volver al sitio" above the sign-in form leads to the home page, can be reached
+    with the keyboard, and keeps the page free of horizontal scroll at 360 px.
+
 ## Verification plan
 
 | # | Criterion | Layer |
@@ -362,6 +392,7 @@ customers.
 | 37 | No "Diseños" in the panel, its addresses answer 404 | End to end (Playwright) at 360 and 1280 px, as the admin and as a visitor |
 | 39, 40, 41 | Counting, reading the filter from the address, grouping | Unit test for the pure function that counts, filters and groups the list; end to end for the address and the reload |
 | 38, 41, 42 | Badge, headings, empty message, keyboard, no horizontal scroll | End to end (Playwright) at 360 and 1280 px against local Supabase, with axe |
+| 43, 44, 45 | "Salir" ends on the home page, "Ver sitio", "Volver al sitio" | End to end (Playwright) at 360 and 1280 px against local Supabase, as a throwaway admin (signing out ends every session of that user); criterion 10 and spec 005 criterion 9 keep their tests |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
