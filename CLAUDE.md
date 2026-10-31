@@ -212,7 +212,7 @@ Needs Docker running. All commands run from the repo root. Before the first
   The Playwright config reads them from `supabase status` itself when they are unset.
 - `proxy.ts` guards `/panel` and `/panel/*`: no session goes to `/entrar`, a session
   that is not the admin goes to `/entrar?error=sin-acceso`. The panel layout checks
-  again. Sign-out is a form POST to `/salir`, which ends with a full page load.
+  again. Sign-out is a form POST to `/salir`, which ends with a full page load on the home page (`/`). The panel header has "Ver sitio" (back to the site, still signed in) and `/entrar` has "Volver al sitio" (spec 002, criteria 43 to 45).
 - The service-role key is used only by `scripts/create-admin.mjs`. App code never
   reads it (a unit test enforces it), and it never goes in `.env*` files or the repo.
 - **Any number of admins can exist** (spec 005). Create one per person, one run of

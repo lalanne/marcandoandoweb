@@ -42,6 +42,10 @@ async function AdminOnly({ children }: { children: React.ReactNode }) {
           <Link href="/panel/productos" className="underline">
             Productos
           </Link>
+          {/* Back to the public site, still signed in (spec 002, criterion 44). */}
+          <Link href="/" className="underline">
+            Ver sitio
+          </Link>
           <Link href="/panel/disenos" className="underline">
             Diseños
           </Link>
