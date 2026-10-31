@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
+**Status:** draft (the second 2026-10-31 amendment, issue #69, waits for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -60,7 +60,7 @@ and hosting are part of delivery (Req §4, §8).
 | **Schools and courses section** (Req §3E) | Blog, newsletter, email marketing |
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |
-| **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); highlighted products; designs in the gallery; available or temporarily unavailable (Req §7) | Roles beyond a single admin |
+| **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); highlighted products; ~~designs in the gallery~~ (postponed 2026-10-31, issue #69: no "Diseños" in the panel for now); available or temporarily unavailable (Req §7) | Roles beyond a single admin |
 | **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | **Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5) |
 | **Offers ("Ofertas"):** a product can be flagged "en oferta" with its old and new price, and appears in a filtered view reached from the menu (Req §3A; interpretation, see decisions) | |
 | **Delivery:** domain, hosting, forms, training for Javiera, handover of accounts and ownership, cost information (Req §8) | |
