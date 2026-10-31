@@ -1,6 +1,6 @@
 # 004 — Deployment Pipeline
 
-**Status:** draft (the 2026-10-31 amendment to criterion 15, issue #63, waits for the owner's approval; before it: approved (by the owner, 2026-10-25))
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25)
 
 Sources: [spec 002](002-launch-0.md) (criteria 20 and 24),
 [spec 003](003-ci-and-testing.md), [ADR-0001](../docs/adr/0001-web-stack.md). Issue

@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** draft (the 2026-10-31 amendment, issue #63, waits for the owner's approval; the spec was approved by the owner on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
