@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft (the second and third 2026-10-31 amendments, issues #69 and #72, wait for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69 and #72; first approved by the owner on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
