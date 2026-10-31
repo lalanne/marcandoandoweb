@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -35,10 +35,10 @@ decision is the owner's, not the agent's.
 
 Spec 001 must be approved for the part launch 0 uses. Launch 0 implements only:
 
-- **Category**: seeded by migration with the ten categories of Req §3B; not
-  editable in the admin at launch.
+- ~~**Category**: seeded by migration with the ten categories of Req §3B; not
+  editable in the admin at launch.~~ Removed 2026-10-31 (amendment below).
 - **Product**: name, slug, description, `price_from_clp`, `is_available`,
-  `is_featured`, `is_published`, category.
+  `is_featured`, `is_published`, ~~category~~ type (`kind`, amended 2026-10-31).
 - **Design**: title, slug, description, `is_published`; the gallery's unit.
 - **Image**: alt text required, owner is a product or a design, position.
 - **Row-level security** exactly as in spec 001 for those tables: the public reads
@@ -51,15 +51,37 @@ categories per product.
 A product in launch 0 belongs to one category **(interpretation: the join table
 comes with the multi-category work)**.
 
+**2026-10-31 amendment - Productos and Packs instead of categories (issue #63).**
+After trying the site, Javiera asked to remove the categories and keep two groups,
+"Productos" and "Packs", and to change the header links ("Feedback from Javiera
+(2026-10-31)" in `docs/requirements.md`). Following the amendment of the same date
+in spec 001:
+
+- **Category** is no longer seeded or used. A product has a required **type**
+  (`kind`): "Producto" or "Pack". A pack is an ordinary product with a different
+  label, with no link to other products.
+- The admin chooses the type instead of the category (Admin below).
+- The public page lists products in two sections, "Productos" and "Packs" (Public
+  site below).
+- The header links read exactly **Productos · Packs · Cómo pedir · Colegios y
+  grupos**. The "Trabajos" link is removed from the header (owner decision,
+  2026-10-31); the "Real work" section itself stays.
+- "Multiple categories per product" is no longer deferred: it is dropped.
+
+Implemented in two steps (spec 001, migration plan): issue #64 (product type, admin,
+public page, header; the `category` table stays unused) and issue #65 (the table is
+dropped once #64 is in production).
+
 ### Admin: `/panel`
 
 - **Sign-in** with email and password (Supabase Auth). One admin account, created
   by the developer and handed to Javiera. No sign-up page.
 - **Products:** list, create, edit, delete; set price, availability, highlighted,
-  published; choose the category; upload and order photos with alt text.
+  published; choose the ~~category~~ type, "Producto" or "Pack" (amended
+  2026-10-31); upload and order photos with alt text.
 - **Designs:** list, create, edit, delete; upload photos with alt text.
 - Designed for a computer, usable on a phone.
-- Out: roles, category editing, password reset flow beyond what Supabase gives by
+- Out: roles, ~~category editing~~ (no categories since 2026-10-31), password reset flow beyond what Supabase gives by
   default, bulk actions, search.
 
 ### Public site
@@ -68,9 +90,10 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
-| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31) |
+| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
-| **Products** | Published products grouped by category: cover photo, name, "desde" price if set, and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it |
+| **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, "desde" price if set, and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
+| **Packs** | Added 2026-10-31. Published products of type "Pack", shown and ordered exactly like the Products section. Section heading "Packs", anchor `#packs` |
 | **Real work** | Published designs with their photos |
 | **How to order** | Three short steps: tell us your idea, we send you a quote, we make it |
 | **Schools and groups** | A short block for courses, generations and teams, with a WhatsApp button (Req §3E, reduced) |
@@ -121,8 +144,11 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
 
 **Data and security** (these are spec 001's criteria for the tables above)
 
-1. Spec 001's criteria 1, 3, 5, 6, 8, 13, 15, 16, 18, 19 and 20, restricted to
-   Category, Product, Design and Image, pass against local Supabase.
+1. Spec 001's criteria 1, 3, 5, 6, 8, 13, 15, 16, 18, 19, 20, 22 and 23,
+   restricted to Product, Design and Image, pass against local Supabase.
+
+   **2026-10-31 amendment.** Category is removed from the list of tables, and spec
+   001's new product-type criteria 22 and 23 are added.
 2. Given production, when the database is inspected, then it holds only real
    content: no seed rows.
 
@@ -135,9 +161,12 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
    signed out.
 5. Given a signed-in user who is not the admin, when they open the panel or try to
    write, then they are refused.
-6. Given the admin, when they create a product with name, price, category and a
+6. Given the admin, when they create a product with name, price, type and a
    photo with alt text and publish it, then it appears on the public page without a
-   deploy.
+   deploy, in the section of its type.
+
+   **2026-10-31 amendment.** "Category" is replaced by "type" (Producto or Pack),
+   and the product appears in the section of its type.
 7. Given a published product, when the admin changes its price, then the public page
    shows the new price; when they mark it unavailable, then it shows the notice and
    no WhatsApp button; when they unpublish or delete it, then it disappears.
@@ -222,6 +251,30 @@ customers.
     shows "Entrar", the hero and the other sections are not delayed or broken, and
     the header does not shift the layout when the label changes to "Mi panel".
 
+**Productos and Packs** (added 2026-10-31, issue #63)
+
+32. Given the admin creating or editing a product, when they open the form, then it
+    has a required "Tipo" field with the options "Producto" and "Pack" and no
+    "Categoría" field; a new product starts as "Producto"; and the product list in
+    the panel shows each product's type.
+33. Given published products of both types, when the home page loads, then the
+    "Productos" section lists only the products of type "Producto" and the "Packs"
+    section, right after it, lists only those of type "Pack"; in each, highlighted
+    products come first; and no category name or category heading appears anywhere
+    on the page.
+34. Given no published product of one type, when the home page loads, then that
+    type's section is not shown and its header link is not shown, and the other
+    type's section and link are.
+35. Given the home page with published products of both types and published
+    designs, when the header is read, then its section links are exactly
+    "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order, each
+    going to its section (`#productos`, `#packs`, `#como-pedir`, `#colegios`); there
+    is no "Trabajos" link; and the links fit without horizontal scroll at 360 px and
+    1280 px.
+36. Given the admin, when they change a published product's type from "Producto"
+    to "Pack", then the home page shows it in the "Packs" section and no longer in
+    "Productos", without a deploy.
+
 ## Verification plan
 
 | # | Criterion | Layer |
@@ -234,6 +287,9 @@ customers.
 | 25 | Storage read policy: unpublished images not readable or listable | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin; end to end for `/img/...` |
 | 26 | `/panel/img/...` for the admin, `/img/...` with cache headers | Unit (URL helper), integration (storage), end to end (Playwright) |
 | 27, 31 | Link visible and stable at 360 and 1280 px, keyboard, no layout shift, fallback label | End to end (Playwright) with axe |
+| 32, 36 | Type field in the admin, moving a product between sections | End to end (Playwright) against local Supabase; a unit test for the form input parser (type required, only the two values) |
+| 33, 34 | Two sections by type, empty type hidden | Unit test for the pure grouping function; end to end (Playwright) at 360 and 1280 px with axe |
+| 35 | Header links | End to end (Playwright) at 360 and 1280 px with axe |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
@@ -265,6 +321,8 @@ message to the business number. Then delete the test product.
 ## Open questions
 
 1. Is one category per product enough at launch, or is the join table needed now?
+   **Answered 2026-10-31:** neither; categories are removed and a product has one
+   type, "Producto" or "Pack" (amendment under Scope).
 2. Show "desde" prices from the start, or leave price off until Javiera confirms?
 3. The social-sharing preview image: the logo or a collage?
 4. The pre-filled WhatsApp message: a fixed greeting naming the product, asking them

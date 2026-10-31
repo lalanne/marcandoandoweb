@@ -31,6 +31,9 @@ a description, a reference or "from" price, personalization options (for
 example a mockup saying "your logo or design here") and size, color and
 material information where relevant. Prices are editable from the admin.
 
+*Changed 2026-10-31 by Javiera's feedback (below): no categories; only two groups,
+"Productos" and "Packs".*
+
 **Product page.** Photos, available designs, detailed description, price,
 personalization options (including the print size), minimum quantities if any
 and a quote button. A product can have several variants (for example a bottle
@@ -115,6 +118,23 @@ related spec can be approved.
 12. **Original text.** Section 4 has no heading in the original; the list that
     starts with "La web debe contar con:" appears to be that section
     (functional requirements). Confirm.
+
+## Feedback from Javiera (2026-10-31)
+
+Javiera tried the live site and sent this note to the owner. Her words, verbatim:
+
+> "quiero eliminar las categorías, y que sean solo 2, productos y packs. Los packs son como productos no bundle. Arriba donde dice, Productos Como pedir Colegios y grupos quiero que diga, Productos Packs Como pedir Colegios y grupos"
+
+**Summary (English).** Remove the categories; there are only two groups,
+"Productos" and "Packs". A pack is like a product, not a bundle of products. The
+header links, which today read "Productos · Cómo pedir · Colegios y grupos",
+should read "Productos · Packs · Cómo pedir · Colegios y grupos".
+
+This changes §3B and §7 of the original text (ten categories, "Crear categorías").
+Owner decisions on 2026-10-31 that fill the gaps: a pack has the same fields as a
+product and no link to other products; the two groups are a fixed type on the
+product, not editable groups; themes stay; the header has no "Trabajos" link.
+Specs 000, 001, 002 and 004 carry the change (issue #63).
 
 ## Original text (Spanish, verbatim)
 

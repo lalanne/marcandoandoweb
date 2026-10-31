@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** approved (by the owner, 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -53,14 +53,14 @@ and hosting are part of delivery (Req §4, §8).
 | In | Out (later, or not at all) |
 |----|----------------------------|
 | **Home:** logo, navigation, main collage image, prominent "Cotizar por WhatsApp" button bottom left, footer with Instagram, email and WhatsApp (Req §3A) | Online payment and checkout |
-| **Catalog:** ten categories (bottles, t-shirts, hoodies, pencil cases, socks, school products, gifts, courses and generations, special dates, clothing labels); categories and products addable without redesign (Req §3B) | Customer accounts and order history |
+| **Catalog:** ~~ten categories (bottles, t-shirts, hoodies, pencil cases, socks, school products, gifts, courses and generations, special dates, clothing labels); categories and products addable without redesign (Req §3B)~~ amended 2026-10-31 (Javiera's feedback, issue #63): two groups, "Productos" and "Packs", a fixed type on each product (a pack is a product, not a bundle); products addable without redesign | Customer accounts and order history |
 | **Product page:** photos, variants and available designs, description, "from" price, personalization options including print size, minimum quantities, quote button (Req §3C) | Shipping cost calculation, inventory counts |
 | **WhatsApp quote:** a pre-filled message with product, variant or design, quantity and personalization (Req §5) | Reviews and testimonials |
 | **Gallery of designs and finished work:** grouped by theme, new designs added constantly, each design linked to one or more products (Req §3D) | Multiple languages (Spanish only) |
 | **Schools and courses section** (Req §3E) | Blog, newsletter, email marketing |
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |
-| **Admin panel:** add, edit and delete products; prices, photos and descriptions; categories; highlighted products; designs in the gallery; available or temporarily unavailable (Req §7) | Roles beyond a single admin |
+| **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); highlighted products; designs in the gallery; available or temporarily unavailable (Req §7) | Roles beyond a single admin |
 | **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | **Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5) |
 | **Offers ("Ofertas"):** a product can be flagged "en oferta" with its old and new price, and appears in a filtered view reached from the menu (Req §3A; interpretation, see decisions) | |
 | **Delivery:** domain, hosting, forms, training for Javiera, handover of accounts and ownership, cost information (Req §8) | |
@@ -120,12 +120,12 @@ proposed build order.
 
 | Proposed | Topic | Covers |
 |----------|-------|--------|
-| 001 | Content model | Products, categories, variants, designs, themes, courses, how designs link to products, availability, and the RLS read rules |
+| 001 | Content model | Products, ~~categories~~ product type (2026-10-31), variants, designs, themes, courses, how designs link to products, availability, and the RLS read rules |
 | 002 | Design system and brand | Palette tokens, typography, components, layout, responsive rules (Req §2) |
 | 003 | Auth and admin foundation | Admin sign-in, the admin role, protected `/panel` area (Req §7) |
-| 004 | Admin: catalog | Products, categories, prices, availability, highlights (Req §7) |
+| 004 | Admin: catalog | Products, ~~categories~~ product type (2026-10-31), prices, availability, highlights (Req §7) |
 | 005 | Images | Upload, storage, size limits, optimization (Req §4) |
-| 006 | Public catalog | Home, category and product listing, search and filters (Req §3A, §3B, §4) |
+| 006 | Public catalog | Home, ~~category and~~ product listing (by type since 2026-10-31), search and filters (Req §3A, §3B, §4) |
 | 007 | Product page and WhatsApp quote | Variants, personalization options, pre-filled message (Req §3C, §5) |
 | 008 | Gallery and admin: designs | Themes, design-to-product links, adding designs (Req §3D, §7) |
 | 009 | Schools and courses | The dedicated section (Req §3E) |

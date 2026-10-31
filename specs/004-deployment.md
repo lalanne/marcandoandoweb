@@ -1,6 +1,6 @@
 # 004 — Deployment Pipeline
 
-**Status:** approved (by the owner, 2026-10-25)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25)
 
 Sources: [spec 002](002-launch-0.md) (criteria 20 and 24),
 [spec 003](003-ci-and-testing.md), [ADR-0001](../docs/adr/0001-web-stack.md). Issue
@@ -99,10 +99,16 @@ supersedes an older pending one.
 14. Given a visitor who is not signed in, when the smoke test requests `/panel`, then
     it is redirected to `/entrar`.
 15. Given `GET /api/health` with a working database connection and correct Supabase
-    settings, when it is called, then it reads the categories with the public
-    client and answers 200 with `{"status":"ok"}`; given a missing or wrong URL or
-    key or a failed read, then it answers 503 with `{"status":"error"}` and no
-    detail, secret or error message; in both cases `Cache-Control: no-store`.
+    settings, when it is called, then it reads the published products with the
+    public client and answers 200 with `{"status":"ok"}` (also when there are no
+    products yet); given a missing or wrong URL or key or a failed read, then it
+    answers 503 with `{"status":"error"}` and no detail, secret or error message;
+    in both cases `Cache-Control: no-store`.
+
+    **2026-10-31 amendment (issue #63).** The health route read the categories,
+    which are removed (spec 001, amendment of the same date). It now reads the
+    products table, which exists before and after the change, so the route keeps
+    working through both migration steps.
 16. Given the smoke test, when it runs, then it only sends GET requests and uses no
     credentials: it never writes to the database or signs in.
 17. Given a failing smoke test, when the run ends, then the run is marked failed, the
