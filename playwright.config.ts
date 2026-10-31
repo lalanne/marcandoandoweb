@@ -22,17 +22,19 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
     },
     // Tests that change shared seeded data (tests/e2e/isolated/) run only after
-    // every other test, and one viewport after the other, so nothing else reads
-    // the database while they do.
+    // every other test, one viewport after the other and one file at a time
+    // (workers: 1), so nothing else reads the database while they do.
     {
       name: "isolated-360",
       testMatch: /isolated\/.*\.spec\.ts/,
+      workers: 1,
       dependencies: ["mobile-360", "desktop-1280"],
       use: { ...devices["Pixel 7"], viewport: { width: 360, height: 740 } },
     },
     {
       name: "isolated-1280",
       testMatch: /isolated\/.*\.spec\.ts/,
+      workers: 1,
       dependencies: ["isolated-360"],
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
     },
