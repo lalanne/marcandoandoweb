@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-23)
+**Status:** draft (the 2026-10-31 amendment, issue #63, waits for the owner's approval; the spec was approved by the owner on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -13,7 +13,10 @@ from it.
 
 ## Requirements covered
 
-- Ten catalog categories, and new ones addable without a redesign (Req §3B).
+- ~~Ten catalog categories, and new ones addable without a redesign (Req §3B).~~
+  Replaced 2026-10-31: two product types, "Productos" and "Packs" (Javiera's
+  feedback of 2026-10-31 in `docs/requirements.md`). See the amendment under
+  Category.
 - Products with name, photos, description, "from" price, personalization
   options, and size, color and material information (Req §3B).
 - Products with variants: different designs, names, colors and themes of the same
@@ -50,6 +53,26 @@ special dates, clothing labels).
 
 Categories are flat (no nesting) in v1. **(interpretation)**
 
+**2026-10-31 amendment - categories replaced by a product type (issue #63).**
+Javiera asked to remove the categories and keep only two groups, "Productos" and
+"Packs" ("Feedback from Javiera (2026-10-31)" in `docs/requirements.md`). The
+owner decided that a pack is an ordinary product with a different label (same
+fields, no link to other products: "Los packs son como productos no bundle"),
+and that the two groups are a **fixed type on the product**, not rows the admin
+can edit. So:
+
+- The **Category** entity, its product join table and its public read rule are
+  removed from the model. Adding a third type is a spec change, not an admin task.
+- **Product** gets a required `kind` (see the Product table).
+- Themes are unchanged.
+
+Migration plan (`CLAUDE.md`, "expand then contract"): first a migration adds
+`product.kind` and makes `product.category_id` nullable, and the code stops
+reading categories (issue #64); only after that code is in production, a later
+migration drops `product.category_id` and the `category` table (issue #65).
+Before this amendment, the ten categories of Req §3B were the catalog's
+navigation.
+
 ### Theme
 
 A theme the visitor can filter and browse by: Christmas, school and courses,
@@ -59,7 +82,7 @@ sports teams, Father's Day, and so on (Req §3D, §4: "temática").
 |-------|-------|
 | `slug`, `name` | required |
 | `parent_id` | optional, **one level only**: a theme may have children (for example "Colegios y cursos" with "Regalos para profesores") but a child cannot have children **(interpretation)** |
-| `position`, `is_published` | as for categories |
+| `position`, `is_published` | integer display order; default false, unpublished themes are hidden from the public |
 
 ### Product
 
@@ -77,6 +100,7 @@ A thing Marcando Ando can personalize and quote.
 | `is_featured` | highlighted on the site (Req §7) |
 | `is_available` | default true; false means "temporarily unavailable" (Req §7) |
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
+| `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
 
 **2026-10-25 amendment - price is optional.** The owner decided that
 `price_from_clp` is optional, because the client has not confirmed prices and a
@@ -86,9 +110,12 @@ site shows no price for it. When a price is set, criterion 1 still applies (whol
 pesos, `>= 0`). It used to be required. `offer_price_clp` only makes sense with a
 price: the offer rule (criterion 2) applies when `price_from_clp` is set.
 
-A product belongs to **one or more categories** (a school bottle sits in both
+~~A product belongs to **one or more categories** (a school bottle sits in both
 "Botellas" and "Productos escolares") and may carry **themes**. Both through join
-tables, with an order within a category.
+tables, with an order within a category.~~
+
+**2026-10-31 amendment.** A product has exactly one `kind` and may carry
+**themes** through a join table. It no longer belongs to categories.
 
 ### Variant
 
@@ -145,8 +172,11 @@ An owner's first image by `position` is its cover image.
 
 ## Relationships
 
+Amended 2026-10-31: Category and ProductCategory are removed; `kind` is a column
+of Product.
+
 ```
-Category ──< ProductCategory >── Product ──< Variant
+                                 Product (kind) ──< Variant
                                     │ │
 Theme ──< ProductTheme >────────────┘ └──< Image (product or variant)
   │
@@ -161,7 +191,7 @@ The public is anonymous; the admin is the single admin role (spec 000).
 
 | Data | The public can read | Only the admin can |
 |------|--------------------|--------------------|
-| Category, Theme | published rows | create, change, delete, and read unpublished rows |
+| Theme (Category until the 2026-10-31 amendment) | published rows | create, change, delete, and read unpublished rows |
 | Product | published rows, **including unavailable ones** (shown as unavailable, **(interpretation)**) | create, change, delete, and read unpublished rows |
 | Variant | variants of a published product | all writes, and read variants of unpublished products |
 | Design | published rows | all writes, and read unpublished rows |
@@ -173,6 +203,8 @@ storage; their access rules belong to spec 005.
 
 ## Derived behavior
 
+- **Group (added 2026-10-31):** a product with `kind` `producto` is listed under
+  "Productos", one with `kind` `pack` under "Packs".
 - **On offer:** `offer_price_clp` is set. The offers view lists the published
   products on offer, available or not. The old price is `price_from_clp`.
 - **Quote enabled:** a product is quotable when it is published and available.
@@ -195,7 +227,10 @@ plan.
    7000 or more, the write is rejected; when set to 5900, it is accepted and the
    product is on offer.
 3. Given two products, when they share a slug, the second write is rejected; the
-   same holds for categories, themes and designs within their own table.
+   same holds for themes and designs within their own table.
+
+   **2026-10-31 amendment.** This criterion also covered categories; they are
+   removed from the model.
 4. Given a product, when `min_quantity` is less than 1, the write is rejected.
 5. Given an image, when it has no owner or more than one owner, the write is
    rejected.
@@ -207,8 +242,9 @@ plan.
 
 **Relationships**
 
-9. Given a product, when it is added to two categories, it appears in both
-   categories' listings.
+9. ~~Given a product, when it is added to two categories, it appears in both
+   categories' listings.~~ **Retired 2026-10-31:** there are no categories; a
+   product has one `kind` (criteria 22 and 23).
 10. Given a design linked to three products, when the public reads the design, the
     three products are returned; and when it reads one of those products, the
     design is returned.
@@ -223,8 +259,12 @@ plan.
     is not returned, and neither are its variants, images or links.
 14. Given a published product marked unavailable, when the public lists products,
     it is returned with its unavailable flag set.
-15. Given a published category with one published and one unpublished product, when
-    the public lists the category, only the published product is returned.
+15. Given one published and one unpublished product of the same `kind`, when the
+    public lists the products of that `kind`, only the published product is
+    returned.
+
+    **2026-10-31 amendment.** This criterion listed a published category; it now
+    lists a `kind`.
 16. Given an unpublished design or theme, when the public lists them, it is not
     returned.
 17. Given products on offer and not, when the public asks for offers, only the
@@ -237,14 +277,28 @@ plan.
     row in any table of this model, the write is rejected.
 19. Given a signed-in user who is not the admin, when they try the same writes, they
     are rejected.
-20. Given the admin, when they create, change or delete a product, variant, design,
-    category, theme, image row or link, the write succeeds, and the admin can read
-    unpublished rows.
+20. Given the admin, when they create, change or delete a product (including its
+    `kind`), variant, design, theme, image row or link, the write succeeds, and the
+    admin can read unpublished rows.
+
+    **2026-10-31 amendment.** "Category" is removed from the list and changing a
+    product's `kind` is added.
 
 **Ordering**
 
-21. Given categories, themes, variants and images with positions, when they are
-    listed, they come back ordered by position.
+21. Given themes, variants and images with positions, when they are listed, they
+    come back ordered by position.
+
+    **2026-10-31 amendment.** Categories are removed from the list.
+
+**Product type** (added 2026-10-31, issue #63)
+
+22. Given a product, when `kind` is set to anything other than `producto` or
+    `pack`, or set to null, the write is rejected; when it is not given, the
+    product is saved with `kind` `producto`.
+23. Given published products of both kinds, when the public reads products, each
+    one is returned with its `kind`, and asking for one `kind` returns only the
+    published products of that `kind`.
 
 ## Verification plan
 
@@ -257,11 +311,12 @@ a mock of the database.
 | 1–4, 7 | Value and shape constraints | Integration (local Supabase) |
 | 5, 6 | Image owner and alt text | Integration |
 | 8 | Delete cascade | Integration |
-| 9–12 | Relationships | Integration |
+| 10–12 | Relationships | Integration (9 retired 2026-10-31) |
 | 13–17 | Public visibility | Integration, as the anonymous role |
 | 18, 19 | Writes rejected | Integration, as anonymous and as a non-admin user |
 | 20 | Admin writes | Integration, as the admin |
 | 21 | Ordering | Integration |
+| 22, 23 | Product type: allowed values, default, public read by `kind` | Integration (local Supabase), as the anonymous role and the admin |
 | 2, 17 | Offer rule | Also a unit test for the pure "is on offer / old and new price" helper |
 
 A criterion is checked off here when its test exists, failed first for the right
@@ -269,7 +324,8 @@ reason, and now passes.
 
 ## Seed data (proposal)
 
-For local development and tests: the ten categories of Req §3B, a few themes taken
+For local development and tests: ~~the ten categories of Req §3B~~ (removed
+2026-10-31) products of both kinds (at least one `pack`), a few themes taken
 from the requirements and the Instagram account (Christmas, Colegios y cursos with
 a couple of children, Equipos deportivos, Día del Padre), a handful of sample
 products with variants and designs, one admin, one non-admin user. Seed prices and
@@ -286,6 +342,8 @@ The owner approved the spec on 2026-10-23 with the proposals below as the workin
    keeps both: categories as the catalog navigation (a product may be in several),
    themes as the cross-cutting filter. Is that the right split, or should the
    occasion-style categories become themes?
+   **Answered 2026-10-31 (Javiera, owner):** no categories; a fixed product type,
+   "Productos" or "Packs"; themes stay. See the amendment under Category.
 2. **Unavailable products stay visible.** Proposed: shown with a notice and no quote
    button. The alternative is hiding them. Ask Javiera.
 3. **Draft state.** `is_published` lets the admin prepare products before they go
