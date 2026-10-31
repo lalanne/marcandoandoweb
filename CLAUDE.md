@@ -193,7 +193,8 @@ Needs Docker running. All commands run from the repo root. Before the first
 
 - Schema lives in `supabase/migrations/`. `supabase/seed.sql` is fake data for
   local development and tests only; it runs on `db reset` and is never applied to
-  production. The ten categories are in a migration because they are real data.
+  production. Real data that every environment needs goes in a migration, not
+  the seed. (The ten categories used to; they were dropped in #65.)
 - The tests read the URL and the anon key at run time from `npx supabase status -o env`,
   or from `SUPABASE_URL` and `SUPABASE_ANON_KEY` when set. These are the public local
   demo keys; never commit keys, and never point the tests at a real project.
@@ -306,7 +307,7 @@ because they become required checks (spec 003). Run each locally before opening 
 | `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
 | `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
 | `integration` | Start local Supabase, reset from migrations and seed, run `tests/integration/` | `npx supabase start && npx supabase db reset && npm run test:integration` |
-| `migrations` | A clean reset works from the migrations alone, and leaves the ten categories and no seed rows | `npx supabase db reset --no-seed` |
+| `migrations` | A clean reset works from the migrations alone, and leaves no seed rows and no category table or `product.category_id` (dropped in #65) | `npx supabase db reset --no-seed` |
 | `tests-with-changes` | A PR that changes `app/`, `src/` or `supabase/migrations/` also changes a test file, unless it has the label `no-test-needed` (the owner adds it) | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" LABELS='[]' node scripts/tests-with-changes.mjs` |
 
 | `e2e` | Production build started against local Supabase, Playwright at 360 and 1280 px with axe checks; traces uploaded on failure. **The owner must add `e2e` to the required checks of `main` after the PR that introduced it merges** | `npx supabase start && npx supabase db reset && npm run build && CI=1 npm run test:e2e` |
@@ -353,7 +354,7 @@ installs Chromium and runs `npm run test:smoke` (`tests/smoke/`,
 "Cotizar por WhatsApp" button, shows no "Reload to try again" or "A server error
 occurred", has no console errors or failed requests; that `/panel` signed out goes
 to `/entrar`; and that `/api/health` answers `{"status":"ok"}` (it reads the
-categories with the public client; 503 `{"status":"error"}` and nothing else
+products with the public client; 503 `{"status":"error"}` and nothing else
 otherwise). It only sends GET requests and uses no credentials or secrets. Each
 check retries for up to 60 seconds while the new deployment goes live.
 - **The owner sets `PRODUCTION_URL`** once as a variable of the `production`
