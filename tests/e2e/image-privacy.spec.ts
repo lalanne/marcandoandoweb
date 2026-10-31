@@ -29,12 +29,6 @@ const productIds: string[] = [];
 
 test.beforeAll(async () => {
   admin = await adminClient();
-  const { data: cat, error } = await admin
-    .from("category")
-    .select("id")
-    .eq("slug", "botellas")
-    .single();
-  if (error) throw new Error(error.message);
   for (const [item, isPublished, slug] of [
     [published, true, `e2e-pub-${run}`],
     [draft, false, `e2e-draft-${run}`],
@@ -45,7 +39,7 @@ test.beforeAll(async () => {
     if (up.error) throw new Error(up.error.message);
     const p = await admin
       .from("product")
-      .insert({ slug, name: item.name, category_id: cat.id, is_published: isPublished })
+      .insert({ slug, name: item.name, is_published: isPublished })
       .select("id")
       .single();
     if (p.error) throw new Error(p.error.message);

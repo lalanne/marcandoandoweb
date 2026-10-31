@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { listProducts } from "@/lib/admin/products";
 import { formatClp } from "@/lib/catalog/format";
+import { KIND_LABEL } from "@/lib/catalog/kind";
 import { createClient } from "@/lib/supabase/server";
 import { Notice, primaryButton } from "../ui";
 
@@ -52,7 +53,7 @@ export default async function ProductsPage({
                 {p.name}
               </Link>
               <p>
-                {p.category?.name ?? "Sin categoría"} ·{" "}
+                <span>{KIND_LABEL[p.kind]}</span> ·{" "}
                 {p.price_from_clp === null ? "Sin precio" : formatClp(p.price_from_clp)}
               </p>
               <p className="flex flex-wrap gap-2">

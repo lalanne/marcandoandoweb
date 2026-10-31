@@ -9,14 +9,18 @@ import {
   uniqueSlug,
 } from "./helpers";
 
-// Spec 001 (content model), restricted to the launch 0 tables: category,
-// product, design, image (spec 002, Data). Variants, themes, join tables and
-// offers come with later specs, so their halves of a criterion are not tested.
+// Spec 001 (content model), restricted to the launch 0 tables: product, design,
+// image (spec 002, Data). Variants, themes, join tables and offers come with
+// later specs, so their halves of a criterion are not tested.
+//
+// Categories were removed from the model on 2026-10-31 (spec 001 amendment,
+// issue #63): a product has a `kind` instead. The `category` table stays in the
+// database, unused, until issue #65 drops it, so its rules keep being checked in
+// the "category table" block at the end.
 
 let admin: SupabaseClient;
 let nonAdmin: SupabaseClient;
 let anon: SupabaseClient;
-let categoryId: string;
 
 // Rows created by the tests, removed at the end.
 const created = {
@@ -33,7 +37,6 @@ async function newProduct(overrides: Record<string, unknown> = {}) {
         slug: uniqueSlug("p"),
         name: "Producto de prueba",
         price_from_clp: 7000,
-        category_id: categoryId,
         ...overrides,
       })
       .select()
@@ -76,10 +79,6 @@ beforeAll(async () => {
   anon = anonClient();
   admin = await signedInClient(ADMIN);
   nonAdmin = await signedInClient(NON_ADMIN);
-  const cat = ok(
-    await admin.from("category").select("id").eq("slug", "botellas").single(),
-  );
-  categoryId = cat.id;
 });
 
 afterAll(async () => {
@@ -92,7 +91,7 @@ afterAll(async () => {
 });
 
 describe("migrations", () => {
-  it("seed the ten catalog categories of Req 3B, published", async () => {
+  it("still hold the ten categories of Req 3B, published, until #65 drops the table", async () => {
     const rows = ok(
       await anon.from("category").select("slug, name, position").order("position"),
     );
@@ -113,7 +112,6 @@ describe("constraints", () => {
         slug: uniqueSlug("p"),
         name: "Precio malo",
         price_from_clp: price,
-        category_id: categoryId,
       });
       expect(error, `price ${price}`).not.toBeNull();
     }
@@ -134,20 +132,14 @@ describe("constraints", () => {
     expect(error).not.toBeNull();
   });
 
-  it("[001-AC3] rejects a second row with the same slug in product, category and design", async () => {
+  it("[001-AC3] rejects a second row with the same slug in product and design", async () => {
     const p = await newProduct();
     const dupProduct = await admin.from("product").insert({
       slug: p.slug,
       name: "Otro",
       price_from_clp: 1,
-      category_id: categoryId,
     });
     expect(dupProduct.error?.code).toBe("23505");
-
-    const dupCategory = await admin
-      .from("category")
-      .insert({ slug: "botellas", name: "Otra", position: 99 });
-    expect(dupCategory.error?.code).toBe("23505");
 
     const d = await newDesign();
     const dupDesign = await admin
@@ -248,16 +240,40 @@ describe("public visibility (anonymous)", () => {
     ).toHaveLength(1);
   });
 
-  it("[001-AC15] lists only the published product of a published category", async () => {
-    const cat = await newCategory({ is_published: true });
-    const shown = await newProduct({ category_id: cat.id, is_published: true });
-    const hidden = await newProduct({ category_id: cat.id, is_published: false });
+  it("[001-AC15] lists only the published product of a kind", async () => {
+    for (const kind of ["producto", "pack"]) {
+      const shown = await newProduct({ kind, is_published: true });
+      const hidden = await newProduct({ kind, is_published: false });
 
-    const rows = ok(
-      await anon.from("product").select("id").eq("category_id", cat.id),
+      const rows = ok(
+        await anon
+          .from("product")
+          .select("id")
+          .eq("kind", kind)
+          .in("id", [shown.id, hidden.id]),
+      );
+      expect(rows.map((r: { id: string }) => r.id), kind).toEqual([shown.id]);
+    }
+  });
+
+  it("[001-AC23] returns each published product with its kind, and filters by kind", async () => {
+    const producto = await newProduct({ kind: "producto", is_published: true });
+    const pack = await newProduct({ kind: "pack", is_published: true });
+    const draftPack = await newProduct({ kind: "pack", is_published: false });
+    const ids = [producto.id, pack.id, draftPack.id];
+
+    const all = ok(
+      await anon.from("product").select("id, kind").in("id", ids).order("kind"),
     );
-    expect(rows.map((r: { id: string }) => r.id)).toEqual([shown.id]);
-    expect(rows.map((r: { id: string }) => r.id)).not.toContain(hidden.id);
+    expect(all).toEqual([
+      { id: pack.id, kind: "pack" },
+      { id: producto.id, kind: "producto" },
+    ]);
+
+    const packs = ok(
+      await anon.from("product").select("id").eq("kind", "pack").in("id", ids),
+    );
+    expect(packs).toEqual([{ id: pack.id }]);
   });
 
   it("[001-AC16] does not return an unpublished design", async () => {
@@ -273,13 +289,6 @@ describe("public visibility (anonymous)", () => {
     ).toEqual([]);
   });
 
-  it("[001-AC16] does not return an unpublished category", async () => {
-    const cat = await newCategory();
-    expect(cat.is_published).toBe(false);
-    expect(
-      ok(await anon.from("category").select("id").eq("id", cat.id)),
-    ).toEqual([]);
-  });
 });
 
 // The same attempts, as the public and as a signed-in non-admin.
@@ -292,9 +301,6 @@ function rejectsWrites(
     const client = getClient();
     const p = await newProduct({ is_published: true });
     const d = await newDesign({ is_published: true });
-    const cat = ok(
-      await admin.from("category").select("*").eq("slug", "botellas").single(),
-    );
     const img = ok(
       await admin
         .from("image")
@@ -310,14 +316,11 @@ function rejectsWrites(
 
     // Create: refused outright.
     const inserts = await Promise.all([
-      client
-        .from("category")
-        .insert({ slug: uniqueSlug("c"), name: "X", position: 200 }),
       client.from("product").insert({
         slug: uniqueSlug("p"),
         name: "X",
         price_from_clp: 1,
-        category_id: categoryId,
+        kind: "pack",
       }),
       client.from("design").insert({ slug: uniqueSlug("d"), title: "X" }),
       client.from("image").insert({
@@ -331,15 +334,14 @@ function rejectsWrites(
 
     // Change and delete: the write touches no row, so nothing is returned.
     const changes = await Promise.all([
-      client.from("category").update({ name: "Hackeada" }).eq("id", cat.id).select(),
       client.from("product").update({ name: "Hackeado" }).eq("id", p.id).select(),
+      client.from("product").update({ kind: "pack" }).eq("id", p.id).select(),
       client.from("design").update({ title: "Hackeado" }).eq("id", d.id).select(),
       client.from("image").update({ alt_text: "Hackeada" }).eq("id", img.id).select(),
     ]);
     for (const r of changes) expect(r.data ?? []).toEqual([]);
 
     const deletes = await Promise.all([
-      client.from("category").delete().eq("id", cat.id).select(),
       client.from("product").delete().eq("id", p.id).select(),
       client.from("design").delete().eq("id", d.id).select(),
       client.from("image").delete().eq("id", img.id).select(),
@@ -348,11 +350,8 @@ function rejectsWrites(
 
     // Nothing changed, checked as the admin.
     expect(
-      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
-    ).toBe(cat.name);
-    expect(
-      ok(await admin.from("product").select("name").eq("id", p.id).single()).name,
-    ).toBe("Producto de prueba");
+      ok(await admin.from("product").select("name, kind").eq("id", p.id).single()),
+    ).toEqual({ name: "Producto de prueba", kind: "producto" });
     expect(
       ok(await admin.from("design").select("title").eq("id", d.id).single()).title,
     ).toBe("Diseño de prueba");
@@ -372,19 +371,18 @@ describe("writes", () => {
   );
 
   it("[001-AC20] lets the admin create, change and delete every table and read unpublished rows", async () => {
-    const cat = await newCategory({ name: "Admin cat", position: 300 });
-    ok(await admin.from("category").update({ name: "Admin cat 2" }).eq("id", cat.id));
-    expect(
-      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
-    ).toBe("Admin cat 2");
-
-    const p = await newProduct({ category_id: cat.id, is_published: false });
-    ok(await admin.from("product").update({ price_from_clp: 5500 }).eq("id", p.id));
+    const p = await newProduct({ is_published: false });
+    ok(
+      await admin
+        .from("product")
+        .update({ price_from_clp: 5500, kind: "pack" })
+        .eq("id", p.id),
+    );
     expect(
       ok(
-        await admin.from("product").select("price_from_clp").eq("id", p.id).single(),
-      ).price_from_clp,
-    ).toBe(5500);
+        await admin.from("product").select("price_from_clp, kind").eq("id", p.id).single(),
+      ),
+    ).toEqual({ price_from_clp: 5500, kind: "pack" });
 
     const d = await newDesign({ is_published: false });
     ok(await admin.from("design").update({ title: "Nuevo título" }).eq("id", d.id));
@@ -404,7 +402,6 @@ describe("writes", () => {
     ok(await admin.from("image").update({ alt_text: "Foto nueva" }).eq("id", img.id));
 
     // The admin reads unpublished rows, and an unpublished design's image.
-    expect(ok(await admin.from("category").select("id").eq("id", cat.id))).toHaveLength(1);
     expect(ok(await admin.from("product").select("id").eq("id", p.id))).toHaveLength(1);
     expect(ok(await admin.from("design").select("id").eq("id", d.id))).toHaveLength(1);
     expect(ok(await admin.from("image").select("id").eq("id", img.id))).toHaveLength(1);
@@ -413,6 +410,94 @@ describe("writes", () => {
     expect(ok(await admin.from("image").delete().eq("id", img.id).select())).toHaveLength(1);
     expect(ok(await admin.from("design").delete().eq("id", d.id).select())).toHaveLength(1);
     expect(ok(await admin.from("product").delete().eq("id", p.id).select())).toHaveLength(1);
+  });
+});
+
+describe("product kind", () => {
+  it("[001-AC22] saves a product with no kind as producto", async () => {
+    const p = await newProduct();
+    expect(p.kind).toBe("producto");
+  });
+
+  it("[001-AC22] accepts producto and pack", async () => {
+    expect((await newProduct({ kind: "producto" })).kind).toBe("producto");
+    expect((await newProduct({ kind: "pack" })).kind).toBe("pack");
+  });
+
+  it("[001-AC22] rejects any other kind, and null, on insert and on update", async () => {
+    for (const kind of ["Pack", "bundle", "botellas", ""]) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Tipo malo", kind });
+      expect(error?.code, `kind "${kind}"`).toBe("23514");
+    }
+    const nullKind = await admin
+      .from("product")
+      .insert({ slug: uniqueSlug("p"), name: "Sin tipo", kind: null });
+    expect(nullKind.error?.code).toBe("23502");
+
+    const p = await newProduct({ kind: "pack" });
+    const bad = await admin.from("product").update({ kind: "otro" }).eq("id", p.id);
+    expect(bad.error?.code).toBe("23514");
+    expect(
+      ok(await admin.from("product").select("kind").eq("id", p.id).single()).kind,
+    ).toBe("pack");
+  });
+
+  it("saves a product without a category (the column is unused until #65 drops it)", async () => {
+    const p = await newProduct({ kind: "pack" });
+    expect(p.category_id).toBeNull();
+  });
+});
+
+// The category table is no longer part of the model, but it exists until #65
+// drops it, so it must stay locked: the public reads only published rows and
+// only the admin writes.
+describe("category table (unused since 2026-10-31, dropped in #65)", () => {
+  it("still rejects a duplicate category slug", async () => {
+    const dup = await admin
+      .from("category")
+      .insert({ slug: "botellas", name: "Otra", position: 99 });
+    expect(dup.error?.code).toBe("23505");
+  });
+
+  it("does not return an unpublished category to the public", async () => {
+    const cat = await newCategory();
+    expect(cat.is_published).toBe(false);
+    expect(
+      ok(await anon.from("category").select("id").eq("id", cat.id)),
+    ).toEqual([]);
+  });
+
+  it("rejects category writes from the public and from a non-admin", async () => {
+    const cat = ok(
+      await admin.from("category").select("*").eq("slug", "botellas").single(),
+    );
+    for (const client of [anon, nonAdmin]) {
+      const insert = await client
+        .from("category")
+        .insert({ slug: uniqueSlug("c"), name: "X", position: 200 });
+      expect(insert.error?.code).toBe("42501");
+      const update = await client
+        .from("category")
+        .update({ name: "Hackeada" })
+        .eq("id", cat.id)
+        .select();
+      expect(update.data ?? []).toEqual([]);
+      const del = await client.from("category").delete().eq("id", cat.id).select();
+      expect(del.data ?? []).toEqual([]);
+    }
+    expect(
+      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
+    ).toBe(cat.name);
+  });
+
+  it("lets the admin manage categories", async () => {
+    const cat = await newCategory({ name: "Admin cat", position: 300 });
+    ok(await admin.from("category").update({ name: "Admin cat 2" }).eq("id", cat.id));
+    expect(
+      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
+    ).toBe("Admin cat 2");
     expect(ok(await admin.from("category").delete().eq("id", cat.id).select())).toHaveLength(1);
   });
 });

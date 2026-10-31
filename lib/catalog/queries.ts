@@ -1,8 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { groupByCategory } from "./group";
+import { groupByKind } from "./group";
+import { isProductKind } from "./kind";
 import type {
   Catalog,
-  CatalogCategory,
   CatalogDesign,
   CatalogImage,
   CatalogProduct,
@@ -28,16 +28,11 @@ function byPosition(a: ImageRow, b: ImageRow): number {
  * intent explicit. Unavailable products are kept (spec 001, "Visibility").
  */
 export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
-  const [categories, products, designs] = await Promise.all([
-    client
-      .from("category")
-      .select("id, slug, name, position")
-      .eq("is_published", true)
-      .order("position"),
+  const [products, designs] = await Promise.all([
     client
       .from("product")
       .select(
-        "id, slug, name, description, price_from_clp, category_id, is_featured, is_available, image(storage_path, alt_text, position)",
+        "id, slug, name, description, price_from_clp, kind, is_featured, is_available, image(storage_path, alt_text, position)",
       )
       .eq("is_published", true)
       .order("name"),
@@ -50,18 +45,13 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
       .order("title"),
   ]);
 
-  for (const result of [categories, products, designs]) {
+  for (const result of [products, designs]) {
     if (result.error) throw new Error(result.error.message);
   }
 
-  const categoryList: CatalogCategory[] = (categories.data ?? []).map((c) => ({
-    id: c.id,
-    slug: c.slug,
-    name: c.name,
-    position: c.position,
-  }));
-
-  const productList: CatalogProduct[] = (products.data ?? []).map((p) => {
+  // The database only allows the two types; anything else is not shown.
+  const rows = (products.data ?? []).filter((p) => isProductKind(p.kind));
+  const productList: CatalogProduct[] = rows.map((p) => {
     const images = ([...(p.image ?? [])] as ImageRow[]).sort(byPosition);
     return {
       id: p.id,
@@ -69,7 +59,7 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
       name: p.name,
       description: p.description,
       priceFromClp: p.price_from_clp,
-      categoryId: p.category_id,
+      kind: p.kind,
       isFeatured: p.is_featured,
       isAvailable: p.is_available,
       coverImage: images[0] ? toImage(images[0]) : null,
@@ -85,7 +75,7 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
   }));
 
   return {
-    sections: groupByCategory(categoryList, productList),
+    products: groupByKind(productList),
     designs: designList,
   };
 }

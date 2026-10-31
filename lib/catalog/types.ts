@@ -1,11 +1,6 @@
-export type CatalogImage = { storagePath: string; altText: string };
+import type { ProductKind } from "./kind";
 
-export type CatalogCategory = {
-  id: string;
-  slug: string;
-  name: string;
-  position: number;
-};
+export type CatalogImage = { storagePath: string; altText: string };
 
 export type CatalogProduct = {
   id: string;
@@ -14,15 +9,10 @@ export type CatalogProduct = {
   description: string | null;
   /** Null when the owner has not confirmed a price: nothing is shown then. */
   priceFromClp: number | null;
-  categoryId: string;
+  kind: ProductKind;
   isFeatured: boolean;
   isAvailable: boolean;
   coverImage: CatalogImage | null;
-};
-
-export type CatalogSection = {
-  category: CatalogCategory;
-  products: CatalogProduct[];
 };
 
 export type CatalogDesign = {
@@ -33,4 +23,8 @@ export type CatalogDesign = {
   images: CatalogImage[];
 };
 
-export type Catalog = { sections: CatalogSection[]; designs: CatalogDesign[] };
+export type Catalog = {
+  /** Published products by type, highlighted first (spec 002, criterion 33). */
+  products: Record<ProductKind, CatalogProduct[]>;
+  designs: CatalogDesign[];
+};

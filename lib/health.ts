@@ -18,7 +18,7 @@ function reply(status: 200 | 503, body: "ok" | "error"): Response {
 }
 
 /**
- * Spec 004, criterion 15. Reads the categories with the anonymous public client
+ * Spec 004, criterion 15. Reads the products with the anonymous public client
  * and answers `ok` (200) or `error` (503). Nothing else leaves this function: a
  * missing or wrong URL or key and a failed read all look the same from outside,
  * so the public route reveals no setting, key or error message. The settings are
@@ -37,7 +37,8 @@ export async function healthResponse({
           fetch(input, { ...init, signal: AbortSignal.timeout(READ_TIMEOUT_MS) }),
       },
     });
-    const { error } = await client.from("category").select("id").limit(1);
+    // Row-level security returns only published products; none is still "ok".
+    const { error } = await client.from("product").select("id").limit(1);
     return error ? reply(503, "error") : reply(200, "ok");
   } catch {
     return reply(503, "error");

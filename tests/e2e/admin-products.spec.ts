@@ -62,7 +62,7 @@ async function signIn(page: Page) {
 type NewProduct = {
   name: string;
   price?: string;
-  category?: string;
+  kind?: "Producto" | "Pack";
   published?: boolean;
   available?: boolean;
 };
@@ -74,9 +74,7 @@ async function createProduct(page: Page, p: NewProduct) {
   if (p.price !== undefined) {
     await page.getByLabel("Precio desde (CLP)").fill(p.price);
   }
-  await page
-    .getByLabel("Categoría", { exact: true })
-    .selectOption({ label: p.category ?? "Botellas personalizadas" });
+  if (p.kind) await page.getByLabel("Tipo", { exact: true }).selectOption({ label: p.kind });
   if (p.available === false) await page.getByLabel("Disponible", { exact: true }).uncheck();
   if (p.published) await page.getByLabel("Publicado", { exact: true }).check();
   await page.getByRole("button", { name: "Guardar producto" }).click();
@@ -111,7 +109,7 @@ async function publicCard(page: Page, name: string) {
   return page.locator("article", { hasText: name });
 }
 
-test("[002-AC6] the admin creates a product with price, category and a photo with alt text, publishes it, and it shows on the public page", async ({
+test("[002-AC6] the admin creates a product with price, type and a photo with alt text, publishes it, and it shows on the public page", async ({
   page,
 }, testInfo) => {
   const name = productName("nuevo", testInfo.project.name);
@@ -142,6 +140,61 @@ test("[002-AC6] the admin creates a product with price, category and a photo wit
   await expect(card).toBeVisible({ timeout: PAGE_TIMEOUT });
   await expect(card).toContainText("desde $7.000");
   await expect(card.getByRole("img", { name: alt })).toHaveAttribute("src", /^\/img\/product\//);
+  // In the section of its type: a new product is a "Producto".
+  await expect(page.locator("#productos article", { hasText: name })).toBeVisible();
+  await expect(page.locator("#packs article", { hasText: name })).toHaveCount(0);
+});
+
+test("[002-AC32] the form has a Tipo field, Producto or Pack, starting as Producto, and no Categoría; the list shows the type", async ({
+  page,
+}, testInfo) => {
+  const name = productName("tipo-pack", testInfo.project.name);
+  await signIn(page);
+  await page.goto("/panel/productos/nuevo");
+
+  const tipo = page.getByLabel("Tipo", { exact: true });
+  await expect(tipo).toBeVisible();
+  await expect(tipo).toHaveValue("producto");
+  await expect(tipo.locator("option")).toHaveText(["Producto", "Pack"]);
+  await expect(page.getByLabel("Categoría")).toHaveCount(0);
+  await expect(page.getByText("Categoría")).toHaveCount(0);
+
+  await createProduct(page, { name, kind: "Pack" });
+  await expect(page.getByLabel("Tipo", { exact: true })).toHaveValue("pack");
+
+  await page.goto("/panel/productos");
+  const row = page.getByRole("listitem").filter({ hasText: name });
+  await expect(row.getByText("Pack", { exact: true })).toBeVisible();
+  await expect(row).not.toContainText("categoría");
+  // The seeded products are "Producto".
+  const seeded = page.getByRole("listitem").filter({ hasText: "Botella de ejemplo" });
+  await expect(seeded.getByText("Producto", { exact: true })).toBeVisible();
+});
+
+test("[002-AC36] changing a published product's type to Pack moves it to the Packs section, without a deploy", async ({
+  page,
+}, testInfo) => {
+  const name = productName("a-pack", testInfo.project.name);
+  await signIn(page);
+  await createProduct(page, { name, price: "7.000", published: true });
+  const edit = new URL(page.url()).pathname;
+
+  await page.goto("/");
+  await expect(page.locator("#productos article", { hasText: name })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await expect(page.locator("#packs article", { hasText: name })).toHaveCount(0);
+
+  await page.goto(edit);
+  await page.getByLabel("Tipo", { exact: true }).selectOption({ label: "Pack" });
+  await saveChanges(page);
+  await expect(page.getByLabel("Tipo", { exact: true })).toHaveValue("pack");
+
+  await page.goto("/");
+  await expect(page.locator("#packs article", { hasText: name })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await expect(page.locator("#productos article", { hasText: name })).toHaveCount(0);
 });
 
 test("[002-AC7] changing the price, marking it unavailable and unpublishing a published product make the public page follow", async ({
@@ -351,15 +404,11 @@ test("the form shows Spanish errors, keeps what was typed, and refuses a repeate
   await page.getByRole("button", { name: "Guardar producto" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Escribe el nombre" })).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "precio" })).toBeVisible();
-  await expect(page.getByRole("alert").filter({ hasText: "categoría" })).toBeVisible();
   await expect(page.getByLabel("Precio desde (CLP)")).toHaveValue("7,5");
 
   // A repeated address is refused with a message on the field.
   await page.getByLabel("Nombre", { exact: true }).fill(name);
   await page.getByLabel("Precio desde (CLP)").fill("7.000");
-  await page
-    .getByLabel("Categoría", { exact: true })
-    .selectOption({ label: "Botellas personalizadas" });
   await page.getByLabel("Dirección web (slug)").fill("demo-botella-ejemplo");
   await page.getByRole("button", { name: "Guardar producto" }).click();
   await expect(

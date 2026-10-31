@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { formatClp } from "@/lib/catalog/format";
 import { imageUrl } from "@/lib/catalog/images";
+import type { ProductKind } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
@@ -31,7 +32,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
           className="aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30"
         />
       )}
-      <h4 className="text-lg font-semibold">{product.name}</h4>
+      <h3 className="text-lg font-semibold">{product.name}</h3>
       {product.priceFromClp !== null && (
         <p className="font-medium">desde {formatClp(product.priceFromClp)}</p>
       )}
@@ -52,32 +53,45 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   );
 }
 
-export async function ProductsSection() {
-  const { sections } = await loadCatalog();
-  if (sections.length === 0) return null;
+// The anchor and heading of each type's section (spec 002, criteria 33 to 35).
+// The header links use the same anchors.
+export const KIND_SECTION: Record<ProductKind, { id: string; title: string }> = {
+  producto: { id: "productos", title: "Productos" },
+  pack: { id: "packs", title: "Packs" },
+};
+
+async function KindSection({
+  kind,
+  className,
+}: {
+  kind: ProductKind;
+  className: string;
+}) {
+  const products = (await loadCatalog()).products[kind];
+  if (products.length === 0) return null;
+  const { id, title } = KIND_SECTION[kind];
   return (
-    <section
-      id="productos"
-      aria-labelledby="productos-title"
-      className="bg-brand-cream px-4 py-12"
-    >
+    <section id={id} aria-labelledby={`${id}-title`} className={`px-4 py-12 ${className}`}>
       <div className="mx-auto max-w-5xl">
-        <h2 id="productos-title" className="text-3xl font-bold">
-          Productos
+        <h2 id={`${id}-title`} className="text-3xl font-bold">
+          {title}
         </h2>
-        {sections.map(({ category, products }) => (
-          <div key={category.id} className="mt-8">
-            <h3 className="text-2xl font-semibold">{category.name}</h3>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
     </section>
   );
+}
+
+export function ProductsSection() {
+  return <KindSection kind="producto" className="bg-brand-cream" />;
+}
+
+export function PacksSection() {
+  return <KindSection kind="pack" className="bg-brand-yellow/20" />;
 }
 
 export async function RealWorkSection() {

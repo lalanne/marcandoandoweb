@@ -13,10 +13,27 @@ export default defineConfig({
   projects: [
     {
       name: "mobile-360",
+      testIgnore: /isolated\//,
       use: { ...devices["Pixel 7"], viewport: { width: 360, height: 740 } },
     },
     {
       name: "desktop-1280",
+      testIgnore: /isolated\//,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
+    },
+    // Tests that change shared seeded data (tests/e2e/isolated/) run only after
+    // every other test, and one viewport after the other, so nothing else reads
+    // the database while they do.
+    {
+      name: "isolated-360",
+      testMatch: /isolated\/.*\.spec\.ts/,
+      dependencies: ["mobile-360", "desktop-1280"],
+      use: { ...devices["Pixel 7"], viewport: { width: 360, height: 740 } },
+    },
+    {
+      name: "isolated-1280",
+      testMatch: /isolated\/.*\.spec\.ts/,
+      dependencies: ["isolated-360"],
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
     },
   ],

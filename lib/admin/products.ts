@@ -11,6 +11,7 @@ import {
   type ImageKind,
   type Result,
 } from "./images";
+import type { ProductKind } from "@/lib/catalog/kind";
 import type { ProductValues } from "./product-input";
 
 export type { ProductValues } from "./product-input";
@@ -31,10 +32,8 @@ export type ProductListItem = {
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
-  category: { name: string } | null;
+  kind: ProductKind;
 };
-
-export type Category = { id: string; name: string };
 
 export type CreateResult =
   | { ok: true; id: string }
@@ -52,20 +51,11 @@ function failure(error: { code?: string; message: string }): {
   return { ok: false, error: GENERIC };
 }
 
-export async function listCategories(client: SupabaseClient): Promise<Category[]> {
-  const { data, error } = await client
-    .from("category")
-    .select("id, name")
-    .order("position");
-  if (error) throw new Error(error.message);
-  return data ?? [];
-}
-
 export async function listProducts(client: SupabaseClient): Promise<ProductListItem[]> {
   const { data, error } = await client
     .from("product")
     .select(
-      "id, name, slug, price_from_clp, is_featured, is_available, is_published, category(name)",
+      "id, name, slug, price_from_clp, is_featured, is_available, is_published, kind",
     )
     .order("name");
   if (error) throw new Error(error.message);
@@ -79,7 +69,7 @@ export async function getProduct(
   const { data, error } = await client
     .from("product")
     .select(
-      `id, name, slug, description, price_from_clp, category_id, is_featured, is_available, is_published,${IMAGE_COLUMNS}`,
+      `id, name, slug, description, price_from_clp, kind, is_featured, is_available, is_published,${IMAGE_COLUMNS}`,
     )
     .eq("id", id)
     .maybeSingle();

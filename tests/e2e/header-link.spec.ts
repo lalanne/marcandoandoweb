@@ -211,11 +211,11 @@ test("[002-AC31] the header does not shift when the label changes to Mi panel", 
   browser,
   baseURL,
 }) => {
-  // Measured once the catalog links (Productos, Trabajos) have streamed in, so
+  // Measured once the catalog links (Productos, Packs) have streamed in, so
   // only the account link can account for a difference.
   const box = async (p: Page) => {
     await expect(
-      p.locator("header").getByRole("link", { name: "Trabajos" }),
+      p.locator("header").getByRole("link", { name: "Packs" }),
     ).toBeVisible({ timeout: 20_000 });
     return p.evaluate(() => {
       const header = document.querySelector("header")!.getBoundingClientRect();

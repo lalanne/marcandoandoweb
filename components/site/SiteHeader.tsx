@@ -5,33 +5,29 @@ import {
   headerLinkFor,
   type HeaderLink,
 } from "@/lib/auth/header-link";
+import { PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
+import { KIND_SECTION } from "./CatalogSections";
 import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
 
 const linkClass =
   "rounded-full px-3 py-1 text-sm font-medium hover:bg-brand-yellow/40";
 
-// Links to the sections that depend on the database only show when the section
-// exists, so no link points at a hidden section.
+// "Productos" and "Packs" only show when their section exists, so no link points
+// at a hidden section (spec 002, criteria 34 and 35). There is no link to the
+// "Trabajos reales" section (owner decision, 2026-10-31).
 async function CatalogLinks() {
-  const { sections, designs } = await loadCatalog();
+  const { products } = await loadCatalog();
   return (
     <>
-      {sections.length > 0 && (
-        <li>
-          <a className={linkClass} href="#productos">
-            Productos
+      {PRODUCT_KINDS.filter((kind) => products[kind].length > 0).map((kind) => (
+        <li key={kind}>
+          <a className={linkClass} href={`#${KIND_SECTION[kind].id}`}>
+            {KIND_SECTION[kind].title}
           </a>
         </li>
-      )}
-      {designs.length > 0 && (
-        <li>
-          <a className={linkClass} href="#trabajos">
-            Trabajos
-          </a>
-        </li>
-      )}
+      ))}
     </>
   );
 }

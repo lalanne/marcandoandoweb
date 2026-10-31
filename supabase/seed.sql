@@ -38,16 +38,16 @@ select u.id, u.id, u.id::text, 'email',
 from auth.users u
 where u.email in ('admin@marcandoando.test', 'admin2@marcandoando.test', 'cliente@marcandoando.test');
 
--- Fake sample catalog. Prices and names are obviously invented.
-insert into public.product (slug, name, description, price_from_clp, category_id, is_featured, is_available, is_published)
-select v.slug, v.name, v.description, v.price, c.id, v.featured, v.available, v.published
-from (values
-  ('demo-botella-ejemplo', 'Botella de ejemplo', 'Producto falso para desarrollo.', 1000, 'botellas', true, true, true),
-  ('demo-polera-ejemplo', 'Polera de ejemplo', 'Producto falso para desarrollo.', 1000, 'poleras', false, true, true),
-  ('demo-calcetines-agotados', 'Calcetines de ejemplo (no disponibles)', 'Producto falso, no disponible por ahora.', 1000, 'calcetines', false, false, true),
-  ('demo-estuche-borrador', 'Estuche de ejemplo (borrador)', 'Producto falso sin publicar.', 1000, 'estuches', false, true, false)
-) as v(slug, name, description, price, category_slug, featured, available, published)
-join public.category c on c.slug = v.category_slug;
+-- Fake sample catalog. Prices and names are obviously invented. Two published
+-- packs, one highlighted, so the "Packs" section and its order can be tested.
+insert into public.product (slug, name, description, price_from_clp, kind, is_featured, is_available, is_published) values
+  ('demo-botella-ejemplo', 'Botella de ejemplo', 'Producto falso para desarrollo.', 1000, 'producto', true, true, true),
+  ('demo-polera-ejemplo', 'Polera de ejemplo', 'Producto falso para desarrollo.', 1000, 'producto', false, true, true),
+  ('demo-calcetines-agotados', 'Calcetines de ejemplo (no disponibles)', 'Producto falso, no disponible por ahora.', 1000, 'producto', false, false, true),
+  ('demo-estuche-borrador', 'Estuche de ejemplo (borrador)', 'Producto falso sin publicar.', 1000, 'producto', false, true, false),
+  ('demo-pack-regalo', 'Pack regalo de ejemplo', 'Pack falso para desarrollo.', 1000, 'pack', true, true, true),
+  ('demo-pack-curso', 'Pack curso de ejemplo', 'Pack falso para desarrollo.', 1000, 'pack', false, true, true),
+  ('demo-pack-borrador', 'Pack de ejemplo (borrador)', 'Pack falso sin publicar.', 1000, 'pack', false, true, false);
 
 insert into public.design (slug, title, description, is_published) values
   ('demo-diseno-estrellas', 'Diseño de ejemplo: estrellas', 'Diseño falso para desarrollo.', true),

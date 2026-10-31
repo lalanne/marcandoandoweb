@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { formatPriceInput, parsePriceClp } from "@/lib/admin/price";
 import { slugify } from "@/lib/admin/slug";
+import { KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { saveProduct, type ProductFormState, type RawProduct } from "./actions";
 import { errorClass, fieldClass, inputClass, primaryButton } from "../ui";
 
@@ -10,11 +11,10 @@ type Props = {
   /** Present when editing; its id is sent along so the action updates it. */
   productId?: string;
   initial: RawProduct;
-  categories: { id: string; name: string }[];
   submitLabel: string;
 };
 
-export function ProductForm({ productId, initial, categories, submitLabel }: Props) {
+export function ProductForm({ productId, initial, submitLabel }: Props) {
   const [state, action, pending] = useActionState<ProductFormState, FormData>(
     saveProduct,
     { errors: {}, values: null },
@@ -27,7 +27,7 @@ export function ProductForm({ productId, initial, categories, submitLabel }: Pro
   const [slugTouched, setSlugTouched] = useState(productId !== undefined);
   const [price, setPrice] = useState(start.price);
   const [description, setDescription] = useState(start.description);
-  const [categoryId, setCategoryId] = useState(start.category_id);
+  const [kind, setKind] = useState(start.kind);
   const [isFeatured, setIsFeatured] = useState(start.is_featured);
   const [isAvailable, setIsAvailable] = useState(start.is_available);
   const [isPublished, setIsPublished] = useState(start.is_published);
@@ -132,27 +132,29 @@ export function ProductForm({ productId, initial, categories, submitLabel }: Pro
       </div>
 
       <div className={fieldClass}>
-        <label htmlFor="product-category" className="font-medium">
-          Categoría
+        <label htmlFor="product-kind" className="font-medium">
+          Tipo
         </label>
         <select
-          id="product-category"
-          name="category_id"
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
+          id="product-kind"
+          name="kind"
+          value={kind}
+          onChange={(e) => setKind(e.target.value)}
           aria-required="true"
-          aria-describedby={errors.category_id ? "category_id-error" : undefined}
-          aria-invalid={errors.category_id ? true : undefined}
+          aria-describedby={errors.kind ? "kind-hint kind-error" : "kind-hint"}
+          aria-invalid={errors.kind ? true : undefined}
           className={inputClass}
         >
-          <option value="">Elige una categoría</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
+          {PRODUCT_KINDS.map((k) => (
+            <option key={k} value={k}>
+              {KIND_LABEL[k]}
             </option>
           ))}
         </select>
-        {error("category_id")}
+        <p id="kind-hint" className="text-sm">
+          Los productos se muestran en «Productos» y los packs en «Packs».
+        </p>
+        {error("kind")}
       </div>
 
       <fieldset className="flex flex-col gap-3 rounded-xl border-2 border-brand-night bg-white p-4">

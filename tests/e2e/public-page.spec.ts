@@ -39,7 +39,7 @@ test.describe("[002-AC11] first screen", () => {
 test("[002-AC12] has every section in order, in Spanish", async ({ page }) => {
   await open(page);
   const order = await page.evaluate(() =>
-    ["header", "inicio", "productos", "trabajos", "como-pedir", "colegios"].map(
+    ["header", "inicio", "productos", "packs", "trabajos", "como-pedir", "colegios"].map(
       (id) => {
         const el =
           id === "header"
@@ -58,14 +58,104 @@ test("[002-AC12] has every section in order, in Spanish", async ({ page }) => {
   await expect(page.getByText("Diseño de ejemplo: estrellas")).toBeVisible();
 });
 
-test("[002-AC12] shows no draft product and no empty category", async ({ page }) => {
+test("[002-AC12] shows no draft product or draft pack", async ({ page }) => {
   await open(page);
   await expect(page.getByText("Estuche de ejemplo (borrador)")).toHaveCount(0);
-  // The ten categories exist but only those with products get a section.
-  await expect(page.getByRole("heading", { name: "Estuches personalizados" })).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Botellas personalizadas" }),
-  ).toBeVisible();
+  await expect(page.getByText("Pack de ejemplo (borrador)")).toHaveCount(0);
+});
+
+// The ten old category names, which the seed still holds in the unused table
+// until #65 drops it: none of them may show.
+const CATEGORY_NAMES = [
+  "Botellas personalizadas",
+  "Poleras personalizadas",
+  "Polerones personalizados",
+  "Estuches personalizados",
+  "Calcetines personalizados",
+  "Productos escolares",
+  "Regalos personalizados",
+  "Productos para cursos y generaciones",
+  "Productos para fechas especiales",
+  "Etiquetas para ropa",
+];
+
+const cardNames = (page: Page, sectionId: string) =>
+  page.locator(`#${sectionId} article h3`).allInnerTexts();
+
+test("[002-AC33] lists productos and packs in their own sections, highlighted first, with no category", async ({
+  page,
+}) => {
+  await open(page);
+  await expect(page.getByRole("heading", { name: "Productos", level: 2 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Packs", level: 2 })).toBeVisible();
+
+  const productos = await cardNames(page, "productos");
+  expect(productos).toContain("Botella de ejemplo");
+  expect(productos).toContain("Polera de ejemplo");
+  expect(productos).not.toContain("Pack regalo de ejemplo");
+  // The highlighted product comes first.
+  expect(productos[0]).toBe("Botella de ejemplo");
+
+  // "Pack regalo" is highlighted, so it comes before "Pack curso" even though it
+  // sorts after it by name.
+  const packs = await cardNames(page, "packs");
+  expect(packs).toContain("Pack curso de ejemplo");
+  expect(packs).not.toContain("Botella de ejemplo");
+  expect(packs[0]).toBe("Pack regalo de ejemplo");
+
+  // Packs come right after Productos.
+  const next = await page.evaluate(
+    () => document.getElementById("productos")?.nextElementSibling?.id,
+  );
+  expect(next).toBe("packs");
+
+  const text = await page.locator("main").innerText();
+  for (const name of CATEGORY_NAMES) expect(text, name).not.toContain(name);
+  await expect(page.getByRole("heading", { level: 3, name: /personalizad/ })).toHaveCount(0);
+});
+
+test("[002-AC33] a pack has the same card as a product: price and a WhatsApp button naming it", async ({
+  page,
+}) => {
+  await open(page);
+  const card = page.locator("#packs article").filter({ hasText: "Pack regalo de ejemplo" });
+  await expect(card).toContainText("desde $1.000");
+  const href = await card.locator("a").getAttribute("href");
+  expect(href).toMatch(/^https:\/\/wa\.me\/56982661835\?text=/);
+  expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
+});
+
+test("[002-AC35] the header links are exactly Productos, Packs, Cómo pedir and Colegios y grupos", async ({
+  page,
+}) => {
+  await open(page);
+  const nav = page.getByRole("navigation", { name: "Secciones" });
+  await expect(nav.getByRole("link", { name: "Packs" })).toBeVisible();
+  const links = await nav
+    .locator("a")
+    .evaluateAll((els) =>
+      els
+        .map((el) => ({ text: el.textContent?.trim() ?? "", href: el.getAttribute("href") }))
+        .filter((l) => !/^(Entrar|Mi panel)$/.test(l.text)),
+    );
+  expect(links).toEqual([
+    { text: "Productos", href: "#productos" },
+    { text: "Packs", href: "#packs" },
+    { text: "Cómo pedir", href: "#como-pedir" },
+    { text: "Colegios y grupos", href: "#colegios" },
+  ]);
+  // Published designs exist (the "Trabajos reales" section shows) but there is no
+  // header link to it.
+  await expect(page.getByRole("heading", { name: "Trabajos reales" })).toBeVisible();
+  await expect(page.locator("header").getByRole("link", { name: /Trabajos/ })).toHaveCount(0);
+  // Each link leads to its section.
+  for (const { href } of links) {
+    await expect(page.locator(href ?? "")).toHaveCount(1);
+  }
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
 });
 
 test("[002-AC12] shows prices only when the database has one, with the dot", async ({

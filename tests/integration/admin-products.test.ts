@@ -6,6 +6,7 @@ import {
   deleteProduct,
   deleteProductImage,
   getProduct,
+  listProducts,
   moveProductImage,
   updateProduct,
   updateProductImage,
@@ -24,7 +25,6 @@ const PNG = Uint8Array.from(
 );
 
 let admin: SupabaseClient;
-let categoryId: string;
 const created: string[] = [];
 
 function values(overrides: Partial<ProductValues> = {}): ProductValues {
@@ -33,7 +33,7 @@ function values(overrides: Partial<ProductValues> = {}): ProductValues {
     slug: uniqueSlug("prod"),
     description: null,
     price_from_clp: 7000,
-    category_id: categoryId,
+    kind: "producto",
     is_featured: false,
     is_available: true,
     is_published: false,
@@ -54,13 +54,6 @@ async function make(overrides: Partial<ProductValues> = {}): Promise<string> {
 
 beforeAll(async () => {
   admin = await signedInClient(ADMIN);
-  const { data, error } = await admin
-    .from("category")
-    .select("id")
-    .eq("slug", "botellas")
-    .single();
-  if (error) throw new Error(error.message);
-  categoryId = data.id;
 });
 
 afterAll(async () => {
@@ -80,6 +73,18 @@ describe("products as the admin", () => {
 
     expect((await deleteProduct(admin, id)).ok).toBe(true);
     expect(await getProduct(admin, id)).toBeNull();
+  });
+
+  it("saves the type, changes it, and lists it without a category", async () => {
+    const id = await make({ kind: "pack" });
+    expect((await getProduct(admin, id))?.kind).toBe("pack");
+
+    expect((await updateProduct(admin, id, values({ kind: "producto" }))).ok).toBe(true);
+    expect((await getProduct(admin, id))?.kind).toBe("producto");
+
+    const row = (await listProducts(admin)).find((p) => p.id === id);
+    expect(row?.kind).toBe("producto");
+    expect(row).not.toHaveProperty("category");
   });
 
   it("refuses a repeated slug with a Spanish message on the slug field", async () => {

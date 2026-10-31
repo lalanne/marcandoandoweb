@@ -1,21 +1,17 @@
-import type { CatalogCategory, CatalogProduct, CatalogSection } from "./types";
+import type { ProductKind } from "./kind";
+import type { CatalogProduct } from "./types";
 
 /**
- * Groups products by category. Categories keep their `position` order, empty
- * categories are dropped, and highlighted products come first inside a category
- * (otherwise the incoming order is kept).
+ * Splits products by type (spec 002, criteria 33 and 34). Highlighted products
+ * come first inside a type; otherwise the incoming order is kept. A type with
+ * no products gets an empty list, and its section is not shown.
  */
-export function groupByCategory(
-  categories: CatalogCategory[],
+export function groupByKind(
   products: CatalogProduct[],
-): CatalogSection[] {
-  return [...categories]
-    .sort((a, b) => a.position - b.position)
-    .map((category) => {
-      const inCategory = products.filter((p) => p.categoryId === category.id);
-      const featured = inCategory.filter((p) => p.isFeatured);
-      const rest = inCategory.filter((p) => !p.isFeatured);
-      return { category, products: [...featured, ...rest] };
-    })
-    .filter((section) => section.products.length > 0);
+): Record<ProductKind, CatalogProduct[]> {
+  const of = (kind: ProductKind) => {
+    const inKind = products.filter((p) => p.kind === kind);
+    return [...inKind.filter((p) => p.isFeatured), ...inKind.filter((p) => !p.isFeatured)];
+  };
+  return { producto: of("producto"), pack: of("pack") };
 }
