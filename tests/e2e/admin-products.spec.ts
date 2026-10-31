@@ -446,7 +446,8 @@ test("the products screens have no serious or critical accessibility violations 
   expect(await check()).toEqual([]);
 
   await page.goto("/panel/productos");
-  await expect(page.getByRole("heading", { name: "Productos" })).toBeVisible();
+  // The page title; the list's group heading "Productos" is an h2.
+  await expect(page.getByRole("heading", { name: "Productos", level: 1 })).toBeVisible();
   expect(await check()).toEqual([]);
   await noHorizontalScroll();
 
@@ -528,6 +529,9 @@ test("[002-AC38] each pack carries a Pack badge first in its badges, and no prod
 test("[002-AC39] the filters count every product and pack, published or not", async ({ page }) => {
   await signIn(page);
   await page.goto("/panel/productos");
+  // The list streams in after the page shell: wait for it before reading.
+  await expect(filters(page).getByRole("link")).toHaveCount(3);
+  await expect(page.locator('[data-testid="product-group"]').first()).toBeVisible();
   const labels = await filters(page).getByRole("link").allInnerTexts();
   expect(labels.map((l) => l.replace(/\s*\(\d+\)$/, ""))).toEqual(["Todos", "Productos", "Packs"]);
   const [todos, productos, packs] = labels.map((l) => Number(l.match(/\((\d+)\)$/)?.[1]));
@@ -580,6 +584,7 @@ test("[002-AC40] choosing a filter lists only that type, keeps it in the address
 test("[002-AC41] under Todos the list is grouped under Productos and then Packs", async ({ page }) => {
   await signIn(page);
   await page.goto("/panel/productos");
+  await expect(page.locator('[data-testid="product-group"]')).toHaveCount(2);
   const headings = await page
     .locator('[data-testid="product-group"]')
     .getByRole("heading", { level: 2 })
@@ -590,6 +595,7 @@ test("[002-AC41] under Todos the list is grouped under Productos and then Packs"
   await expect(packGroup.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toHaveCount(0);
   // A chosen type has no group heading.
   await page.goto("/panel/productos?tipo=pack");
+  await expect(page.locator('[data-testid="product-group"]')).toHaveCount(1);
   await expect(
     page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
   ).toHaveCount(0);
