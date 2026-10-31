@@ -46,9 +46,6 @@ async function AdminOnly({ children }: { children: React.ReactNode }) {
           <Link href="/" className="underline">
             Ver sitio
           </Link>
-          <Link href="/panel/disenos" className="underline">
-            Diseños
-          </Link>
         </nav>
         <p className="font-semibold">{user.email}</p>
         <form action="/salir" method="post">

@@ -14,12 +14,6 @@ export default function PanelPage() {
         >
           Productos
         </Link>
-        <Link
-          href="/panel/disenos"
-          className="rounded-xl border-2 border-brand-night bg-brand-yellow px-4 py-2 font-semibold text-brand-night"
-        >
-          Diseños
-        </Link>
       </div>
     </main>
   );

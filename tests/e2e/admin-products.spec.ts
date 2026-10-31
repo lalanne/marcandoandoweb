@@ -446,7 +446,8 @@ test("the products screens have no serious or critical accessibility violations 
   expect(await check()).toEqual([]);
 
   await page.goto("/panel/productos");
-  await expect(page.getByRole("heading", { name: "Productos" })).toBeVisible();
+  // The page title; the list's group heading "Productos" is an h2.
+  await expect(page.getByRole("heading", { name: "Productos", level: 1 })).toBeVisible();
   expect(await check()).toEqual([]);
   await noHorizontalScroll();
 
@@ -471,4 +472,157 @@ test("the products screens have no serious or critical accessibility violations 
   await page.goto("/panel/productos");
   await expect(page.getByRole("link", { name })).toBeVisible();
   expect(await check()).toEqual([]);
+});
+
+// Spec 002, criteria 38 to 42 (amendment of 2026-10-31, issue #72): telling
+// packs apart in the panel list. Other tests add products at the same time, so
+// the checks compare the page with itself rather than with fixed numbers (the
+// exact counting is unit tested in admin-product-list.test.ts).
+
+const filters = (page: Page) => page.getByRole("navigation", { name: "Filtrar por tipo" });
+
+function contrast(fg: string, bg: string): number {
+  const lum = (rgb: string) => {
+    const [r, g, b] = (rgb.match(/\d+(\.\d+)?/g) ?? []).slice(0, 3).map((v) => {
+      const c = Number(v) / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+  return (a + 0.05) / (b + 0.05);
+}
+
+test("[002-AC38] each pack carries a Pack badge first in its badges, and no product does", async ({
+  page,
+}, testInfo) => {
+  const pack = productName("badge-pack", testInfo.project.name);
+  const producto = productName("badge-producto", testInfo.project.name);
+  await signIn(page);
+  await createProduct(page, { name: pack, kind: "Pack" });
+  await createProduct(page, { name: producto });
+
+  await page.goto("/panel/productos");
+  const packRow = page.getByRole("listitem").filter({ hasText: pack });
+  const badge = packRow.getByTestId("pack-badge");
+  await expect(badge).toHaveText("Pack");
+  // First in its row of badges, before "Sin publicar".
+  const badgeTexts = await packRow.getByTestId("badges").locator("> *").allInnerTexts();
+  expect(badgeTexts[0].trim()).toBe("Pack");
+  expect(badgeTexts).toContain("Sin publicar");
+  // The icon is decoration only.
+  await expect(badge.locator("svg")).toHaveAttribute("aria-hidden", "true");
+  const colors = await badge.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { fg: s.color, bg: s.backgroundColor };
+  });
+  expect(contrast(colors.fg, colors.bg)).toBeGreaterThanOrEqual(4.5);
+
+  const productRow = page.getByRole("listitem").filter({ hasText: producto });
+  await expect(productRow.getByTestId("pack-badge")).toHaveCount(0);
+  // The seeded packs carry it too.
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "Pack regalo de ejemplo" }).getByTestId("pack-badge"),
+  ).toBeVisible();
+});
+
+test("[002-AC39] the filters count every product and pack, published or not", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/panel/productos");
+  // The list streams in after the page shell: wait for it before reading.
+  await expect(filters(page).getByRole("link")).toHaveCount(3);
+  await expect(page.locator('[data-testid="product-group"]').first()).toBeVisible();
+  const labels = await filters(page).getByRole("link").allInnerTexts();
+  expect(labels.map((l) => l.replace(/\s*\(\d+\)$/, ""))).toEqual(["Todos", "Productos", "Packs"]);
+  const [todos, productos, packs] = labels.map((l) => Number(l.match(/\((\d+)\)$/)?.[1]));
+  // The seeded draft pack and draft product count too.
+  expect(packs).toBeGreaterThanOrEqual(3);
+  expect(todos).toBe(productos + packs);
+  // Under Todos, every item shows once, in its group.
+  const shown = await page.locator('[data-testid="product-group"] li').count();
+  expect(shown).toBe(todos);
+  const draftPack = page.getByRole("listitem").filter({ hasText: "Pack de ejemplo (borrador)" });
+  await expect(draftPack).toBeVisible();
+});
+
+test("[002-AC40] choosing a filter lists only that type, keeps it in the address and after a reload", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/panel/productos");
+  await filters(page).getByRole("link", { name: /^Packs/ }).click();
+  await expect(page).toHaveURL(/\/panel\/productos\?tipo=pack$/);
+  await expect(page.getByRole("listitem").filter({ hasText: "Pack regalo de ejemplo" })).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toHaveCount(0);
+  // Every item listed is a pack.
+  const rows = page.locator('[data-testid="product-group"] li');
+  const total = await rows.count();
+  expect(total).toBeGreaterThan(0);
+  await expect(rows.getByTestId("pack-badge")).toHaveCount(total);
+
+  await page.reload();
+  await expect(filters(page).getByRole("link", { name: /^Packs/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toHaveCount(0);
+
+  await filters(page).getByRole("link", { name: /^Productos/ }).click();
+  await expect(page).toHaveURL(/\/panel\/productos\?tipo=producto$/);
+  await expect(page.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toBeVisible();
+  await expect(page.locator('[data-testid="product-group"]').getByTestId("pack-badge")).toHaveCount(0);
+
+  // No tipo, or an unknown one, is Todos.
+  for (const path of ["/panel/productos", "/panel/productos?tipo=bundle"]) {
+    await page.goto(path);
+    await expect(filters(page).getByRole("link", { name: /^Todos/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await expect(page.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: "Pack regalo de ejemplo" })).toBeVisible();
+  }
+});
+
+test("[002-AC41] under Todos the list is grouped under Productos and then Packs", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/panel/productos");
+  // Retrying assertion: the streamed list is briefly in the page as hidden
+  // HTML before it shows, so a one-off read can find nothing.
+  await expect(
+    page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
+  ).toHaveText(["Productos", "Packs"]);
+  const packGroup = page.locator('[data-testid="product-group"]').nth(1);
+  await expect(packGroup.getByRole("listitem").filter({ hasText: "Pack regalo de ejemplo" })).toBeVisible();
+  await expect(packGroup.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toHaveCount(0);
+  // A chosen type has no group heading.
+  await page.goto("/panel/productos?tipo=pack");
+  await expect(
+    page.locator('[data-testid="product-group"]').getByRole("listitem").first(),
+  ).toBeVisible();
+  await expect(
+    page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
+  ).toHaveCount(0);
+});
+
+test("[002-AC42] the filters work with the keyboard, mark the current one, and do not scroll sideways", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/panel/productos");
+  const packs = filters(page).getByRole("link", { name: /^Packs/ });
+  await packs.focus();
+  const outline = await packs.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0;
+  });
+  expect(outline).toBe(true);
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\?tipo=pack$/);
+  await expect(filters(page).getByRole("link", { name: /^Packs/ })).toHaveAttribute("aria-current", "page");
+  await expect(filters(page).locator('[aria-current="page"]')).toHaveCount(1);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  expect(
+    violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id),
+  ).toEqual([]);
 });
