@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
+**Status:** draft (the second 2026-10-31 amendment, issue #69, waits for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -79,7 +79,24 @@ dropped once #64 is in production).
 - **Products:** list, create, edit, delete; set price, availability, highlighted,
   published; choose the ~~category~~ type, "Producto" or "Pack" (amended
   2026-10-31); upload and order photos with alt text.
-- **Designs:** list, create, edit, delete; upload photos with alt text.
+- ~~**Designs:** list, create, edit, delete; upload photos with alt text.~~
+  Postponed 2026-10-31 (amendment below).
+
+**2026-10-31 amendment - "Diseños" removed from the panel (issue #69).** The owner
+decided to drop "Diseños" from the admin: "we are not going to use it now". It is
+postponed, not cancelled, so only the panel changes:
+
+- The panel menu and the panel home have no "Diseños" link, and `/panel/disenos`,
+  `/panel/disenos/nuevo` and `/panel/disenos/<id>` answer 404 (criterion 37).
+- The `design` table, its rows and photos, its row-level security and the shared
+  admin code for designs stay as they are, so the screens can come back with a
+  small change.
+- The public "Real work" section keeps its rule: it shows only when a design is
+  published. Production has none and the panel can no longer publish one, so it
+  stays hidden; visitors see no change.
+
+Implemented in issue #70. Before this amendment the admin managed designs
+(criterion 9).
 - Designed for a computer, usable on a phone.
 - Out: roles, ~~category editing~~ (no categories since 2026-10-31), password reset flow beyond what Supabase gives by
   default, bulk actions, search.
@@ -172,8 +189,9 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
    no WhatsApp button; when they unpublish or delete it, then it disappears.
 8. Given the admin, when they try to save an image without alt text or above the size
    limit, then it is refused with a clear message.
-9. Given the admin, when they create, edit and delete a design with photos, then the
-   "Real work" section reflects it.
+9. ~~Given the admin, when they create, edit and delete a design with photos, then
+   the "Real work" section reflects it.~~ **Retired 2026-10-31 (issue #69):** the
+   panel no longer manages designs (criterion 37).
 10. Given the admin signs out, when they press the browser's back button, then the
     panel does not show data.
 
@@ -275,13 +293,21 @@ customers.
     to "Pack", then the home page shows it in the "Packs" section and no longer in
     "Productos", without a deploy.
 
+**No "Diseños" in the panel** (added 2026-10-31, issue #69)
+
+37. Given the admin signed in, when they open the panel, then neither the panel
+    menu nor the panel home shows a "Diseños" link; and when they open
+    `/panel/disenos`, `/panel/disenos/nuevo` or `/panel/disenos/<id>` of an existing
+    design, then they get the "not found" page and no design data; a visitor who is
+    not signed in is still sent to the sign-in page from those addresses.
+
 ## Verification plan
 
 | # | Criterion | Layer |
 |---|-----------|-------|
 | 1, 5, 8 (size) | Constraints, RLS, non-admin refused | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin |
 | 13 | WhatsApp URL and message builder | Unit (Vitest), pure function |
-| 3, 4, 6, 7, 9, 10 | Admin flows | End to end (Playwright) against local Supabase |
+| 3, 4, 6, 7, 10 | Admin flows | End to end (Playwright) against local Supabase (9 retired 2026-10-31) |
 | 11, 12, 14–18 | Public page, layout, keyboard | End to end (Playwright) at 360, 768 and 1280 px |
 | 19, 21 | Accessibility, performance | axe and Lighthouse on the preview deploy |
 | 25 | Storage read policy: unpublished images not readable or listable | Integration (Vitest) against local Supabase, as anonymous, non-admin and admin; end to end for `/img/...` |
@@ -290,6 +316,7 @@ customers.
 | 32, 36 | Type field in the admin, moving a product between sections | End to end (Playwright) against local Supabase; a unit test for the form input parser (type required, only the two values) |
 | 33, 34 | Two sections by type, empty type hidden | Unit test for the pure grouping function; end to end (Playwright) at 360 and 1280 px with axe |
 | 35 | Header links | End to end (Playwright) at 360 and 1280 px with axe |
+| 37 | No "Diseños" in the panel, its addresses answer 404 | End to end (Playwright) at 360 and 1280 px, as the admin and as a visitor |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
 
