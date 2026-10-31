@@ -72,7 +72,7 @@ async function createProduct(page: Page, p: NewProduct) {
   await page.goto("/panel/productos/nuevo");
   await page.getByLabel("Nombre", { exact: true }).fill(p.name);
   if (p.price !== undefined) {
-    await page.getByLabel("Precio desde (CLP)").fill(p.price);
+    await page.getByLabel("Precio (CLP)").fill(p.price);
   }
   if (p.kind) await page.getByLabel("Tipo", { exact: true }).selectOption({ label: p.kind });
   if (p.available === false) await page.getByLabel("Disponible", { exact: true }).uncheck();
@@ -138,7 +138,7 @@ test("[002-AC6] the admin creates a product with price, type and a photo with al
   // No deploy: the public page, read at request time, already has it.
   const card = await publicCard(page, name);
   await expect(card).toBeVisible({ timeout: PAGE_TIMEOUT });
-  await expect(card).toContainText("desde $7.000");
+  await expect(card).toContainText("$7.000 c/u");
   await expect(card.getByRole("img", { name: alt })).toHaveAttribute("src", /^\/img\/product\//);
   // In the section of its type: a new product is a "Producto".
   await expect(page.locator("#productos article", { hasText: name })).toBeVisible();
@@ -206,23 +206,24 @@ test("[002-AC7] changing the price, marking it unavailable and unpublishing a pu
   const edit = new URL(page.url()).pathname;
 
   const card = await publicCard(page, name);
-  await expect(card).toContainText("desde $7.000", { timeout: PAGE_TIMEOUT });
+  await expect(card).toContainText("$7.000 c/u", { timeout: PAGE_TIMEOUT });
 
   await page.goto(edit);
-  await page.getByLabel("Precio desde (CLP)").fill("9.900");
+  await page.getByLabel("Precio (CLP)").fill("9.900");
   await saveChanges(page);
-  await expect(page.getByLabel("Precio desde (CLP)")).toHaveValue("9.900");
-  await expect(await publicCard(page, name)).toContainText("desde $9.900", {
+  await expect(page.getByLabel("Precio (CLP)")).toHaveValue("9.900");
+  await expect(await publicCard(page, name)).toContainText("$9.900 c/u", {
     timeout: PAGE_TIMEOUT,
   });
 
   // An empty price is saved as no price: the public page shows none.
   await page.goto(edit);
-  await page.getByLabel("Precio desde (CLP)").fill("");
+  await page.getByLabel("Precio (CLP)").fill("");
   await saveChanges(page);
   const noPrice = await publicCard(page, name);
   await expect(noPrice).toBeVisible({ timeout: PAGE_TIMEOUT });
   await expect(noPrice).not.toContainText("desde");
+  await expect(noPrice).not.toContainText("c/u");
 
   await page.goto(edit);
   await page.getByLabel("Disponible", { exact: true }).uncheck();
@@ -400,15 +401,15 @@ test("the form shows Spanish errors, keeps what was typed, and refuses a repeate
   await expect(page.getByLabel("Dirección web (slug)")).toHaveValue("taza-magica-nandu");
 
   await page.getByLabel("Nombre", { exact: true }).fill("");
-  await page.getByLabel("Precio desde (CLP)").fill("7,5");
+  await page.getByLabel("Precio (CLP)").fill("7,5");
   await page.getByRole("button", { name: "Guardar producto" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Escribe el nombre" })).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "precio" })).toBeVisible();
-  await expect(page.getByLabel("Precio desde (CLP)")).toHaveValue("7,5");
+  await expect(page.getByLabel("Precio (CLP)")).toHaveValue("7,5");
 
   // A repeated address is refused with a message on the field.
   await page.getByLabel("Nombre", { exact: true }).fill(name);
-  await page.getByLabel("Precio desde (CLP)").fill("7.000");
+  await page.getByLabel("Precio (CLP)").fill("7.000");
   await page.getByLabel("Dirección web (slug)").fill("demo-botella-ejemplo");
   await page.getByRole("button", { name: "Guardar producto" }).click();
   await expect(
@@ -625,4 +626,20 @@ test("[002-AC42] the filters work with the keyboard, mark the current one, and d
   expect(
     violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id),
   ).toEqual([]);
+});
+
+test("[002-AC54] the price field reads \"Precio (CLP)\", not \"Precio desde (CLP)\", and \"7.000\" is still saved as 7000", async ({
+  page,
+}, testInfo) => {
+  const name = productName("precio-label", testInfo.project.name);
+  await signIn(page);
+  await page.goto("/panel/productos/nuevo");
+  await expect(page.getByLabel("Precio (CLP)", { exact: true })).toBeVisible();
+  await expect(page.getByText("Precio desde")).toHaveCount(0);
+
+  await createProduct(page, { name, price: "7.000" });
+  await expect(page.getByLabel("Precio (CLP)", { exact: true })).toHaveValue("7.000");
+  await expect(page.getByText("Precio desde")).toHaveCount(0);
+  await page.goto("/panel/productos");
+  await expect(page.getByRole("listitem").filter({ hasText: name })).toContainText("$7.000");
 });

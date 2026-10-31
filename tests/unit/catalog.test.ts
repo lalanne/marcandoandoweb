@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatClp } from "@/lib/catalog/format";
+import { formatClp, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
 import { groupByKind } from "@/lib/catalog/group";
 import { imagePathFromSegments, imageUrl, panelImageUrl } from "@/lib/catalog/images";
 import { isProductKind, KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
@@ -96,5 +96,23 @@ describe("imagePathFromSegments", () => {
     expect(imagePathFromSegments(["."])).toBeNull();
     expect(imagePathFromSegments(["a", ""])).toBeNull();
     expect(imagePathFromSegments(["a\\b"])).toBeNull();
+  });
+});
+
+describe("priceLabel", () => {
+  it("[002-AC52] reads \"$7.000 c/u\", with the dot and no \"desde\"", () => {
+    expect(priceLabel(7000)).toBe("$7.000 c/u");
+    expect(priceLabel(14000)).toBe("$14.000 c/u");
+    expect(priceLabel(7000)).not.toContain("desde");
+  });
+
+  it("[002-AC52] shows nothing, and no \"c/u\", for a product without a price", () => {
+    expect(priceLabel(null)).toBeNull();
+  });
+
+  it("[002-AC53] the wholesale note is the approved text", () => {
+    expect(WHOLESALE_NOTE).toBe(
+      "Precios por unidad. Al por mayor es otro precio: cotiza por WhatsApp.",
+    );
   });
 });
