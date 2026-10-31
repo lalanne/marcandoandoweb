@@ -149,7 +149,8 @@ test("[005-AC9] after signing out a session ends and /panel redirects to /entrar
     await page.goto("/panel");
     await expect(page.getByRole("heading", { name: PANEL_HEADING })).toBeVisible();
     await page.getByRole("button", { name: "Salir" }).click();
-    await expect(page).toHaveURL(/\/entrar/);
+    // Sign-out ends on the home page (spec 002, criterion 43).
+    await expect(page).toHaveURL(/\/$/);
     await page.goto("/panel");
     await expect(page).toHaveURL(/\/entrar/);
     await expect(page.getByRole("heading", { name: PANEL_HEADING })).toHaveCount(0);

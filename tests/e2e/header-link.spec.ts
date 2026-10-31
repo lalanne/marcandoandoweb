@@ -182,7 +182,8 @@ test("[002-AC30] after signing out through /salir the link reads Entrar again", 
     await expect(headerLink(page)).toHaveText("Mi panel");
     await page.goto("/panel");
     await page.getByRole("button", { name: "Salir" }).click();
-    await expect(page).toHaveURL(/\/entrar/);
+    // Sign-out ends on the home page (criterion 43).
+    await expect(page).toHaveURL(/\/$/);
     await page.goto("/");
     await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
       timeout: 20_000,
