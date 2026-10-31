@@ -148,7 +148,7 @@ test("[002-AC6] the admin creates a product with price, type and a photo with al
 test("[002-AC32] the form has a Tipo field, Producto or Pack, starting as Producto, and no Categoría; the list shows the type", async ({
   page,
 }, testInfo) => {
-  const name = productName("tipo", testInfo.project.name);
+  const name = productName("tipo-pack", testInfo.project.name);
   await signIn(page);
   await page.goto("/panel/productos/nuevo");
 
