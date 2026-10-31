@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** draft (the second 2026-10-31 amendment, issue #69, waits for the owner's approval; approved by the owner on 2026-10-31 with the first amendment of that date, issue #63, and first on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69; first approved by the owner on 2026-10-23)
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
