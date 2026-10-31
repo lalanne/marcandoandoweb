@@ -55,12 +55,10 @@ test("[002-AC41] with no packs, the Packs filter says so in Spanish and Todos ha
     ).toBeVisible();
 
     await page.goto("/panel/productos");
-    await expect(page.locator('[data-testid="product-group"]')).toHaveCount(1);
-    const headings = await page
-      .locator('[data-testid="product-group"]')
-      .getByRole("heading", { level: 2 })
-      .allInnerTexts();
-    expect(headings).toEqual(["Productos"]);
+    // Retrying: the streamed list is briefly hidden HTML before it shows.
+    await expect(
+      page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
+    ).toHaveText(["Productos"]);
   } finally {
     const { error: restore } = await admin.from("product").update({ kind: "pack" }).in("id", ids);
     if (restore) throw new Error(restore.message);

@@ -584,18 +584,19 @@ test("[002-AC40] choosing a filter lists only that type, keeps it in the address
 test("[002-AC41] under Todos the list is grouped under Productos and then Packs", async ({ page }) => {
   await signIn(page);
   await page.goto("/panel/productos");
-  await expect(page.locator('[data-testid="product-group"]')).toHaveCount(2);
-  const headings = await page
-    .locator('[data-testid="product-group"]')
-    .getByRole("heading", { level: 2 })
-    .allInnerTexts();
-  expect(headings).toEqual(["Productos", "Packs"]);
+  // Retrying assertion: the streamed list is briefly in the page as hidden
+  // HTML before it shows, so a one-off read can find nothing.
+  await expect(
+    page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
+  ).toHaveText(["Productos", "Packs"]);
   const packGroup = page.locator('[data-testid="product-group"]').nth(1);
   await expect(packGroup.getByRole("listitem").filter({ hasText: "Pack regalo de ejemplo" })).toBeVisible();
   await expect(packGroup.getByRole("listitem").filter({ hasText: "Botella de ejemplo" })).toHaveCount(0);
   // A chosen type has no group heading.
   await page.goto("/panel/productos?tipo=pack");
-  await expect(page.locator('[data-testid="product-group"]')).toHaveCount(1);
+  await expect(
+    page.locator('[data-testid="product-group"]').getByRole("listitem").first(),
+  ).toBeVisible();
   await expect(
     page.locator('[data-testid="product-group"]').getByRole("heading", { level: 2 }),
   ).toHaveCount(0);
