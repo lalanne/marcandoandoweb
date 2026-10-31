@@ -111,11 +111,13 @@ jobs:
         run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
       - name: Clean reset from the migrations alone (no seed)
         run: npx supabase db reset --no-seed
-      - name: The migrations leave the ten categories and no seed rows
+      # Categories were dropped in #65 (spec 001, amendment of 2026-10-31): no
+      # category table and no product.category_id are left.
+      - name: The migrations leave no categories and no seed rows
         run: |
           docker exec supabase_db_marcandoandoweb psql -U postgres -tA -c \
-            "select (select count(*) from public.category) || ',' || (select count(*) from public.product) || ',' || (select count(*) from auth.users)" \
-            | tee /dev/stderr | grep -qx '10,0,0'
+            "select (to_regclass('public.category') is null) || ',' || (select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'product' and column_name = 'category_id') || ',' || (select count(*) from public.product) || ',' || (select count(*) from auth.users)" \
+            | tee /dev/stderr | grep -qx 'true,0,0,0'
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup
