@@ -40,9 +40,6 @@ beforeAll(async () => {
   anon = anonClient();
   admin = await signedInClient(ADMIN);
   nonAdmin = await signedInClient(NON_ADMIN);
-  const cat = ok(
-    await admin.from("category").select("id").eq("slug", "botellas").single(),
-  );
 
   for (const [key, isPublished] of [
     ["publishedProduct", true],
@@ -54,7 +51,6 @@ beforeAll(async () => {
         .insert({
           slug: uniqueSlug("p"),
           name: "Producto de prueba",
-          category_id: cat.id,
           is_published: isPublished,
         })
         .select()

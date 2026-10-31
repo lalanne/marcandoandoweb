@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { healthResponse } from "@/lib/health";
 import { localSupabase } from "./helpers";
 
-// Spec 004, criterion 15: the health route reads the categories with the public
+// Spec 004, criterion 15: the health route reads the products with the public
 // client and answers only ok or error, never a detail. Settings are injected, so
 // a wrong URL or key is tested without touching the environment.
 
@@ -15,7 +15,20 @@ async function expectError(response: Response) {
   expect(await response.text()).toBe('{"status":"error"}');
 }
 
+afterEach(() => vi.restoreAllMocks());
+
 describe("[004-AC15] health check", () => {
+  it("[004-AC15] reads the products table, not the categories", async () => {
+    const spy = vi.spyOn(globalThis, "fetch");
+    const response = await healthResponse({ url, anonKey });
+    expect(response.status).toBe(200);
+    const paths = spy.mock.calls.map(([input]) =>
+      new URL(input instanceof Request ? input.url : String(input)).pathname,
+    );
+    expect(paths).toContain("/rest/v1/product");
+    expect(paths).not.toContain("/rest/v1/category");
+  });
+
   it("[004-AC15] answers 200 ok with correct settings", async () => {
     const response = await healthResponse({ url, anonKey });
     expect(response.status).toBe(200);

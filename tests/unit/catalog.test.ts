@@ -1,25 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { formatClp } from "@/lib/catalog/format";
-import { groupByCategory } from "@/lib/catalog/group";
+import { groupByKind } from "@/lib/catalog/group";
 import { imagePathFromSegments, imageUrl, panelImageUrl } from "@/lib/catalog/images";
+import { isProductKind, KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
+import type { CatalogProduct } from "@/lib/catalog/types";
 
-const cat = (slug: string, position: number) => ({
-  id: `c-${slug}`,
-  slug,
-  name: slug,
-  position,
-});
 const prod = (
   slug: string,
-  categoryId: string,
-  extra: Record<string, unknown> = {},
-) => ({
+  kind: CatalogProduct["kind"],
+  extra: Partial<CatalogProduct> = {},
+): CatalogProduct => ({
   id: `p-${slug}`,
   slug,
   name: slug,
   description: null,
   priceFromClp: null,
-  categoryId,
+  kind,
   isFeatured: false,
   isAvailable: true,
   coverImage: null,
@@ -36,26 +32,36 @@ describe("formatClp", () => {
   });
 });
 
-describe("groupByCategory", () => {
-  it("[002-AC12] hides categories with no products", () => {
-    const sections = groupByCategory(
-      [cat("a", 1), cat("b", 2)],
-      [prod("x", "c-b")],
-    );
-    expect(sections.map((s) => s.category.slug)).toEqual(["b"]);
+describe("groupByKind", () => {
+  it("[002-AC33] puts products of type producto in productos and packs in packs, highlighted first", () => {
+    const groups = groupByKind([
+      prod("polera", "producto"),
+      prod("pack-cole", "pack"),
+      prod("botella", "producto", { isFeatured: true }),
+      prod("pack-navidad", "pack", { isFeatured: true }),
+      prod("estuche", "producto"),
+    ]);
+    expect(groups.producto.map((p) => p.slug)).toEqual(["botella", "polera", "estuche"]);
+    expect(groups.pack.map((p) => p.slug)).toEqual(["pack-navidad", "pack-cole"]);
   });
 
-  it("[002-AC12] keeps the category order and puts highlighted products first", () => {
-    const sections = groupByCategory(
-      [cat("b", 2), cat("a", 1)],
-      [
-        prod("plain", "c-a"),
-        prod("star", "c-a", { isFeatured: true }),
-        prod("other", "c-b"),
-      ],
-    );
-    expect(sections.map((s) => s.category.slug)).toEqual(["a", "b"]);
-    expect(sections[0].products.map((p) => p.slug)).toEqual(["star", "plain"]);
+  it("[002-AC34] leaves a type empty when it has no products", () => {
+    const groups = groupByKind([prod("polera", "producto")]);
+    expect(groups.producto).toHaveLength(1);
+    expect(groups.pack).toEqual([]);
+    expect(groupByKind([])).toEqual({ producto: [], pack: [] });
+  });
+});
+
+describe("product kinds", () => {
+  it("[002-AC32] has exactly the two types, producto first, with Spanish labels", () => {
+    expect(PRODUCT_KINDS).toEqual(["producto", "pack"]);
+    expect(KIND_LABEL).toEqual({ producto: "Producto", pack: "Pack" });
+    expect(isProductKind("pack")).toBe(true);
+    expect(isProductKind("producto")).toBe(true);
+    expect(isProductKind("Pack")).toBe(false);
+    expect(isProductKind("")).toBe(false);
+    expect(isProductKind("botellas")).toBe(false);
   });
 });
 
