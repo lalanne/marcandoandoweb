@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import {
+  PacksSection,
   ProductsSection,
   RealWorkSection,
   SectionSkeleton,
@@ -21,6 +22,9 @@ export default function Home() {
         <Hero />
         <Suspense fallback={<SectionSkeleton />}>
           <ProductsSection />
+        </Suspense>
+        <Suspense fallback={null}>
+          <PacksSection />
         </Suspense>
         <Suspense fallback={null}>
           <RealWorkSection />

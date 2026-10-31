@@ -1,3 +1,4 @@
+import { isProductKind, type ProductKind } from "@/lib/catalog/kind";
 import { parsePriceClp } from "./price";
 import { isValidSlug, slugify } from "./slug";
 
@@ -6,13 +7,13 @@ export type ProductValues = {
   slug: string;
   description: string | null;
   price_from_clp: number | null;
-  category_id: string;
+  kind: ProductKind;
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
 };
 
-export type ProductField = "name" | "slug" | "price" | "category_id";
+export type ProductField = "name" | "slug" | "price" | "kind";
 
 export type ProductFormResult = {
   values: ProductValues | null;
@@ -40,10 +41,13 @@ export function parseProductForm(data: FormData): ProductFormResult {
   const price = parsePriceClp(text(data, "price"));
   if (!price.ok) errors.price = price.error;
 
-  const category_id = text(data, "category_id").trim();
-  if (!category_id) errors.category_id = "Elige una categoría.";
+  // Producto or Pack only (spec 002, criterion 32). The form starts on Producto.
+  const kind = text(data, "kind");
+  if (!isProductKind(kind)) errors.kind = "Elige el tipo: producto o pack.";
 
-  if (Object.keys(errors).length > 0 || !price.ok) return { values: null, errors };
+  if (Object.keys(errors).length > 0 || !price.ok || !isProductKind(kind)) {
+    return { values: null, errors };
+  }
 
   return {
     errors,
@@ -52,7 +56,7 @@ export function parseProductForm(data: FormData): ProductFormResult {
       slug,
       description: text(data, "description").trim() || null,
       price_from_clp: price.value,
-      category_id,
+      kind,
       is_featured: data.get("is_featured") === "on",
       is_available: data.get("is_available") === "on",
       is_published: data.get("is_published") === "on",

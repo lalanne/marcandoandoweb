@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatPriceInput } from "@/lib/admin/price";
-import { getProduct, listCategories } from "@/lib/admin/products";
+import { getProduct } from "@/lib/admin/products";
 import { createClient } from "@/lib/supabase/server";
 import {
   deletePhoto,
@@ -26,10 +26,7 @@ export default async function EditProductPage({
 }) {
   const [{ id }, { aviso }] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
-  const [product, categories] = await Promise.all([
-    getProduct(supabase, id),
-    listCategories(supabase),
-  ]);
+  const product = await getProduct(supabase, id);
   if (!product) notFound();
 
   return (
@@ -42,16 +39,15 @@ export default async function EditProductPage({
 
       <ProductForm
         // A new key after each save, so the form shows what is stored.
-        key={`${product.id}:${JSON.stringify([product.name, product.slug, product.price_from_clp, product.is_published, product.is_available, product.is_featured, product.category_id, product.description])}`}
+        key={`${product.id}:${JSON.stringify([product.name, product.slug, product.price_from_clp, product.is_published, product.is_available, product.is_featured, product.kind, product.description])}`}
         productId={product.id}
-        categories={categories}
         submitLabel="Guardar cambios"
         initial={{
           name: product.name,
           slug: product.slug,
           description: product.description ?? "",
           price: formatPriceInput(product.price_from_clp),
-          category_id: product.category_id,
+          kind: product.kind,
           is_featured: product.is_featured,
           is_available: product.is_available,
           is_published: product.is_published,
