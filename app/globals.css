@@ -7,6 +7,9 @@
   --brand-purple: #9565c4;
   --brand-night: #141824;
   --brand-cream: #fbf5e9;
+  /* A darker purple for white text: #9565c4 with white is only 4.25:1, this
+     one is 6.1:1 (spec 002, criterion 38, the Pack badge). */
+  --brand-purple-deep: #7a4bae;
 
   --background: var(--brand-cream);
   --foreground: var(--brand-night);
@@ -21,6 +24,7 @@
   --color-brand-purple: var(--brand-purple);
   --color-brand-night: var(--brand-night);
   --color-brand-cream: var(--brand-cream);
+  --color-brand-purple-deep: var(--brand-purple-deep);
   --font-sans: var(--font-fredoka);
 }
 
