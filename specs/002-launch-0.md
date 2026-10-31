@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft (the 2026-10-31 amendment for issue #82 waits for the owner's approval; approved by the owner on 2026-10-31 with the amendments of that date for issues #63, #69, #72 and #79, and first on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79 and #82; first approved on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -169,8 +169,7 @@ all of them, and chose option 1 of the design canvas
   through the photos **inside the card**, in the admin's order: previous and next
   buttons on the photo, a counter ("2 / 4") on the photo, a row of dots under it
   (each one a button to that photo), and sideways swipe on touch screens. Past the
-  last photo it goes back to the first, and before the first to the last
-  **(proposed; the owner confirms when approving)**.
+  last photo it goes back to the first, and before the first to the last (confirmed by the owner when approving, 2026-10-31).
 - Every photo keeps its own Spanish alt text. Only the first photo of a card loads
   with the page as today; the others load when the visitor moves to them (or just
   before), so the page stays as fast as it was.
