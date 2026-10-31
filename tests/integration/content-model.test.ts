@@ -14,9 +14,8 @@ import {
 // later specs, so their halves of a criterion are not tested.
 //
 // Categories were removed from the model on 2026-10-31 (spec 001 amendment,
-// issue #63): a product has a `kind` instead. The `category` table stays in the
-// database, unused, until issue #65 drops it, so its rules keep being checked in
-// the "category table" block at the end.
+// issue #63): a product has a `kind` instead. Issue #65 dropped the `category`
+// table and `product.category_id`; the "categories are gone" block checks it.
 
 let admin: SupabaseClient;
 let nonAdmin: SupabaseClient;
@@ -26,7 +25,6 @@ let anon: SupabaseClient;
 const created = {
   product: [] as string[],
   design: [] as string[],
-  category: [] as string[],
 };
 
 async function newProduct(overrides: Record<string, unknown> = {}) {
@@ -58,23 +56,6 @@ async function newDesign(overrides: Record<string, unknown> = {}) {
   return row;
 }
 
-async function newCategory(overrides: Record<string, unknown> = {}) {
-  const row = ok(
-    await admin
-      .from("category")
-      .insert({
-        slug: uniqueSlug("c"),
-        name: "Categoría de prueba",
-        position: 100,
-        ...overrides,
-      })
-      .select()
-      .single(),
-  );
-  created.category.push(row.id);
-  return row;
-}
-
 beforeAll(async () => {
   anon = anonClient();
   admin = await signedInClient(ADMIN);
@@ -86,23 +67,6 @@ afterAll(async () => {
     await admin.from("product").delete().in("id", created.product);
   if (created.design.length)
     await admin.from("design").delete().in("id", created.design);
-  if (created.category.length)
-    await admin.from("category").delete().in("id", created.category);
-});
-
-describe("migrations", () => {
-  it("still hold the ten categories of Req 3B, published, until #65 drops the table", async () => {
-    const rows = ok(
-      await anon.from("category").select("slug, name, position").order("position"),
-    );
-    expect(rows).toHaveLength(10);
-    expect(rows.map((r: { position: number }) => r.position)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    ]);
-    const slugs = rows.map((r: { slug: string }) => r.slug);
-    expect(slugs).toContain("botellas");
-    expect(slugs).toContain("etiquetas-para-ropa");
-  });
 });
 
 describe("constraints", () => {
@@ -443,61 +407,23 @@ describe("product kind", () => {
       ok(await admin.from("product").select("kind").eq("id", p.id).single()).kind,
     ).toBe("pack");
   });
-
-  it("saves a product without a category (the column is unused until #65 drops it)", async () => {
-    const p = await newProduct({ kind: "pack" });
-    expect(p.category_id).toBeNull();
-  });
 });
 
-// The category table is no longer part of the model, but it exists until #65
-// drops it, so it must stay locked: the public reads only published rows and
-// only the admin writes.
-describe("category table (unused since 2026-10-31, dropped in #65)", () => {
-  it("still rejects a duplicate category slug", async () => {
-    const dup = await admin
-      .from("category")
-      .insert({ slug: "botellas", name: "Otra", position: 99 });
-    expect(dup.error?.code).toBe("23505");
-  });
-
-  it("does not return an unpublished category to the public", async () => {
-    const cat = await newCategory();
-    expect(cat.is_published).toBe(false);
-    expect(
-      ok(await anon.from("category").select("id").eq("id", cat.id)),
-    ).toEqual([]);
-  });
-
-  it("rejects category writes from the public and from a non-admin", async () => {
-    const cat = ok(
-      await admin.from("category").select("*").eq("slug", "botellas").single(),
-    );
-    for (const client of [anon, nonAdmin]) {
-      const insert = await client
-        .from("category")
-        .insert({ slug: uniqueSlug("c"), name: "X", position: 200 });
-      expect(insert.error?.code).toBe("42501");
-      const update = await client
-        .from("category")
-        .update({ name: "Hackeada" })
-        .eq("id", cat.id)
-        .select();
-      expect(update.data ?? []).toEqual([]);
-      const del = await client.from("category").delete().eq("id", cat.id).select();
-      expect(del.data ?? []).toEqual([]);
+// Issue #65 (contract step of the 2026-10-31 amendment): nothing of the
+// categories is left in the database.
+describe("categories are gone", () => {
+  it("has no category table, for the public or the admin", async () => {
+    for (const client of [anon, admin]) {
+      const { data, error } = await client.from("category").select("id").limit(1);
+      expect(data).toBeNull();
+      // PostgREST answers "not in the schema cache" (PGRST205) for a missing
+      // table; older versions passed Postgres's 42P01 through.
+      expect(["PGRST205", "42P01"]).toContain(error?.code);
     }
-    expect(
-      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
-    ).toBe(cat.name);
   });
 
-  it("lets the admin manage categories", async () => {
-    const cat = await newCategory({ name: "Admin cat", position: 300 });
-    ok(await admin.from("category").update({ name: "Admin cat 2" }).eq("id", cat.id));
-    expect(
-      ok(await admin.from("category").select("name").eq("id", cat.id).single()).name,
-    ).toBe("Admin cat 2");
-    expect(ok(await admin.from("category").delete().eq("id", cat.id).select())).toHaveLength(1);
+  it("has no category_id column on product", async () => {
+    const { error } = await admin.from("product").select("category_id").limit(1);
+    expect(error?.code).toBe("42703");
   });
 });

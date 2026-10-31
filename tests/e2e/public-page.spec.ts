@@ -64,8 +64,8 @@ test("[002-AC12] shows no draft product or draft pack", async ({ page }) => {
   await expect(page.getByText("Pack de ejemplo (borrador)")).toHaveCount(0);
 });
 
-// The ten old category names, which the seed still holds in the unused table
-// until #65 drops it: none of them may show.
+// The ten old category names (dropped from the database in #65): none of them
+// may show.
 const CATEGORY_NAMES = [
   "Botellas personalizadas",
   "Poleras personalizadas",
