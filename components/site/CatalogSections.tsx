@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { formatClp } from "@/lib/catalog/format";
+import { priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
 import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
@@ -34,7 +34,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       )}
       <h3 className="text-lg font-semibold">{product.name}</h3>
       {product.priceFromClp !== null && (
-        <p className="font-medium">desde {formatClp(product.priceFromClp)}</p>
+        <p className="font-medium">{priceLabel(product.priceFromClp)}</p>
       )}
       {product.isAvailable ? (
         <a
@@ -76,6 +76,7 @@ async function KindSection({
         <h2 id={`${id}-title`} className="text-3xl font-bold">
           {title}
         </h2>
+        <p className="mt-2 text-brand-night">{WHOLESALE_NOTE}</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />

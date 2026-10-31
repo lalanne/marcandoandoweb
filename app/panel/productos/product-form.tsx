@@ -106,7 +106,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
 
       <div className={fieldClass}>
         <label htmlFor="product-price" className="font-medium">
-          Precio desde (CLP)
+          Precio (CLP)
         </label>
         <input
           id="product-price"
