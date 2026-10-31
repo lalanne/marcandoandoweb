@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { isAdminUser } from "@/lib/auth/admin";
@@ -24,6 +25,10 @@ export default function SignInPage({
   return (
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-sm rounded-2xl border-2 border-brand-night bg-white p-6">
+        {/* Back to the public site (spec 002, criterion 45). */}
+        <Link href="/" className="mb-4 inline-block font-semibold text-brand-night underline">
+          Volver al sitio
+        </Link>
         <h1 className="mb-6 text-3xl font-semibold text-brand-night">Entrar</h1>
         {/* Reads the session and the URL, so it streams in at request time. */}
         <Suspense fallback={<p>Cargando...</p>}>

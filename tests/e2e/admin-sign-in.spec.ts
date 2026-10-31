@@ -107,7 +107,8 @@ test("[002-AC10] after signing out, the back button does not show the panel", as
   await signIn(page, ADMIN);
   await expect(page.getByRole("heading", { name: PANEL_HEADING })).toBeVisible();
   await page.getByRole("button", { name: "Salir" }).click();
-  await expect(page).toHaveURL(/\/entrar/);
+  // Sign-out ends on the home page (criterion 43, amendment of 2026-10-31).
+  await expect(page).toHaveURL(/\/$/);
   await page.goBack();
   // Back lands on the panel's history entry; the guard must send it to sign-in.
   await expect(page).toHaveURL(/\/entrar/);
