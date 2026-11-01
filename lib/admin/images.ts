@@ -1,10 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  IMAGE_TYPE_ERROR,
   buildDesignImagePath,
   buildProductImagePath,
   validateAltText,
   validateImageFile,
 } from "./image-upload";
+import { PHOTO_CONTENT_TYPE, resizePhoto } from "./resize-image";
 
 // The photos of products and designs: the same rules for both owners. Every
 // function takes the client of the signed-in admin: row-level security and the
@@ -64,6 +66,14 @@ export async function addImage(
   const problem = validateAltText(altText) ?? validateImageFile(input.file);
   if (problem) return { ok: false, error: problem };
 
+  // Stored resized, as WebP (issue #98): the phone's original is 1.5 to 3 MB.
+  const bytes =
+    input.file.body instanceof Uint8Array
+      ? input.file.body
+      : new Uint8Array(await input.file.body.arrayBuffer());
+  const resized = await resizePhoto(bytes);
+  if (!resized) return { ok: false, error: IMAGE_TYPE_ERROR };
+
   const column = ownerColumn(input.owner);
   const { data: last, error: lastError } = await client
     .from("image")
@@ -75,10 +85,10 @@ export async function addImage(
 
   const buildPath =
     input.owner.kind === "product" ? buildProductImagePath : buildDesignImagePath;
-  const path = buildPath(input.owner.id, input.file.type, crypto.randomUUID());
+  const path = buildPath(input.owner.id, PHOTO_CONTENT_TYPE, crypto.randomUUID());
   const upload = await client.storage
     .from("images")
-    .upload(path, input.file.body, { contentType: input.file.type });
+    .upload(path, resized, { contentType: PHOTO_CONTENT_TYPE });
   if (upload.error) return { ok: false, error: "No se pudo subir la foto. Intenta de nuevo." };
 
   const inserted = await client.from("image").insert({

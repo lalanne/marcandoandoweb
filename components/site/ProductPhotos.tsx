@@ -1,6 +1,6 @@
 "use client";
 
-import Image, { getImageProps } from "next/image";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
 import { imageUrl } from "@/lib/catalog/images";
@@ -14,13 +14,10 @@ import type { CatalogImage } from "@/lib/catalog/types";
 
 // All of a product's photos on its card (spec 002, criteria 46 to 50). Only the
 // first photo is in the page on load; once the photo on show has loaded, the next and
-// the previous ones are preloaded (a low-priority image preload with the same srcset,
-// so the browser reuses it when the visitor moves; criterion 49).
+// the previous ones are preloaded (a low-priority image preload of the same URL, so
+// the browser reuses it when the visitor moves; criterion 49). The files are already
+// resized to about 1000 px WebP on upload, so they are served as they are.
 // The box is brand teal until its photo arrives, so there is never an empty gap.
-
-// The card is one column on a phone, a third of 1024 px on a computer, and the
-// product page's photo is half of 1024 px.
-export const PHOTO_SIZES = "(min-width: 768px) 480px, 100vw";
 
 const photoClass =
   "aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30 object-cover";
@@ -46,22 +43,15 @@ function Arrow({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function photoProps(image: CatalogImage) {
-  return {
-    src: imageUrl(image.storagePath),
-    alt: image.altText,
-    width: 600,
-    height: 450,
-    sizes: PHOTO_SIZES,
-  };
-}
-
 function Photo({ image, onLoad }: { image: CatalogImage; onLoad?: () => void }) {
   return (
     <Image
-      {...photoProps(image)}
+      src={imageUrl(image.storagePath)}
       alt={image.altText}
+      width={600}
+      height={450}
       loading="lazy"
+      unoptimized
       onLoad={onLoad}
       className={photoClass}
     />
@@ -79,13 +69,7 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
   useEffect(() => {
     if (count < 2 || loadedPath !== shownPath) return;
     for (const i of photosToPreload(Math.min(index, count - 1), count)) {
-      const { props } = getImageProps(photoProps(images[i]));
-      preload(props.src, {
-        as: "image",
-        imageSrcSet: props.srcSet,
-        imageSizes: props.sizes,
-        fetchPriority: "low",
-      });
+      preload(imageUrl(images[i].storagePath), { as: "image", fetchPriority: "low" });
     }
   }, [count, index, images, loadedPath, shownPath]);
 

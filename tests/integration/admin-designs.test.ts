@@ -128,7 +128,7 @@ describe("design images as the admin", () => {
     const design = await getDesign(admin, id);
     expect(design?.images.map((i) => i.alt_text)).toEqual(["Primera foto", "Segundo gráfico"]);
     expect(design?.images[0].storage_path).toMatch(
-      new RegExp(`^design/${id}/[0-9a-f-]{36}\\.png$`),
+      new RegExp(`^design/${id}/[0-9a-f-]{36}\\.webp$`),
     );
     expect(design?.images[1].kind).toBe("graphic");
     expect(design!.images[1].position).toBeGreaterThan(design!.images[0].position);

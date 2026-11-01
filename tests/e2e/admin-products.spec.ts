@@ -123,7 +123,7 @@ test("[002-AC6] the admin creates a product with price, type and a photo with al
   });
   // The admin previews the private file through /panel/img.
   const preview = page.getByRole("img", { name: alt });
-  await expect(preview).toHaveAttribute("src", /^\/panel\/img\/product\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.png$/);
+  await expect(preview).toHaveAttribute("src", /^\/panel\/img\/product\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.webp$/);
   await expect
     .poll(() => preview.evaluate((i: HTMLImageElement) => i.naturalWidth))
     .toBeGreaterThan(0);

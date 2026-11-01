@@ -192,9 +192,8 @@ test("[002-AC49] on the product page the next and previous photos are requested 
 }) => {
   const requested = new Set<string>();
   page.on("request", (req) => {
-    const u = new URL(req.url());
-    const source = u.pathname === "/_next/image" ? u.searchParams.get("url") : u.pathname;
-    if (source?.startsWith(`/img/${folder}/completa-`)) requested.add(source.slice(5));
+    const path = new URL(req.url()).pathname;
+    if (path.startsWith(`/img/${folder}/completa-`)) requested.add(path.slice("/img/".length));
   });
   await page.goto(`/productos/${full.slug}`);
   const photo = page.getByRole("main").getByRole("img").first();
