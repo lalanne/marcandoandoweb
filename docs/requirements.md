@@ -136,6 +136,26 @@ product and no link to other products; the two groups are a fixed type on the
 product, not editable groups; themes stay; the header has no "Trabajos" link.
 Specs 000, 001, 002 and 004 carry the change (issue #63).
 
+## Feedback from Javiera: product details and a link to share (2026-10-31)
+
+Javiera asked for a detail view per product. Her words, verbatim, in the order she sent them:
+
+> "tengo como hacer click en la imagen y que se abra algo? disponibilidad de colores, tamaños, tallas, características tecnicas"
+>
+> "y desde ahi puedo enviar un link por ejemplo"
+>
+> "siempre me preguntan los colores y tengo q mandar una imagen"
+
+**Summary (English).** She asks whether a visitor can click a product's image and
+open something that shows the available colors, sizes (tamaños), clothing sizes
+(tallas) and technical characteristics, and whether she can send a link to it. Customers
+keep asking her which colors exist and she answers by sending an image; a link
+would replace that. Owner decisions on 2026-10-31 that fill the gaps: the detail is
+a page per product with its own link (option A of the design canvas
+https://claude.ai/artifact/7re5R2fp8YvJ4Hxa4Yk99y); colors and sizes are lists, so
+the site can show color swatches and size pills. Specs 000, 001 and 002 carry the
+change (issue #87).
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
