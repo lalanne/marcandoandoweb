@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69, #72 and #79; first approved by the owner on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79 and #82; first approved on 2026-10-23)
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -157,6 +157,26 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 | **Floating button** | A WhatsApp button always visible (Req §6) |
 
 There are no separate product pages, search or filters at launch.
+
+**2026-10-31 amendment - all of a product's photos on its card (issue #82).** The
+admin could already give a product several photos, in an order, but each card showed
+only the cover (the first photo by position). The owner asked that visitors can see
+all of them, and chose option 1 of the design canvas
+(https://claude.ai/artifact/A4u9PaJuwpbFUYzhr8mUw3), "swipe on the card":
+
+- A card with **one photo looks as before**: no controls are added.
+- A card with **several photos** keeps one 4:3 photo area and lets the visitor move
+  through the photos **inside the card**, in the admin's order: previous and next
+  buttons on the photo, a counter ("2 / 4") on the photo, a row of dots under it
+  (each one a button to that photo), and sideways swipe on touch screens. Past the
+  last photo it goes back to the first, and before the first to the last (confirmed by the owner when approving, 2026-10-31).
+- Every photo keeps its own Spanish alt text. Only the first photo of a card loads
+  with the page as today; the others load when the visitor moves to them (or just
+  before), so the page stays as fast as it was.
+- The same applies to products and packs. The rest of the card (name, price,
+  availability, "Cotizar") does not change.
+
+A separate product page stays out of launch 0 (issue #87 covers a detail view).
 
 ## Constraints
 
@@ -374,7 +394,29 @@ customers.
     "Volver al sitio" above the sign-in form leads to the home page, can be reached
     with the keyboard, and keeps the page free of horizontal scroll at 360 px.
 
-## Verification plan
+**All of a product's photos on its card** (added 2026-10-31, issue #82)
+
+46. Given a published product or pack with one photo, when the home page loads, then
+    its card shows that photo and no previous or next button, counter or dots.
+47. Given a published product with four photos, when the home page loads, then its
+    card shows the first photo by position, the counter "1 / 4", buttons labelled
+    "Foto anterior" and "Foto siguiente", and four dots; when the visitor presses
+    "Foto siguiente", then the second photo shows and the counter reads "2 / 4"; when
+    they press the third dot ("Ver foto 3"), then the third photo shows and that dot
+    is marked as current; and from the fourth photo, "Foto siguiente" shows the
+    first again (from the first, "Foto anterior" shows the fourth).
+48. Given a card with several photos on a touch screen, when the visitor swipes the
+    photo sideways, then the next or previous photo shows, as with the buttons.
+49. Given a card with several photos, when the page loads, then only its first photo
+    is requested; the next photo is requested no earlier than when the visitor moves
+    toward it; every photo has its own Spanish alt text; and changing photos does not
+    change the size of the card (no layout shift).
+50. Given the photo controls, when they are used with the keyboard only, then each
+    can be reached and pressed with a visible focus, each is at least 44 by 44 px,
+    their labels are in Spanish, and at 360 px the page has no horizontal scroll.
+51. Given a product that is not published, when a visitor asks for any of its photos
+    at `/img/<path>`, then they are refused as in criterion 25.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -392,6 +434,11 @@ customers.
 | 37 | No "Diseños" in the panel, its addresses answer 404 | End to end (Playwright) at 360 and 1280 px, as the admin and as a visitor |
 | 39, 40, 41 | Counting, reading the filter from the address, grouping | Unit test for the pure function that counts, filters and groups the list; end to end for the address and the reload |
 | 38, 41, 42 | Badge, headings, empty message, keyboard, no horizontal scroll | End to end (Playwright) at 360 and 1280 px against local Supabase, with axe |
+| 46, 47 | One photo shows no controls; several photos: counter, buttons, dots, going round | Unit test for the pure helper that orders the photos and computes the next and previous index; end to end (Playwright) at 360 and 1280 px against local Supabase with seeded photos, with axe |
+| 48 | Swipe | End to end (Playwright) with touch emulation on the 360 px project |
+| 49 | Lazy loading, alt text, no layout shift | End to end: the network requests on load name only each card's first photo; alt text per photo; the card's box keeps its size when the photo changes |
+| 50 | Keyboard, focus, 44 px targets, no horizontal scroll | End to end (Playwright) at 360 and 1280 px with axe |
+| 51 | Unpublished photos stay private | Covered by the criterion 25 tests, extended to a product's second and later photos |
 | 43, 44, 45 | "Salir" ends on the home page, "Ver sitio", "Volver al sitio" | End to end (Playwright) at 360 and 1280 px against local Supabase, as a throwaway admin (signing out ends every session of that user); criterion 10 and spec 005 criterion 9 keep their tests |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |
