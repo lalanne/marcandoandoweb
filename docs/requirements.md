@@ -156,6 +156,21 @@ https://claude.ai/artifact/7re5R2fp8YvJ4Hxa4Yk99y); colors and sizes are lists, 
 the site can show color swatches and size pills. Specs 000, 001 and 002 carry the
 change (issue #87).
 
+## Feedback from Javiera: the words "Cotizar" and "Pedir" (2026-10-31)
+
+Javiera reviewed the live site. Her words, verbatim:
+
+> "Cotizar no tiene sentido en la pagina principal, deberia decir "Ver" en vez de cotizar"
+>
+> "En vez de Cotizar por whatsapp deberia decir Pedir por WhatsApp" (about the product details)
+
+**Summary (English).** On the home page, "Cotizar" makes no sense; it should say
+"Ver" instead. On the product details page, "Cotizar por WhatsApp" should say
+"Pedir por WhatsApp". She did not mention the hero or the floating button, so they
+keep their words. Owner decision on 2026-10-31: each home-page card has one action,
+"Ver", which opens the product page (the separate "Ver detalles" link goes away).
+Spec 002 carries the change (issue #101).
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB

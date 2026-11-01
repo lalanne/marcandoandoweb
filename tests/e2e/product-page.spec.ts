@@ -145,7 +145,7 @@ async function noAxeProblems(page: Page) {
   expect(bad.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
 }
 
-test("[002-AC56] a card has a 'Ver detalles' link that goes to the page; pressing the photo stays", async ({
+test("[002-AC56] a card has a 'Ver' link that goes to the page; pressing the photo stays", async ({
   page,
 }) => {
   await page.goto("/");
@@ -153,8 +153,12 @@ test("[002-AC56] a card has a 'Ver detalles' link that goes to the page; pressin
   await expect(card).toBeVisible({ timeout: PAGE_TIMEOUT });
   await card.scrollIntoViewIfNeeded();
 
-  const link = card.getByRole("link", { name: `Ver detalles de ${full.name}` });
+  const link = card.getByRole("link", { name: `Ver ${full.name}` });
   await expect(link).toHaveAttribute("href", `/productos/${full.slug}`);
+  // One action per card: no "Ver detalles" link and no WhatsApp button.
+  await expect(card.getByRole("link")).toHaveCount(1);
+  await expect(card.getByText("Ver detalles")).toHaveCount(0);
+  await expect(card.getByText("Cotizar")).toHaveCount(0);
   const box = await link.boundingBox();
   expect(box!.height).toBeGreaterThanOrEqual(44);
   expect(box!.width).toBeGreaterThanOrEqual(44);
@@ -179,7 +183,7 @@ test("[002-AC56] a pack card also has the link", async ({ page }) => {
   const card = page.locator("article", { hasText: pack.name });
   await expect(card).toBeVisible({ timeout: PAGE_TIMEOUT });
   await expect(
-    card.getByRole("link", { name: `Ver detalles de ${pack.name}` }),
+    card.getByRole("link", { name: `Ver ${pack.name}` }),
   ).toHaveAttribute("href", `/productos/${pack.slug}`);
 });
 
@@ -216,7 +220,7 @@ test("[002-AC57] the page shows name, price, photos, colors with names, sizes, c
   await expect(main.getByText("Descripción falsa de prueba.")).toBeVisible();
 
   // The quote button names the product as the card's does.
-  const quote = main.getByRole("link", { name: "Cotizar por WhatsApp" });
+  const quote = main.getByRole("link", { name: "Pedir por WhatsApp" });
   const href = (await quote.getAttribute("href")) ?? "";
   expect(decodeURIComponent(href)).toContain(`Quiero cotizar: ${full.name}.`);
 });
@@ -234,7 +238,7 @@ test("[002-AC58] a product with nothing to add shows no empty headings or price"
   }
   await expect(main.getByText(/\$\d/)).toHaveCount(0);
   await expect(main.getByRole("img")).toHaveAttribute("alt", bare.photos[0].alt);
-  await expect(main.getByRole("link", { name: "Cotizar por WhatsApp" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "Pedir por WhatsApp" })).toBeVisible();
 });
 
 test("[002-AC59] an unavailable product says so and has no quote button", async ({ page }) => {
@@ -244,7 +248,17 @@ test("[002-AC59] an unavailable product says so and has no quote button", async 
   });
   const main = page.getByRole("main");
   await expect(main.getByText("no disponible por ahora")).toBeVisible();
-  await expect(main.getByRole("link", { name: "Cotizar por WhatsApp" })).toHaveCount(0);
+  await expect(main.getByRole("link", { name: "Pedir por WhatsApp" })).toHaveCount(0);
+
+  // Its card still shows "Ver" so the page can be opened.
+  await page.goto("/");
+  const card = page.locator("article", { hasText: unavailable.name });
+  await expect(card).toBeVisible({ timeout: PAGE_TIMEOUT });
+  await expect(card.getByText("no disponible por ahora")).toBeVisible();
+  await expect(card.getByRole("link", { name: `Ver ${unavailable.name}` })).toHaveAttribute(
+    "href",
+    `/productos/${unavailable.slug}`,
+  );
 });
 
 test("[002-AC60] an unpublished or unknown slug is a 404 with none of its data", async ({
@@ -311,7 +325,7 @@ test("[002-AC62] the public page has no 'Copiar enlace' button or link field, an
   page,
 }) => {
   await page.goto(`/productos/${full.slug}`);
-  await expect(page.getByRole("link", { name: /Cotizar por WhatsApp/ })).toBeVisible({
+  await expect(page.getByRole("link", { name: /Pedir por WhatsApp/ })).toBeVisible({
     timeout: PAGE_TIMEOUT,
   });
   await expect(page.getByRole("button", { name: /Copiar enlace/ })).toHaveCount(0);

@@ -90,7 +90,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
               href={productWhatsappUrl(product.name)}
               className={`${buttonClass} self-start text-center text-base`}
             >
-              Cotizar por WhatsApp
+              Pedir por WhatsApp
             </a>
           ) : null}
         </div>
