@@ -32,3 +32,14 @@ export function swipeStep(dx: number, dy: number): -1 | 0 | 1 {
   if (Math.abs(dx) < MIN_SWIPE_PX || Math.abs(dx) <= Math.abs(dy)) return 0;
   return dx < 0 ? 1 : -1;
 }
+
+/**
+ * The photos to request once the one on show has loaded (spec 002, criterion 49):
+ * the next and the previous, so they are ready when the visitor moves. With two
+ * photos the other one is named once; with one or none there is nothing to name.
+ */
+export function photosToPreload(index: number, count: number): number[] {
+  if (count < 2) return [];
+  const around = [nextPhoto(index, count), previousPhoto(index, count)];
+  return around.filter((n, i) => around.indexOf(n) === i && n !== index);
+}

@@ -245,6 +245,16 @@ Needs Docker running. All commands run from the repo root. Before the first
   4. Sign in at `/entrar` with that email, then give Javiera the password through a
      private channel and ask her to change it.
 
+### Photos (issue #98)
+
+Photos are resized when the admin uploads them: `lib/admin/resize-image.ts` (sharp)
+stores a WebP of at most 1000 px wide, and `/img/...` serves it as stored (no
+`/_next/image`: Next's optimizer keeps serving a photo after it is unpublished). The
+photos uploaded before that are converted once, by the owner, with
+`scripts/optimize-photos.mjs` (service-role key; no flag lists what it would do,
+`--apply` creates the WebP copies and points the rows at them, `--delete-old` later
+removes the originals). Test it locally with the seeded database first.
+
 ### Google sign-in (`/entrar`, spec 005)
 
 For the admin only, as a second way into `/panel`; there are no customer accounts.

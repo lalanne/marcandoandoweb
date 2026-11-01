@@ -188,22 +188,29 @@ test("[002-AC48] swiping the photo sideways moves to the next or previous photo"
   await shows(card, 4);
 });
 
-test("[002-AC49] only the first photo loads with the page, each photo has its alt text, and the card keeps its size", async ({
+test("[002-AC49] only the first photo loads with the page, then the next and previous ones; each photo has its alt text and the card keeps its size", async ({
   page,
 }) => {
-  const requested = new Set<string>();
+  const requested: string[] = [];
   page.on("request", (req) => {
     const path = new URL(req.url()).pathname;
-    if (path.startsWith(`/img/${folder}/`)) requested.add(path.slice("/img/".length));
+    if (!path.startsWith(`/img/${folder}/cuatro-`)) return;
+    const stored = path.slice("/img/".length);
+    if (!requested.includes(stored)) requested.push(stored);
   });
   const card = await cardOf(page, many.name);
   const img = photo(card);
   await expect
     .poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0))
     .toBe(true);
-  expect([...requested].filter((p) => p.startsWith(`${folder}/cuatro-`))).toEqual([
-    many.photos[0].path,
-  ]);
+  // The first photo is asked for first, with the page...
+  expect(requested[0]).toBe(many.photos[0].path);
+  // ...and once it has loaded the next (2) and the previous (4) are preloaded, and
+  // not the third, all before the visitor presses anything.
+  await expect
+    .poll(() => [...requested].sort())
+    .toEqual([many.photos[0].path, many.photos[1].path, many.photos[3].path].sort());
+  expect(requested).not.toContain(many.photos[2].path);
 
   const before = await card.boundingBox();
   const photoBefore = await card.getByTestId("photo-area").boundingBox();
@@ -213,9 +220,8 @@ test("[002-AC49] only the first photo loads with the page, each photo has its al
     if (n === 1) {
       await next(card).click();
       await shows(card, 2);
-      // Moving to the second photo asks for it, and not yet for the others.
-      await expect.poll(() => requested.has(many.photos[1].path)).toBe(true);
-      expect(requested.has(many.photos[3].path)).toBe(false);
+      // Moving to the second photo now preloads the third.
+      await expect.poll(() => requested.includes(many.photos[2].path)).toBe(true);
       expect(await card.boundingBox()).toEqual(before);
       expect(await card.getByTestId("photo-area").boundingBox()).toEqual(photoBefore);
       continue;
@@ -224,6 +230,37 @@ test("[002-AC49] only the first photo loads with the page, each photo has its al
   }
   expect(alts).toEqual(many.photos.map((p) => p.alt));
   expect(await card.boundingBox()).toEqual(before);
+});
+
+test("[002-AC49] while a photo loads its box is brand teal and keeps its size", async ({
+  page,
+}) => {
+  // Hold the photos for a moment so the loading state can be looked at.
+  await page.route(`**/img/${folder}/**`, async (route) => {
+    await new Promise((r) => setTimeout(r, 1500));
+    await route.continue();
+  });
+  await page.goto("/");
+  const card = page.locator("article", { hasText: many.name });
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  await card.scrollIntoViewIfNeeded();
+  const img = photo(card);
+  const loading = await img.evaluate((i: HTMLImageElement) => ({
+    done: i.complete && i.naturalWidth > 0,
+    height: i.getBoundingClientRect().height,
+    background: getComputedStyle(i).backgroundColor,
+  }));
+  expect(loading.done).toBe(false);
+  expect(loading.height).toBeGreaterThan(100);
+  expect(loading.background).not.toBe("rgba(0, 0, 0, 0)");
+  await expect
+    .poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0), {
+      timeout: 15_000,
+    })
+    .toBe(true);
+  expect(await img.evaluate((i: HTMLImageElement) => i.getBoundingClientRect().height)).toBe(
+    loading.height,
+  );
 });
 
 test("[002-AC50] the photo controls work with the keyboard, show focus, are at least 44 px and fit at 360 px", async ({

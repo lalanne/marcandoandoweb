@@ -177,6 +177,32 @@ all of them, and chose option 1 of the design canvas
 - The same applies to products and packs. The rest of the card (name, price,
   availability, "Cotizar") does not change.
 
+**2026-11-01 amendment - fast photo browsing (issue #98).** Javiera reported that
+moving through a product's photos is slow the first time. Cause: the photos were
+served as the stored 1.5 to 3 MB PNG files (about 1448 px wide, shown at about 350 px)
+and the next photo was only requested when the visitor pressed next. Now:
+
+- **Photos are stored resized.** When the admin uploads a photo, the server turns it
+  into a WebP of at most 1000 px wide (never enlarged, upright by its EXIF
+  orientation, no metadata), typically 30 to 100 KB. The 5 MB upload limit and the
+  accepted types (JPG, PNG, WebP, AVIF) do not change; a file that is not really an
+  image is refused with the usual Spanish message. Photos uploaded before this
+  change are converted once with `scripts/optimize-photos.mjs` (run by the owner).
+- **Neighbors are preloaded.** Once the photo on show has loaded, the next and the
+  previous photo of that card or product page are requested, so they are ready when
+  the visitor moves.
+- **No empty gap.** The fixed 4:3 box is filled with the brand teal while a photo
+  loads.
+- Criterion 49 is changed: before, "the next photo is requested no earlier than when
+  the visitor moves toward it"; now, only the first photo loads with the page, and
+  the next and previous ones are requested after it has loaded.
+- Not done, on purpose: serving through Next's image optimizer (`/_next/image`). It
+  works with the `/img/...` route, but it keeps a copy of an image that was
+  unpublished after the route starts answering 404 (checked on the production build:
+  still served 10 minutes after unpublishing, with no end in sight), which would
+  break the 5-minute window of criteria 25 and 26. The owner decided (2026-11-01)
+  to keep that 5-minute window of `/img/...`.
+
 **2026-10-31 amendment - a page per product, with colors, sizes and a link to share
 (issue #87, approved by the owner on 2026-10-31).** Javiera's customers keep asking
 which colors a product comes in and she answers with an image; she asked for a detail
@@ -475,10 +501,11 @@ customers.
     first again (from the first, "Foto anterior" shows the fourth).
 48. Given a card with several photos on a touch screen, when the visitor swipes the
     photo sideways, then the next or previous photo shows, as with the buttons.
-49. Given a card with several photos, when the page loads, then only its first photo
-    is requested; the next photo is requested no earlier than when the visitor moves
-    toward it; every photo has its own Spanish alt text; and changing photos does not
-    change the size of the card (no layout shift).
+49. Given a card (or a product page) with several photos, when the page loads, then
+    only its first photo is requested; after that photo has loaded, the next and the
+    previous photo are requested (so they are ready when the visitor moves), and no
+    other; every photo has its own Spanish alt text; and changing photos does not
+    change the size of the card (no layout shift). (Amended 2026-11-01, issue #98.)
 50. Given the photo controls, when they are used with the keyboard only, then each
     can be reached and pressed with a visible focus, each is at least 44 by 44 px,
     their labels are in Spanish, and at 360 px the page has no horizontal scroll.
@@ -623,7 +650,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 | 38, 41, 42 | Badge, headings, empty message, keyboard, no horizontal scroll | End to end (Playwright) at 360 and 1280 px against local Supabase, with axe |
 | 46, 47 | One photo shows no controls; several photos: counter, buttons, dots, going round | Unit test for the pure helper that orders the photos and computes the next and previous index; end to end (Playwright) at 360 and 1280 px against local Supabase with seeded photos, with axe |
 | 48 | Swipe | End to end (Playwright) with touch emulation on the 360 px project |
-| 49 | Lazy loading, alt text, no layout shift | End to end: the network requests on load name only each card's first photo; alt text per photo; the card's box keeps its size when the photo changes |
+| 49 | First photo only on load, neighbors preloaded, alt text, no layout shift | Unit tests for the helper that names the photos to preload and for the resizing of an upload; integration test that an uploaded photo is stored as a WebP of at most 1000 px; end to end: the network requests on load name only each card's first photo, then the next and previous one, before the visitor presses next; alt text per photo; the card's box keeps its size when the photo changes |
 | 50 | Keyboard, focus, 44 px targets, no horizontal scroll | End to end (Playwright) at 360 and 1280 px with axe |
 | 51 | Unpublished photos stay private | Covered by the criterion 25 tests, extended to a product's second and later photos |
 | 52, 53 | Price "$7.000 c/u", no "desde", the note once per section | Unit test for the price label helper; end to end (Playwright) at 360 and 1280 px with axe |

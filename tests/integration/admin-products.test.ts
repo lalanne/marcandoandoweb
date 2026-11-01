@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   addProductImage,
@@ -133,7 +134,7 @@ describe("product images as the admin", () => {
       "Segundo gráfico",
     ]);
     expect(product?.images[0].storage_path).toMatch(
-      new RegExp(`^product/${id}/[0-9a-f-]{36}\\.png$`),
+      new RegExp(`^product/${id}/[0-9a-f-]{36}\\.webp$`),
     );
     expect(product?.images[1].kind).toBe("graphic");
     expect(product!.images[1].position).toBeGreaterThan(product!.images[0].position);
@@ -142,6 +143,40 @@ describe("product images as the admin", () => {
       .from("images")
       .download(product!.images[0].storage_path);
     expect(down.error).toBeNull();
+  });
+
+  it("[002-AC49] stores a wide photo resized to at most 1000 px as WebP, and refuses bytes that are not an image", async () => {
+    const id = await make();
+    const wide = await sharp({
+      create: { width: 1448, height: 1086, channels: 3, background: "#9565C4" },
+    })
+      .png()
+      .toBuffer();
+    const added = await addProductImage(admin, {
+      productId: id,
+      file: { type: "image/png", size: wide.byteLength, body: wide },
+      altText: "Foto ancha",
+      kind: "photo",
+    });
+    expect(added.ok).toBe(true);
+    const product = await getProduct(admin, id);
+    const path = product!.images[0].storage_path;
+    expect(path).toMatch(/\.webp$/);
+    const down = await admin.storage.from("images").download(path);
+    expect(down.data?.type).toBe("image/webp");
+    const meta = await sharp(Buffer.from(await down.data!.arrayBuffer())).metadata();
+    expect(meta.format).toBe("webp");
+    expect(meta.width).toBe(1000);
+
+    const junk = new TextEncoder().encode("no soy una foto");
+    const refused = await addProductImage(admin, {
+      productId: id,
+      file: { type: "image/png", size: junk.byteLength, body: junk },
+      altText: "No es una foto",
+      kind: "photo",
+    });
+    expect(refused.ok).toBe(false);
+    expect((await getProduct(admin, id))!.images).toHaveLength(1);
   });
 
   it("refuses a missing alt text, a wrong type and a file above 5 MiB, storing nothing", async () => {
