@@ -38,4 +38,14 @@ describe("WhatsApp links", () => {
   it("[002-AC14] points the Instagram link to the business profile", () => {
     expect(INSTAGRAM_URL).toBe("https://www.instagram.com/marcando_ando");
   });
+
+  it("[002-AC55] the product and general messages are the same as before the price amendment", () => {
+    expect(messageOf(generalWhatsappUrl())).toBe(
+      "Hola, Marcando Ando. Quiero cotizar. Te cuento mi idea:",
+    );
+    expect(messageOf(productWhatsappUrl("Botella de ejemplo"))).toBe(
+      "Hola, Marcando Ando. Quiero cotizar: Botella de ejemplo. Te cuento mi idea:",
+    );
+    expect(messageOf(productWhatsappUrl("Botella de ejemplo"))).not.toMatch(/desde|c\/u|mayor/);
+  });
 });

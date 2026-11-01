@@ -119,7 +119,7 @@ test("[002-AC33] a pack has the same card as a product: price and a WhatsApp but
 }) => {
   await open(page);
   const card = page.locator("#packs article").filter({ hasText: "Pack regalo de ejemplo" });
-  await expect(card).toContainText("desde $1.000");
+  await expect(card).toContainText("$1.000 c/u");
   const href = await card.locator("a").getAttribute("href");
   expect(href).toMatch(/^https:\/\/wa\.me\/56982661835\?text=/);
   expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
@@ -162,8 +162,8 @@ test("[002-AC12] shows prices only when the database has one, with the dot", asy
   page,
 }) => {
   await open(page);
-  // Seed prices are a fake 1000 for every product: "desde $1.000".
-  await expect(page.getByText("desde $1.000").first()).toBeVisible();
+  // Seed prices are a fake 1000 for every product: "$1.000 c/u".
+  await expect(page.getByText("$1.000 c/u").first()).toBeVisible();
 });
 
 test("[002-AC12] marks an unavailable product and gives it no WhatsApp button", async ({
