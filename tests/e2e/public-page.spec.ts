@@ -174,13 +174,14 @@ test("[002-AC12] marks an unavailable product and gives it no WhatsApp button", 
     .locator("article")
     .filter({ hasText: "Calcetines de ejemplo (no disponibles)" });
   await expect(card).toContainText("no disponible por ahora");
-  // Its only link is "Ver detalles" (criterion 56): no WhatsApp button.
+  // Its only link is "Ver" (criterion 56): no WhatsApp button.
   await expect(card.locator(`a[href^="${WHATSAPP}"]`)).toHaveCount(0);
   const available = page
     .locator("article")
     .filter({ hasText: "Botella de ejemplo" });
   await expect(available).not.toContainText("no disponible por ahora");
-  await expect(available.locator(`a[href^="${WHATSAPP}"]`)).toHaveCount(1);
+  // Cards have no WhatsApp button since issue #101: the order button is on the page.
+  await expect(available.locator(`a[href^="${WHATSAPP}"]`)).toHaveCount(0);
 });
 
 test("[002-AC13] every ordering button opens WhatsApp with a message, and a product's names it", async ({
@@ -195,10 +196,15 @@ test("[002-AC13] every ordering button opens WhatsApp with a message, and a prod
     expect(href.startsWith(`${WHATSAPP}?text=`)).toBe(true);
     expect(new URL(href).searchParams.get("text")).toMatch(/^Hola, Marcando Ando/);
   }
-  const productHref = await page
+  // A product's message names it; its button is on the product page (issue #101).
+  await page
     .locator("article")
     .filter({ hasText: "Botella de ejemplo" })
-    .locator(`a[href^="${WHATSAPP}"]`)
+    .getByRole("link", { name: /^Ver / })
+    .click();
+  const productHref = await page
+    .getByRole("main")
+    .getByRole("link", { name: "Pedir por WhatsApp" })
     .getAttribute("href");
   expect(new URL(productHref ?? "").searchParams.get("text")).toContain(
     "Botella de ejemplo",

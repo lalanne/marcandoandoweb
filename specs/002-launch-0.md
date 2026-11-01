@@ -498,9 +498,31 @@ customers.
 54. Given the admin creating or editing a product, when they look at the price field,
     then its label reads "Precio (CLP)" and not "Precio desde (CLP)", and a price typed
     as "7.000" is still saved as 7000.
-55. Given a product card's "Cotizar" button and the floating WhatsApp button, when
-    they are followed, then the pre-filled messages are the same as before this
-    amendment.
+55. Given a product page's "Pedir por WhatsApp" button and the floating WhatsApp
+    button, when they are followed, then the pre-filled messages are the same as before
+    this amendment (reworded 2026-10-31, issue #101: the card's "Cotizar" button became
+    the "Ver" link).
+
+**2026-10-31 amendment - "Ver" on the card, "Pedir por WhatsApp" on the page (issue
+#101, approved by the owner by merging).** Javiera: "Cotizar" makes no sense on the
+home page (it should say "Ver"), and on the product page "Cotizar por WhatsApp" should
+say "Pedir por WhatsApp" (her words in `docs/requirements.md`). The owner chose that
+each card has one action. So (copy and one link only):
+
+- **Card.** The WhatsApp button "Cotizar" is replaced by a button-styled link "Ver"
+  that goes to `/productos/<slug>`; the separate "Ver detalles" link is removed. The
+  card no longer has a WhatsApp button: ordering happens on the product page and
+  through the hero and the floating button. A screen reader hears "Ver <name>". An
+  unavailable product's card still shows "no disponible por ahora" and also "Ver", so
+  its page can be opened.
+- **Product page.** The button reads "Pedir por WhatsApp". The pre-filled WhatsApp
+  messages do not change. An unavailable product still shows "no disponible por ahora"
+  and no order button.
+- **Unchanged.** The hero ("Cotizar por WhatsApp", which spec 004's smoke test looks
+  for), the floating button, the footer and the "Colegios y grupos" block.
+- Criteria 55 to 59 are reworded to the new words (60 is about the 404 and does not
+  name a button). Where older text of this spec says "Cotizar" or "Ver detalles" for a
+  card or the product page, this amendment supersedes it.
 
 **2026-10-31 amendment - no "Copiar enlace" on the public page (issue #100, approved
 by the owner by merging).** "Copiar enlace" is a tool for Javiera, who copies a
@@ -514,23 +536,23 @@ component is shared, so it stays for the panel.
 **A page per product, with colors, sizes and a link to share** (added 2026-10-31, issue #87)
 
 56. Given a published product or pack, when the home page loads, then its card has a
-    link "Ver detalles" that goes to `/productos/<slug>`, can be reached and pressed
-    with the keyboard with a visible focus, is at least 44 by 44 px, and is announced
-    as "Ver detalles de <name>"; and pressing the photo itself does not leave the
-    page.
+    link "Ver" (and no "Ver detalles" link and no WhatsApp button) that goes to
+    `/productos/<slug>`, can be reached and pressed with the keyboard with a visible
+    focus, is at least 44 by 44 px, and is announced as "Ver <name>"; and pressing the
+    photo itself does not leave the page. An unavailable product's card also has it.
 57. Given a published product with a price of 7000, three photos, colors Rosado
     (`#E8647F`) and Celeste (`#4FB0B0`), sizes "4", "6" and "8", and two lines of
     characteristics, when a visitor opens `/productos/<slug>`, then they see the
     name, "$7.000 c/u", the photos with the controls of criteria 46 to 50, the two
     colors as swatches with their names written, the three sizes in that order, the
-    characteristics as a list of two items, and the "Cotizar por WhatsApp" button
+    characteristics as a list of two items, and the "Pedir por WhatsApp" button
     whose message names the product as on the card.
 58. Given a published product with no colors, no sizes, no characteristics and no
     price, when a visitor opens its page, then it shows no "Colores", "Tamaños y
     tallas" or "Características" heading and no price, and still shows the name, the
-    photos and the "Cotizar por WhatsApp" button.
+    photos and the "Pedir por WhatsApp" button.
 59. Given a published product marked unavailable, when a visitor opens its page,
-    then it shows "no disponible por ahora" and no "Cotizar por WhatsApp" button.
+    then it shows "no disponible por ahora" and no "Pedir por WhatsApp" button.
 60. Given an unpublished product, or a slug that does not exist, when a visitor opens
     `/productos/<slug>`, then the answer is 404 and none of its data or photos is
     shown (a photo asked at `/img/<path>` is refused, criterion 25).
@@ -546,7 +568,7 @@ component is shared, so it stays for the panel.
     text field, selected, instead.~~ Amended (issue #100): Given a published product
     page, when it loads, then it has no "Copiar enlace" button, no "Enlace copiado"
     text and no link text field, and no empty space, spacing or focus stop where the
-    button was; the photos, price, colors, sizes, characteristics and "Cotizar por
+    button was; the photos, price, colors, sizes, characteristics and "Pedir por
     WhatsApp" are as before.
 63. Given the admin looking at the product list in the panel, when a product is
     published, then its row has a "Copiar enlace" button, and when pressed
@@ -607,11 +629,11 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 | 52, 53 | Price "$7.000 c/u", no "desde", the note once per section | Unit test for the price label helper; end to end (Playwright) at 360 and 1280 px with axe |
 | 54 | Admin price label | End to end (Playwright); the existing price parser unit tests stay |
 | 55 | WhatsApp messages unchanged | The existing unit tests of the message builder stay green |
-| 56 | "Ver detalles" link on the card, photo does not navigate | End to end (Playwright) at 360 and 1280 px, with axe |
+| 56 | "Ver" link on the card, photo does not navigate | End to end (Playwright) at 360 and 1280 px, with axe |
 | 57, 58, 59 | Page content, only fields with content, unavailable | End to end (Playwright) at 360 and 1280 px against local Supabase with seeded fake colors, sizes and characteristics; a unit test for the pure helper that turns the characteristics text into items and the list into what the page shows |
 | 60 | 404 for unpublished or unknown | End to end (Playwright); integration for the data being hidden (spec 001 criterion 13) |
 | 61 | Title, description, Open Graph tags, sitemap | Unit test for the pure metadata builder; end to end that reads the tags and the sitemap of the running server |
-| 62 | No "Copiar enlace" on the public page | End to end (Playwright) at 360 and 1280 px: no button, text or field, "Cotizar por WhatsApp" still there |
+| 62 | No "Copiar enlace" on the public page | End to end (Playwright) at 360 and 1280 px: no button, text or field, "Pedir por WhatsApp" still there |
 | 63 | "Copiar enlace" in the panel and its fallback | Unit test for the pure link builder; end to end (Playwright) as a throwaway admin, clipboard stubbed to work and to refuse |
 | 64 | Admin fields: save, order, remove, errors, optional | End to end (Playwright) against local Supabase as a throwaway admin; unit tests for the form parser (spec 001 criteria 24 to 26 share it) |
 | 65 | Responsive, keyboard, contrast, axe, back link | End to end (Playwright) at 360 and 1280 px with axe |

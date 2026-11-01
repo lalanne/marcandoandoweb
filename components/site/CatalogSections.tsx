@@ -5,7 +5,6 @@ import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
-import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
 
@@ -31,26 +30,18 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       {product.priceFromClp !== null && (
         <p className="font-medium">{priceLabel(product.priceFromClp)}</p>
       )}
-      <a
-        href={productPath(product.slug)}
-        className="inline-flex min-h-11 items-center self-start font-semibold underline"
-      >
-        Ver detalles
-        <span className="sr-only"> de {product.name}</span>
-      </a>
-      {product.isAvailable ? (
-        <a
-          href={productWhatsappUrl(product.name)}
-          className={`${buttonClass} mt-auto text-center text-base`}
-        >
-          Cotizar
-          <span className="sr-only"> {product.name}</span>
-        </a>
-      ) : (
+      {!product.isAvailable && (
         <p className="mt-auto rounded-full bg-brand-night/10 px-4 py-2 text-center font-medium">
           no disponible por ahora
         </p>
       )}
+      <a
+        href={productPath(product.slug)}
+        className={`${buttonClass} ${product.isAvailable ? "mt-auto " : ""}text-center text-base`}
+      >
+        Ver
+        <span className="sr-only"> {product.name}</span>
+      </a>
     </article>
   );
 }

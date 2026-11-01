@@ -151,7 +151,7 @@ test("[002-AC47] a card with four photos moves with the buttons and the dots, an
 
   // Only one photo is in the card at a time; name, price and button stay.
   await expect(photo(card)).toHaveCount(1);
-  await expect(card.getByRole("link", { name: /Cotizar/ })).toBeVisible();
+  await expect(card.getByRole("link", { name: /^Ver / })).toBeVisible();
 
   const { violations } = await new AxeBuilder({ page }).include("article").analyze();
   const bad = violations.filter((v) => v.impact === "serious" || v.impact === "critical");

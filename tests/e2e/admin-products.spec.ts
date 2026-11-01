@@ -230,8 +230,8 @@ test("[002-AC7] changing the price, marking it unavailable and unpublishing a pu
   await saveChanges(page);
   const unavailable = await publicCard(page, name);
   await expect(unavailable).toContainText("no disponible por ahora", { timeout: PAGE_TIMEOUT });
-  // No quote button; its only link is "Ver detalles" (spec 002, criterion 56).
-  await expect(unavailable.getByRole("link", { name: /Cotizar/ })).toHaveCount(0);
+  // No order button; its only link is "Ver" (spec 002, criterion 56).
+  await expect(unavailable.getByRole("link", { name: /Cotizar|Pedir/ })).toHaveCount(0);
   await expect(unavailable.getByRole("link")).toHaveCount(1);
 
   await page.goto(edit);
