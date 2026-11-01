@@ -114,13 +114,18 @@ test("[002-AC33] lists productos and packs in their own sections, highlighted fi
   await expect(page.getByRole("heading", { level: 3, name: /personalizad/ })).toHaveCount(0);
 });
 
-test("[002-AC33] a pack has the same card as a product: price and a WhatsApp button naming it", async ({
+test("[002-AC33] a pack has the same card as a product: price and a page whose WhatsApp button names it", async ({
   page,
 }) => {
   await open(page);
   const card = page.locator("#packs article").filter({ hasText: "Pack regalo de ejemplo" });
   await expect(card).toContainText("$1.000 c/u");
-  const href = await card.locator(`a[href^="${WHATSAPP}"]`).getAttribute("href");
+  // The WhatsApp button is on the pack's page, reached with "Ver" (issue #101).
+  await card.getByRole("link", { name: /^Ver / }).click();
+  const href = await page
+    .getByRole("main")
+    .getByRole("link", { name: "Pedir por WhatsApp" })
+    .getAttribute("href");
   expect(href).toMatch(/^https:\/\/wa\.me\/56982661835\?text=/);
   expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
 });
@@ -196,6 +201,9 @@ test("[002-AC13] every ordering button opens WhatsApp with a message, and a prod
     expect(href.startsWith(`${WHATSAPP}?text=`)).toBe(true);
     expect(new URL(href).searchParams.get("text")).toMatch(/^Hola, Marcando Ando/);
   }
+  await expect(
+    page.getByRole("link", { name: "Escríbenos por WhatsApp" }),
+  ).toHaveAttribute("href", /^https:\/\/wa\.me\/56982661835\?text=/);
   // A product's message names it; its button is on the product page (issue #101).
   await page
     .locator("article")
@@ -209,9 +217,6 @@ test("[002-AC13] every ordering button opens WhatsApp with a message, and a prod
   expect(new URL(productHref ?? "").searchParams.get("text")).toContain(
     "Botella de ejemplo",
   );
-  await expect(
-    page.getByRole("link", { name: "Escríbenos por WhatsApp" }),
-  ).toHaveAttribute("href", /^https:\/\/wa\.me\/56982661835\?text=/);
 });
 
 test("[002-AC14] the Instagram link opens the business profile", async ({ page }) => {
