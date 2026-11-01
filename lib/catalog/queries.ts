@@ -56,6 +56,24 @@ export async function getProductBySlug(
   return toCatalogProduct(data);
 }
 
+/**
+ * Whether a published product has this slug. A light check for the proxy, which
+ * answers 404 before the page streams (spec 002, criterion 60).
+ */
+export async function isPublishedSlug(
+  client: SupabaseClient,
+  slug: string,
+): Promise<boolean> {
+  const { data, error } = await client
+    .from("product")
+    .select("id")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data !== null;
+}
+
 /** The slugs of every published product, for the sitemap (spec 002, criterion 61). */
 export async function getPublishedSlugs(client: SupabaseClient): Promise<string[]> {
   const { data, error } = await client

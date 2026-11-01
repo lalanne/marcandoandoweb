@@ -12,8 +12,8 @@ import { siteUrl } from "@/lib/site";
 // a change in the panel shows without a deploy; an unpublished or unknown slug
 // is a 404 (criterion 60).
 
-// The product is read before anything is sent, so an unpublished or unknown slug
-// answers a real 404 status (criterion 60); inside <Suspense> it would be a 200.
+// The product is read before the page body is sent; the proxy has already
+// answered 404 for an unpublished or unknown slug (criterion 60).
 export const instant = false;
 
 export async function generateMetadata({
