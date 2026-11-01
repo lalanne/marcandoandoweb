@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
 import { createTestAdmin, supabaseEnv } from "./supabase";
 
-// Spec 002, a page per product (criteria 56 to 61, 62 on the page, 65). Fake
+// Spec 002, a page per product (criteria 56 to 62, 65). Fake
 // products and tiny generated PNGs, created as a throwaway admin and removed after.
 
 const PNG = Buffer.from(
@@ -307,68 +307,16 @@ test("[002-AC61] the sitemap lists published product pages and no unpublished on
   expect(xml).not.toContain(draft.slug);
 });
 
-test("[002-AC62] 'Copiar enlace' copies the address and announces it", async ({
+test("[002-AC62] the public page has no 'Copiar enlace' button or link field, and the quote button is still there", async ({
   page,
-  context,
-  baseURL,
-}, testInfo) => {
-  test.skip(testInfo.project.name.includes("360"), "clipboard permissions: desktop project");
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto(`/productos/${full.slug}`);
-  await page.getByRole("button", { name: /Copiar enlace/ }).click({ timeout: PAGE_TIMEOUT });
-  await expect(page.getByRole("status")).toHaveText("Enlace copiado");
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    `${baseURL}/productos/${full.slug}`,
-  );
-});
-
-test("[002-AC62] 'Copiar enlace' with a working clipboard announces it (stubbed, so it runs at both widths)", async ({
-  page,
-  baseURL,
 }) => {
-  await page.addInitScript(() => {
-    (window as unknown as { __copied: string }).__copied = "";
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: async (text: string) => {
-          (window as unknown as { __copied: string }).__copied = text;
-        },
-      },
-    });
-  });
   await page.goto(`/productos/${full.slug}`);
-  await page.getByRole("button", { name: /Copiar enlace/ }).click({ timeout: PAGE_TIMEOUT });
-  await expect(page.getByRole("status")).toHaveText("Enlace copiado");
-  expect(await page.evaluate(() => (window as unknown as { __copied: string }).__copied)).toBe(
-    `${baseURL}/productos/${full.slug}`,
-  );
-});
-
-test("[002-AC62] when the browser refuses to copy, the link shows in a selected text field", async ({
-  page,
-  baseURL,
-}) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: async () => {
-          throw new DOMException("denied", "NotAllowedError");
-        },
-      },
-    });
+  await expect(page.getByRole("link", { name: /Cotizar por WhatsApp/ })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
   });
-  await page.goto(`/productos/${full.slug}`);
-  await page.getByRole("button", { name: /Copiar enlace/ }).click({ timeout: PAGE_TIMEOUT });
-  const field = page.getByRole("textbox", { name: /Copia este enlace/ });
-  await expect(field).toHaveValue(`${baseURL}/productos/${full.slug}`);
-  await expect(field).toBeFocused();
-  const selected = await field.evaluate(
-    (el: HTMLInputElement) => el.selectionStart === 0 && el.selectionEnd === el.value.length,
-  );
-  expect(selected).toBe(true);
-  await expect(page.getByText("Enlace copiado")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Copiar enlace/ })).toHaveCount(0);
+  await expect(page.getByText(/Copiar enlace|Enlace copiado/)).toHaveCount(0);
+  await expect(page.getByRole("textbox")).toHaveCount(0);
 });
 
 test("[002-AC65] the page has no horizontal scroll, Spanish text, nothing for axe, and the back link leads to the section", async ({

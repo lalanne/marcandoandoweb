@@ -2,12 +2,8 @@ import Link from "next/link";
 import { backLink, productPageView } from "@/lib/catalog/details";
 import type { CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
-import { CopyLinkButton } from "./CopyLinkButton";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
-
-const secondaryLinkButton =
-  "inline-flex min-h-11 items-center justify-center rounded-full border-2 border-brand-night bg-white px-5 py-2 font-semibold text-brand-night";
 
 const headingClass = "text-xl font-semibold";
 
@@ -89,21 +85,14 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
 
           {product.description ? <p className="whitespace-pre-line">{product.description}</p> : null}
 
-          <div className="flex flex-wrap items-start gap-3">
-            {product.isAvailable ? (
-              <a
-                href={productWhatsappUrl(product.name)}
-                className={`${buttonClass} text-center text-base`}
-              >
-                Cotizar por WhatsApp
-              </a>
-            ) : null}
-            <CopyLinkButton
-              slug={product.slug}
-              productName={product.name}
-              className={secondaryLinkButton}
-            />
-          </div>
+          {product.isAvailable ? (
+            <a
+              href={productWhatsappUrl(product.name)}
+              className={`${buttonClass} self-start text-center text-base`}
+            >
+              Cotizar por WhatsApp
+            </a>
+          ) : null}
         </div>
       </div>
     </article>

@@ -193,7 +193,8 @@ date). So:
   the card, criteria 46 to 50), the name, the price ("$7.000 c/u"), the "no
   disponible por ahora" notice when unavailable, the colors, the sizes, the
   characteristics, the description, the "Cotizar por WhatsApp" button (same message
-  as the card's) and the "Copiar enlace" button. A heading, list or row shows **only
+  as the card's). ~~and the "Copiar enlace" button~~ (removed from the page, see the
+  2026-10-31 amendment for issue #100 below). A heading, list or row shows **only
   when it has content**: a product with no colors shows no "Colores" heading.
 - **Colors** show as round swatches, each with its name written next to it (never
   color alone). **Sizes** show as pills. **Characteristics** show as a list, one item
@@ -202,11 +203,12 @@ date). So:
   another page) after the price. Tapping the photo does not open the page, so swiping
   through photos stays free (issue #82). A screen reader hears "Ver detalles de
   <name>".
-- **The link to share.** `https://<site>/productos/<slug>`. "Copiar enlace" on the
-  page copies it and says "Enlace copiado" (announced politely); if the browser
-  refuses, the link shows in a text field, selected, so it can be copied by hand. In
-  the panel's product list, every published product has a "Copiar enlace" button
-  with the same behavior; an unpublished product has none, because its page is a 404.
+- **The link to share.** `https://<site>/productos/<slug>`. ~~"Copiar enlace" on the
+  page copies it~~ The public page has no such button (issue #100 amendment below).
+  In the panel's product list, every published product has a "Copiar enlace" button
+  that copies it and says "Enlace copiado" (announced politely); if the browser
+  refuses, the link shows in a text field, selected, so it can be copied by hand; an
+  unpublished product has none, because its page is a 404.
 - **Preview when shared.** The page has its own title ("<name> | Marcando Ando"), a
   description that includes the price and what it is, a canonical address, and the
   Open Graph tags (title, description, image = the cover photo as an absolute address,
@@ -500,6 +502,15 @@ customers.
     they are followed, then the pre-filled messages are the same as before this
     amendment.
 
+**2026-10-31 amendment - no "Copiar enlace" on the public page (issue #100, approved
+by the owner by merging).** "Copiar enlace" is a tool for Javiera, who copies a
+product's link in the panel to send it to customers (her request in #87). A visitor
+can already copy the address from the browser or use the phone's share button, so the
+button is removed from `/productos/<slug>`, with no empty space, spacing or focus stop
+left where it was. The panel button stays as it was (criterion 63, now written out in
+full). The link format, the preview tags and the rest of the page do not change. The
+component is shared, so it stays for the panel.
+
 **A page per product, with colors, sizes and a link to share** (added 2026-10-31, issue #87)
 
 56. Given a published product or pack, when the home page loads, then its card has a
@@ -529,13 +540,20 @@ customers.
     `og:url` and `og:image`, the last one the absolute address of the cover photo and
     absent when the product has no photo; and the sitemap lists the page of every
     published product and none of an unpublished one.
-62. Given a product page, when the visitor presses "Copiar enlace", then
+62. ~~Given a product page, when the visitor presses "Copiar enlace", then
     `https://<site>/productos/<slug>` is on the clipboard and the text "Enlace
     copiado" is announced; when the browser refuses to copy, then the link shows in a
-    text field, selected, instead.
+    text field, selected, instead.~~ Amended (issue #100): Given a published product
+    page, when it loads, then it has no "Copiar enlace" button, no "Enlace copiado"
+    text and no link text field, and no empty space, spacing or focus stop where the
+    button was; the photos, price, colors, sizes, characteristics and "Cotizar por
+    WhatsApp" are as before.
 63. Given the admin looking at the product list in the panel, when a product is
-    published, then its row has a "Copiar enlace" button with the behavior of
-    criterion 62; when it is not published, then its row has none.
+    published, then its row has a "Copiar enlace" button, and when pressed
+    `https://<site>/productos/<slug>` is on the clipboard and the text "Enlace
+    copiado" is announced, and when the browser refuses to copy, the link shows in a
+    text field, selected, instead; when the product is not published, then its row has
+    none.
 64. Given the admin on the product form, when they add the colors Rosado `#E8647F` and
     Celeste `#4FB0B0`, the sizes "4" and "6", and the characteristics "100% algodón"
     and "Estampado con vinilo", and save, then the public page shows them in that
@@ -593,7 +611,8 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 | 57, 58, 59 | Page content, only fields with content, unavailable | End to end (Playwright) at 360 and 1280 px against local Supabase with seeded fake colors, sizes and characteristics; a unit test for the pure helper that turns the characteristics text into items and the list into what the page shows |
 | 60 | 404 for unpublished or unknown | End to end (Playwright); integration for the data being hidden (spec 001 criterion 13) |
 | 61 | Title, description, Open Graph tags, sitemap | Unit test for the pure metadata builder; end to end that reads the tags and the sitemap of the running server |
-| 62, 63 | "Copiar enlace" and its fallback | Unit test for the pure link builder; end to end (Playwright) with clipboard permission granted and denied |
+| 62 | No "Copiar enlace" on the public page | End to end (Playwright) at 360 and 1280 px: no button, text or field, "Cotizar por WhatsApp" still there |
+| 63 | "Copiar enlace" in the panel and its fallback | Unit test for the pure link builder; end to end (Playwright) as a throwaway admin, clipboard stubbed to work and to refuse |
 | 64 | Admin fields: save, order, remove, errors, optional | End to end (Playwright) against local Supabase as a throwaway admin; unit tests for the form parser (spec 001 criteria 24 to 26 share it) |
 | 65 | Responsive, keyboard, contrast, axe, back link | End to end (Playwright) at 360 and 1280 px with axe |
 | 67 | Logo size, sharpness, header fit, tab icon crop | End to end (Playwright) at 360 and 1280 px with axe (header tests) |
