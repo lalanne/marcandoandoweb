@@ -2,6 +2,8 @@ import type { ProductKind } from "./kind";
 
 export type CatalogImage = { storagePath: string; altText: string };
 
+export type CatalogColor = { name: string; hex: string };
+
 export type CatalogProduct = {
   id: string;
   slug: string;
@@ -14,6 +16,12 @@ export type CatalogProduct = {
   isAvailable: boolean;
   /** Every photo in the admin's order; the first is the cover. */
   images: CatalogImage[];
+  /** In display order; empty when the owner gave none (spec 001, criterion 24). */
+  colors: CatalogColor[];
+  /** Sizes and clothing sizes alike, in display order. */
+  sizes: string[];
+  /** One characteristic per line; empty when none. */
+  characteristics: string;
 };
 
 export type CatalogDesign = {

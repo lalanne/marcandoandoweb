@@ -53,6 +53,14 @@ insert into public.design (slug, title, description, is_published) values
   ('demo-diseno-estrellas', 'Diseño de ejemplo: estrellas', 'Diseño falso para desarrollo.', true),
   ('demo-diseno-borrador', 'Diseño de ejemplo (borrador)', 'Diseño falso sin publicar.', false);
 
+-- Fake colors, sizes and characteristics (spec 001 criterion 24 to 26), for the
+-- product page. Invented values only.
+update public.product set
+  colors = '[{"name":"Rosado","hex":"#E8647F"},{"name":"Celeste","hex":"#4FB0B0"}]'::jsonb,
+  sizes = '["4","6","8"]'::jsonb,
+  characteristics = E'100% algodón (ejemplo)\nEstampado con vinilo (ejemplo)'
+where slug = 'demo-polera-ejemplo';
+
 -- Fake image rows (the files do not exist in storage; the gallery shows nothing
 -- until real files are uploaded locally).
 insert into public.image (storage_path, alt_text, kind, position, product_id)

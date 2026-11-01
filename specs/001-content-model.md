@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) is **draft** until the owner approves it.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -105,8 +105,8 @@ A thing Marcando Ando can personalize and quote.
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
 
-**2026-10-31 amendment - colors, sizes and characteristics (issue #87, draft until
-the owner approves it).** Javiera asked for a detail view that shows a product's
+**2026-10-31 amendment - colors, sizes and characteristics (issue #87, approved by
+the owner on 2026-10-31).** Javiera asked for a detail view that shows a product's
 colors, sizes and technical characteristics ("Feedback from Javiera: product details
 and a link to share" in `docs/requirements.md`). The owner decided that colors and
 sizes are **lists**, not free text, so the site can draw color swatches and size
@@ -344,7 +344,9 @@ plan.
     write these fields, the write is rejected; the admin's write succeeds (criteria
     18 to 20 extended).
 
-## Verification plan follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
+## Verification plan
+
+Test layers follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
 constraints and the visibility rules run against a real **local Supabase**, never
 a mock of the database.
 

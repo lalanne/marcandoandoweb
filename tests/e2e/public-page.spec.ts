@@ -120,7 +120,7 @@ test("[002-AC33] a pack has the same card as a product: price and a WhatsApp but
   await open(page);
   const card = page.locator("#packs article").filter({ hasText: "Pack regalo de ejemplo" });
   await expect(card).toContainText("$1.000 c/u");
-  const href = await card.locator("a").getAttribute("href");
+  const href = await card.locator(`a[href^="${WHATSAPP}"]`).getAttribute("href");
   expect(href).toMatch(/^https:\/\/wa\.me\/56982661835\?text=/);
   expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
 });
@@ -174,12 +174,13 @@ test("[002-AC12] marks an unavailable product and gives it no WhatsApp button", 
     .locator("article")
     .filter({ hasText: "Calcetines de ejemplo (no disponibles)" });
   await expect(card).toContainText("no disponible por ahora");
-  await expect(card.locator("a")).toHaveCount(0);
+  // Its only link is "Ver detalles" (criterion 56): no WhatsApp button.
+  await expect(card.locator(`a[href^="${WHATSAPP}"]`)).toHaveCount(0);
   const available = page
     .locator("article")
     .filter({ hasText: "Botella de ejemplo" });
   await expect(available).not.toContainText("no disponible por ahora");
-  await expect(available.locator("a")).toHaveCount(1);
+  await expect(available.locator(`a[href^="${WHATSAPP}"]`)).toHaveCount(1);
 });
 
 test("[002-AC13] every ordering button opens WhatsApp with a message, and a product's names it", async ({
@@ -197,7 +198,7 @@ test("[002-AC13] every ordering button opens WhatsApp with a message, and a prod
   const productHref = await page
     .locator("article")
     .filter({ hasText: "Botella de ejemplo" })
-    .locator("a")
+    .locator(`a[href^="${WHATSAPP}"]`)
     .getAttribute("href");
   expect(new URL(productHref ?? "").searchParams.get("text")).toContain(
     "Botella de ejemplo",

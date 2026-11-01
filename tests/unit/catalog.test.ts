@@ -19,6 +19,9 @@ const prod = (
   isFeatured: false,
   isAvailable: true,
   images: [],
+  colors: [],
+  sizes: [],
+  characteristics: "",
   ...extra,
 });
 

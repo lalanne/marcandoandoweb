@@ -16,13 +16,15 @@ The client's own words live in [`../docs/requirements.md`](../docs/requirements.
 | # | Spec | Status |
 |---|------|--------|
 | 000 | [Product overview & v1 scope](000-overview.md) | approved |
-| 001 | [Content model](001-content-model.md) | approved |
-| 002 | [Launch 0: first public release](002-launch-0.md) | approved |
+| 001 | [Content model](001-content-model.md) | approved (the amendment for #87, criteria 24 to 28, was approved by the owner on 2026-10-31 and is implemented in the PR for #88) |
+| 002 | [Launch 0: first public release](002-launch-0.md) | approved (the amendment for #87, criteria 56 to 66, was approved by the owner on 2026-10-31 and is implemented in the PR for #88) |
 | 003 | [CI and testing policy](003-ci-and-testing.md) | approved |
 | 004 | [Deployment pipeline](004-deployment.md) | approved |
 | 005 | [Google sign-in for the admin](005-google-sign-in.md) | approved |
 
 Status values: `draft` → `approved` → `implemented` → `verified`.
+
+Specs 001 and 002 stay `approved` as a whole, not `implemented`: older criteria in them are still without a test (deferred or manual), and `implemented` makes the traceability check require a test for every criterion. The criteria added by the #87 amendment all have passing tests.
 
 ## Naming and format
 

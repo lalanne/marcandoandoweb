@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
   subsets: ["latin"],
 });
-
-// Absolute base for the Open Graph image. NEXT_PUBLIC_SITE_URL wins; on Vercel
-// the production domain is provided; locally it falls back to localhost.
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000");
 
 const title = "Marcando Ando | Marcamos tus ideas";
 const description =

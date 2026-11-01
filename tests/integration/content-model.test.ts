@@ -409,6 +409,164 @@ describe("product kind", () => {
   });
 });
 
+// Spec 001, criteria 24 to 28 (amendment of 2026-10-31, issue #87): colors,
+// sizes and characteristics.
+describe("colors, sizes and characteristics", () => {
+  const rosado = { name: "Rosado", hex: "#E8647F" };
+
+  it("[001-AC24] rejects a bad colors list", async () => {
+    const tooMany = Array.from({ length: 21 }, (_, i) => ({
+      name: `Color ${i}`,
+      hex: "#E8647F",
+    }));
+    const bad: [string, unknown][] = [
+      ["empty name", [{ name: "", hex: "#E8647F" }]],
+      ["blank name", [{ name: "   ", hex: "#E8647F" }]],
+      ["name over 30", [{ name: "x".repeat(31), hex: "#E8647F" }]],
+      ["hex without #", [{ name: "Rosado", hex: "E8647F" }]],
+      ["short hex", [{ name: "Rosado", hex: "#E86" }]],
+      ["hex not hex", [{ name: "Rosado", hex: "#GGGGGG" }]],
+      ["missing hex", [{ name: "Rosado" }]],
+      ["not a list", { name: "Rosado", hex: "#E8647F" }],
+      ["21 entries", tooMany],
+    ];
+    for (const [label, colors] of bad) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Colores malos", colors });
+      expect(error?.code, label).toBe("23514");
+    }
+  });
+
+  it("[001-AC24] accepts colors, 20 of them, and defaults to an empty list", async () => {
+    const p = await newProduct({
+      colors: [rosado, { name: "Celeste", hex: "#4FB0B0" }],
+    });
+    expect(p.colors).toEqual([rosado, { name: "Celeste", hex: "#4FB0B0" }]);
+    const twenty = Array.from({ length: 20 }, (_, i) => ({
+      name: `Color ${i}`,
+      hex: "#4FB0B0",
+    }));
+    expect((await newProduct({ colors: twenty })).colors).toHaveLength(20);
+    expect((await newProduct()).colors).toEqual([]);
+
+    const bad = await admin
+      .from("product")
+      .update({ colors: [{ name: "", hex: "#E8647F" }] })
+      .eq("id", p.id);
+    expect(bad.error?.code).toBe("23514");
+  });
+
+  it("[001-AC25] rejects a bad sizes list", async () => {
+    const bad: [string, unknown][] = [
+      ["empty label", ["4", ""]],
+      ["blank label", ["  "]],
+      ["label over 20", ["x".repeat(21)]],
+      ["21 labels", Array.from({ length: 21 }, (_, i) => `T${i}`)],
+      ["not text", [4]],
+      ["not a list", "4"],
+    ];
+    for (const [label, sizes] of bad) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Tallas malas", sizes });
+      expect(error?.code, label).toBe("23514");
+    }
+  });
+
+  it("[001-AC25] accepts sizes in the order given, and defaults to an empty list", async () => {
+    const p = await newProduct({ sizes: ["4", "6", "8", "500 ml"] });
+    expect(p.sizes).toEqual(["4", "6", "8", "500 ml"]);
+    expect((await newProduct({ sizes: ["x".repeat(20)] })).sizes).toHaveLength(1);
+    expect((await newProduct()).sizes).toEqual([]);
+  });
+
+  it("[001-AC26] rejects characteristics over 1000 characters; accepts empty and default", async () => {
+    const { error } = await admin.from("product").insert({
+      slug: uniqueSlug("p"),
+      name: "Largo",
+      characteristics: "x".repeat(1001),
+    });
+    expect(error?.code).toBe("23514");
+
+    expect(
+      (await newProduct({ characteristics: "x".repeat(1000) })).characteristics,
+    ).toHaveLength(1000);
+    expect((await newProduct({ characteristics: "" })).characteristics).toBe("");
+    expect((await newProduct()).characteristics).toBe("");
+  });
+
+  it("[001-AC27] gives the public all three of a published product, in order", async () => {
+    const colors = [rosado, { name: "Celeste", hex: "#4FB0B0" }, { name: "Amarillo", hex: "#F0B242" }];
+    const p = await newProduct({
+      is_published: true,
+      colors,
+      sizes: ["8", "4", "6"],
+      characteristics: "100% algodón\nEstampado con vinilo",
+    });
+    const row = ok(
+      await anon
+        .from("product")
+        .select("colors, sizes, characteristics")
+        .eq("id", p.id)
+        .single(),
+    );
+    expect(row.colors).toEqual(colors);
+    expect(row.sizes).toEqual(["8", "4", "6"]);
+    expect(row.characteristics).toBe("100% algodón\nEstampado con vinilo");
+  });
+
+  it("[001-AC27] gives the public nothing of an unpublished product", async () => {
+    const p = await newProduct({
+      is_published: false,
+      colors: [rosado],
+      sizes: ["4"],
+      characteristics: "Secreto",
+    });
+    const rows = ok(
+      await anon.from("product").select("colors, sizes, characteristics").eq("id", p.id),
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it("[001-AC28] refuses the anonymous role and a non-admin user, and lets the admin write", async () => {
+    const p = await newProduct({ is_published: true });
+    const changes = { colors: [rosado], sizes: ["4"], characteristics: "Algodón" };
+
+    for (const client of [anon, nonAdmin]) {
+      const res = await client.from("product").update(changes).eq("id", p.id).select();
+      expect(res.error !== null || (res.data ?? []).length === 0).toBe(true);
+    }
+    const untouched = ok(
+      await admin.from("product").select("colors, sizes, characteristics").eq("id", p.id).single(),
+    );
+    expect(untouched).toEqual({ colors: [], sizes: [], characteristics: "" });
+    const insert = await nonAdmin.from("product").insert({
+      slug: uniqueSlug("p"),
+      name: "No admin",
+      colors: [rosado],
+    });
+    expect(insert.error).not.toBeNull();
+
+    const asAdmin = ok(await admin.from("product").update(changes).eq("id", p.id).select());
+    expect(asAdmin[0].colors).toEqual([rosado]);
+    expect(asAdmin[0].sizes).toEqual(["4"]);
+    expect(asAdmin[0].characteristics).toBe("Algodón");
+  });
+
+  it("[002-AC66] keeps the slug when the other fields are edited", async () => {
+    const p = await newProduct({ is_published: true });
+    ok(
+      await admin
+        .from("product")
+        .update({ name: "Otro nombre", price_from_clp: 9900, colors: [rosado], sizes: ["4"], characteristics: "Nuevo" })
+        .eq("id", p.id),
+    );
+    const after = ok(await anon.from("product").select("slug, name").eq("id", p.id).single());
+    expect(after).toEqual({ slug: p.slug, name: "Otro nombre" });
+  });
+});
+
 // Issue #65 (contract step of the 2026-10-31 amendment): nothing of the
 // categories is left in the database.
 describe("categories are gone", () => {

@@ -69,7 +69,7 @@ export async function getProduct(
   const { data, error } = await client
     .from("product")
     .select(
-      `id, name, slug, description, price_from_clp, kind, is_featured, is_available, is_published,${IMAGE_COLUMNS}`,
+      `id, name, slug, description, price_from_clp, kind, is_featured, is_available, is_published, colors, sizes, characteristics,${IMAGE_COLUMNS}`,
     )
     .eq("id", id)
     .maybeSingle();

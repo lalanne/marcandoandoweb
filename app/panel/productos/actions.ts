@@ -12,7 +12,13 @@ import {
   validateImageFile,
 } from "@/lib/admin/image-upload";
 import { addImage, deleteImage, moveImage, updateImage } from "@/lib/admin/images";
-import { parseProductForm, type ProductField } from "@/lib/admin/product-input";
+import {
+  parseProductForm,
+  readColorRows,
+  readSizeRows,
+  type ColorValue,
+  type ProductField,
+} from "@/lib/admin/product-input";
 import { createProduct, deleteProduct, updateProduct } from "@/lib/admin/products";
 
 // Server Actions behind /panel/productos. Each one checks the admin again and
@@ -30,6 +36,9 @@ export type RawProduct = {
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
+  colors: ColorValue[];
+  sizes: string[];
+  characteristics: string;
 };
 
 export type ProductFormState = {
@@ -54,6 +63,9 @@ export async function saveProduct(
     is_featured: formData.get("is_featured") === "on",
     is_available: formData.get("is_available") === "on",
     is_published: formData.get("is_published") === "on",
+    colors: readColorRows(formData),
+    sizes: readSizeRows(formData),
+    characteristics: text(formData, "characteristics"),
   };
 
   const parsed = parseProductForm(formData);
