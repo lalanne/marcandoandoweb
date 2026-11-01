@@ -18,7 +18,7 @@ const prod = (
   kind,
   isFeatured: false,
   isAvailable: true,
-  coverImage: null,
+  images: [],
   ...extra,
 });
 

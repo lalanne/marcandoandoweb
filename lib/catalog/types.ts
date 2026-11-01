@@ -12,7 +12,8 @@ export type CatalogProduct = {
   kind: ProductKind;
   isFeatured: boolean;
   isAvailable: boolean;
-  coverImage: CatalogImage | null;
+  /** Every photo in the admin's order; the first is the cover. */
+  images: CatalogImage[];
 };
 
 export type CatalogDesign = {
