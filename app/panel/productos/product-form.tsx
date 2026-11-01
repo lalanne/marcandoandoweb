@@ -4,8 +4,17 @@ import { useActionState, useState } from "react";
 import { formatPriceInput, parsePriceClp } from "@/lib/admin/price";
 import { slugify } from "@/lib/admin/slug";
 import { KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
+import { MAX_COLORS, MAX_SIZES } from "@/lib/admin/product-input";
 import { saveProduct, type ProductFormState, type RawProduct } from "./actions";
 import { errorClass, fieldClass, inputClass, primaryButton } from "../ui";
+
+type Row<T> = { key: number; value: T };
+
+let nextKey = 0;
+const withKeys = <T,>(values: T[]): Row<T>[] => values.map((value) => ({ key: nextKey++, value }));
+
+const smallButton =
+  "inline-flex min-h-11 items-center justify-center rounded-full border-2 border-brand-night bg-white px-4 py-1.5 font-semibold text-brand-night";
 
 type Props = {
   /** Present when editing; its id is sent along so the action updates it. */
@@ -31,6 +40,9 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
   const [isFeatured, setIsFeatured] = useState(start.is_featured);
   const [isAvailable, setIsAvailable] = useState(start.is_available);
   const [isPublished, setIsPublished] = useState(start.is_published);
+  const [colors, setColors] = useState(() => withKeys(start.colors));
+  const [sizes, setSizes] = useState(() => withKeys(start.sizes));
+  const [characteristics, setCharacteristics] = useState(start.characteristics);
   const { errors } = state;
 
   const error = (key: keyof typeof errors) =>
@@ -155,6 +167,153 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
           Los productos se muestran en «Productos» y los packs en «Packs».
         </p>
         {error("kind")}
+      </div>
+
+      <fieldset
+        aria-describedby={errors.colors ? "colors-hint colors-error" : "colors-hint"}
+        className="flex flex-col gap-3 rounded-xl border-2 border-brand-night bg-white p-4"
+      >
+        <legend className="px-1 font-medium">Colores (opcional)</legend>
+        <p id="colors-hint" className="text-sm">
+          El orden de la lista es el orden en que se ven. Hasta {MAX_COLORS} colores.
+        </p>
+        {colors.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {colors.map((row, i) => (
+              <li key={row.key} className="flex flex-wrap items-end gap-3">
+                <div className={`${fieldClass} min-w-40 flex-1`}>
+                  <label htmlFor={`color-name-${row.key}`} className="font-medium">
+                    Nombre del color {i + 1}
+                  </label>
+                  <input
+                    id={`color-name-${row.key}`}
+                    name="color_name"
+                    value={row.value.name}
+                    onChange={(e) =>
+                      setColors((rows) =>
+                        rows.map((r) =>
+                          r.key === row.key ? { ...r, value: { ...r.value, name: e.target.value } } : r,
+                        ),
+                      )
+                    }
+                    autoComplete="off"
+                    className={inputClass}
+                  />
+                </div>
+                <div className={fieldClass}>
+                  <label htmlFor={`color-hex-${row.key}`} className="font-medium">
+                    Color {i + 1}
+                  </label>
+                  <input
+                    id={`color-hex-${row.key}`}
+                    name="color_hex"
+                    type="color"
+                    value={row.value.hex}
+                    onChange={(e) =>
+                      setColors((rows) =>
+                        rows.map((r) =>
+                          r.key === row.key ? { ...r, value: { ...r.value, hex: e.target.value } } : r,
+                        ),
+                      )
+                    }
+                    className="h-11 w-16 cursor-pointer rounded-lg border-2 border-brand-night bg-white p-1"
+                  />
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Quitar color ${i + 1}`}
+                  onClick={() => setColors((rows) => rows.filter((r) => r.key !== row.key))}
+                  className={smallButton}
+                >
+                  Quitar
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <button
+          type="button"
+          onClick={() =>
+            setColors((rows) => [...rows, ...withKeys([{ name: "", hex: "#e8647f" }])])
+          }
+          className={`${smallButton} self-start`}
+        >
+          Agregar color
+        </button>
+        {error("colors")}
+      </fieldset>
+
+      <fieldset
+        aria-describedby={errors.sizes ? "sizes-hint sizes-error" : "sizes-hint"}
+        className="flex flex-col gap-3 rounded-xl border-2 border-brand-night bg-white p-4"
+      >
+        <legend className="px-1 font-medium">Tamaños y tallas (opcional)</legend>
+        <p id="sizes-hint" className="text-sm">
+          Escríbelos como los conoce quien compra: «S», «4», «500 ml». Hasta {MAX_SIZES}.
+        </p>
+        {sizes.length > 0 ? (
+          <ul className="flex flex-col gap-3">
+            {sizes.map((row, i) => (
+              <li key={row.key} className="flex flex-wrap items-end gap-3">
+                <div className={`${fieldClass} min-w-40 flex-1`}>
+                  <label htmlFor={`size-${row.key}`} className="font-medium">
+                    Tamaño o talla {i + 1}
+                  </label>
+                  <input
+                    id={`size-${row.key}`}
+                    name="size"
+                    value={row.value}
+                    onChange={(e) =>
+                      setSizes((rows) =>
+                        rows.map((r) => (r.key === row.key ? { ...r, value: e.target.value } : r)),
+                      )
+                    }
+                    autoComplete="off"
+                    className={inputClass}
+                  />
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Quitar tamaño o talla ${i + 1}`}
+                  onClick={() => setSizes((rows) => rows.filter((r) => r.key !== row.key))}
+                  className={smallButton}
+                >
+                  Quitar
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setSizes((rows) => [...rows, ...withKeys([""])])}
+          className={`${smallButton} self-start`}
+        >
+          Agregar
+        </button>
+        {error("sizes")}
+      </fieldset>
+
+      <div className={fieldClass}>
+        <label htmlFor="product-characteristics" className="font-medium">
+          Características (opcional)
+        </label>
+        <textarea
+          id="product-characteristics"
+          name="characteristics"
+          value={characteristics}
+          onChange={(e) => setCharacteristics(e.target.value)}
+          rows={4}
+          aria-describedby={
+            errors.characteristics ? "characteristics-hint characteristics-error" : "characteristics-hint"
+          }
+          aria-invalid={errors.characteristics ? true : undefined}
+          className={inputClass}
+        />
+        <p id="characteristics-hint" className="text-sm">
+          Una por línea: material, medidas, capacidad, cuidados.
+        </p>
+        {error("characteristics")}
       </div>
 
       <fieldset className="flex flex-col gap-3 rounded-xl border-2 border-brand-night bg-white p-4">

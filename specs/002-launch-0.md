@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) is **draft** until the owner approves it.
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -178,7 +178,7 @@ all of them, and chose option 1 of the design canvas
   availability, "Cotizar") does not change.
 
 **2026-10-31 amendment - a page per product, with colors, sizes and a link to share
-(issue #87, draft until the owner approves it).** Javiera's customers keep asking
+(issue #87, approved by the owner on 2026-10-31).** Javiera's customers keep asking
 which colors a product comes in and she answers with an image; she asked for a detail
 view and a link she can send ("Feedback from Javiera: product details and a link to
 share" in `docs/requirements.md`). From the design canvas

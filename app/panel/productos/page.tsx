@@ -4,7 +4,8 @@ import { parseKindFilter, productListView, type KindFilter } from "@/lib/admin/p
 import { listProducts, type ProductListItem } from "@/lib/admin/products";
 import { formatClp } from "@/lib/catalog/format";
 import { createClient } from "@/lib/supabase/server";
-import { Notice, primaryButton } from "../ui";
+import { CopyLinkButton } from "@/components/site/CopyLinkButton";
+import { Notice, primaryButton, secondaryButton } from "../ui";
 
 export const metadata: Metadata = { title: "Productos | Panel | Marcando Ando" };
 
@@ -76,6 +77,10 @@ function ProductRow({ p }: { p: ProductListItem }) {
         </Badge>
         {p.is_featured ? <Badge tone="on">Destacado</Badge> : null}
       </p>
+      {/* An unpublished product's page is a 404, so it gets no link (criterion 63). */}
+      {p.is_published ? (
+        <CopyLinkButton slug={p.slug} productName={p.name} className={`${secondaryButton} self-start`} />
+      ) : null}
     </li>
   );
 }

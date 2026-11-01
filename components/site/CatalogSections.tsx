@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { productPath } from "@/lib/catalog/details";
 import { priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
 import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
@@ -30,6 +31,13 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       {product.priceFromClp !== null && (
         <p className="font-medium">{priceLabel(product.priceFromClp)}</p>
       )}
+      <a
+        href={productPath(product.slug)}
+        className="inline-flex min-h-11 items-center self-start font-semibold underline"
+      >
+        Ver detalles
+        <span className="sr-only"> de {product.name}</span>
+      </a>
       {product.isAvailable ? (
         <a
           href={productWhatsappUrl(product.name)}

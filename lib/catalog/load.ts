@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { connection } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public";
-import { getCatalog } from "./queries";
+import { getCatalog, getProductBySlug } from "./queries";
 
 /**
  * Reads the catalog at request time, so changes in the database show up without a
@@ -12,4 +12,10 @@ import { getCatalog } from "./queries";
 export const loadCatalog = cache(async () => {
   await connection();
   return getCatalog(createPublicClient());
+});
+
+/** One published product for its page, read at request time; null when unknown. */
+export const loadProduct = cache(async (slug: string) => {
+  await connection();
+  return getProductBySlug(createPublicClient(), slug);
 });

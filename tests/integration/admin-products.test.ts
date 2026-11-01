@@ -37,6 +37,9 @@ function values(overrides: Partial<ProductValues> = {}): ProductValues {
     is_featured: false,
     is_available: true,
     is_published: false,
+    colors: [],
+    sizes: [],
+    characteristics: "",
     ...overrides,
   };
 }
@@ -246,5 +249,29 @@ describe("products as a signed-in user who is not the admin", () => {
 
     await deleteProduct(other, id);
     expect(await getProduct(admin, id)).not.toBeNull();
+  });
+});
+
+describe("colors, sizes and characteristics through the admin functions", () => {
+  it("[002-AC64] saves and reads back colors, sizes and characteristics in order", async () => {
+    const colors = [
+      { name: "Rosado", hex: "#E8647F" },
+      { name: "Celeste", hex: "#4FB0B0" },
+    ];
+    const id = await make({ colors, sizes: ["4", "6"], characteristics: "100% algodón\nEstampado con vinilo" });
+    const product = await getProduct(admin, id);
+    expect(product?.colors).toEqual(colors);
+    expect(product?.sizes).toEqual(["4", "6"]);
+    expect(product?.characteristics).toBe("100% algodón\nEstampado con vinilo");
+
+    const update = await updateProduct(admin, id, {
+      ...values({ slug: product!.slug }),
+      colors: [colors[1]],
+      sizes: [],
+    });
+    expect(update.ok).toBe(true);
+    const after = await getProduct(admin, id);
+    expect(after?.colors).toEqual([colors[1]]);
+    expect(after?.sizes).toEqual([]);
   });
 });

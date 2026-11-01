@@ -23,6 +23,9 @@ export default async function NewProductPage() {
           is_featured: false,
           is_available: true,
           is_published: false,
+          colors: [],
+          sizes: [],
+          characteristics: "",
         }}
       />
     </main>
