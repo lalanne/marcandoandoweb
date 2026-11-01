@@ -187,6 +187,25 @@ test("[002-AC56] a pack card also has the link", async ({ page }) => {
   ).toHaveAttribute("href", `/productos/${pack.slug}`);
 });
 
+test("[002-AC49] on the product page the next and previous photos are requested once the first has loaded", async ({
+  page,
+}) => {
+  const requested = new Set<string>();
+  page.on("request", (req) => {
+    const u = new URL(req.url());
+    const source = u.pathname === "/_next/image" ? u.searchParams.get("url") : u.pathname;
+    if (source?.startsWith(`/img/${folder}/completa-`)) requested.add(source.slice(5));
+  });
+  await page.goto(`/productos/${full.slug}`);
+  const photo = page.getByRole("main").getByRole("img").first();
+  await expect(photo).toHaveAttribute("alt", full.photos[0].alt, { timeout: PAGE_TIMEOUT });
+  // Three photos: the next and the previous are the other two.
+  await expect
+    .poll(() => [...requested].sort())
+    .toEqual(full.photos.map((p) => p.path).sort());
+  expect(await page.getByTestId("photo-counter").textContent()).toBe("1 / 3");
+});
+
 test("[002-AC57] the page shows name, price, photos, colors with names, sizes, characteristics and the quote button", async ({
   page,
 }) => {

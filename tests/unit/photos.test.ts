@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { nextPhoto, photosInOrder, previousPhoto, swipeStep } from "@/lib/catalog/photos";
+import {
+  nextPhoto,
+  photosInOrder,
+  photosToPreload,
+  previousPhoto,
+  swipeStep,
+} from "@/lib/catalog/photos";
 
 describe("product photos", () => {
   it("[002-AC47] orders the photos by the admin's position", () => {
@@ -38,5 +44,23 @@ describe("product photos", () => {
     expect(swipeStep(80, -5)).toBe(-1); // finger to the right: previous photo
     expect(swipeStep(-20, 0)).toBe(0); // too short
     expect(swipeStep(-60, 90)).toBe(0); // mostly vertical: the page scrolls
+  });
+});
+
+describe("preloading the neighbors", () => {
+  it("[002-AC49] names the next and the previous photo, going round", () => {
+    expect(photosToPreload(1, 4)).toEqual([2, 0]);
+    expect(photosToPreload(0, 4)).toEqual([1, 3]);
+    expect(photosToPreload(3, 4)).toEqual([0, 2]);
+  });
+
+  it("[002-AC49] with two photos the other one is named once", () => {
+    expect(photosToPreload(0, 2)).toEqual([1]);
+    expect(photosToPreload(1, 2)).toEqual([0]);
+  });
+
+  it("[002-AC49] with one photo or none there is nothing to preload", () => {
+    expect(photosToPreload(0, 1)).toEqual([]);
+    expect(photosToPreload(0, 0)).toEqual([]);
   });
 });

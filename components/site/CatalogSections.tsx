@@ -6,7 +6,7 @@ import type { ProductKind } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { buttonClass } from "./Hero";
-import { ProductPhotos } from "./ProductPhotos";
+import { PHOTO_SIZES, ProductPhotos } from "./ProductPhotos";
 
 function Photo({ image }: { image: CatalogImage }) {
   return (
@@ -15,8 +15,8 @@ function Photo({ image }: { image: CatalogImage }) {
       alt={image.altText}
       width={600}
       height={450}
+      sizes={PHOTO_SIZES}
       loading="lazy"
-      unoptimized
       className="aspect-[4/3] w-full rounded-2xl border-2 border-brand-night object-cover"
     />
   );

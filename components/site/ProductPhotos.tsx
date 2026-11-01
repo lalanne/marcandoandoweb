@@ -1,16 +1,29 @@
 "use client";
 
-import Image from "next/image";
-import { useRef, useState } from "react";
+import Image, { getImageProps } from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 import { imageUrl } from "@/lib/catalog/images";
-import { nextPhoto, previousPhoto, swipeStep } from "@/lib/catalog/photos";
+import {
+  nextPhoto,
+  photosToPreload,
+  previousPhoto,
+  swipeStep,
+} from "@/lib/catalog/photos";
 import type { CatalogImage } from "@/lib/catalog/types";
 
 // All of a product's photos on its card (spec 002, criteria 46 to 50). Only the
-// photo on show is in the page, so the others load when the visitor moves to them.
+// first photo is in the page on load; once the photo on show has loaded, the next and
+// the previous ones are preloaded (a low-priority image preload with the same srcset,
+// so the browser reuses it when the visitor moves; criterion 49).
+// The box is brand teal until its photo arrives, so there is never an empty gap.
+
+// The card is one column on a phone, a third of 1024 px on a computer, and the
+// product page's photo is half of 1024 px.
+export const PHOTO_SIZES = "(min-width: 768px) 480px, 100vw";
 
 const photoClass =
-  "aspect-[4/3] w-full rounded-2xl border-2 border-brand-night object-cover";
+  "aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30 object-cover";
 
 const roundButton =
   "flex h-11 w-11 items-center justify-center rounded-full border-2 border-brand-night bg-white text-brand-night shadow-[2px_2px_0_var(--brand-night)]";
@@ -33,15 +46,23 @@ function Arrow({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function Photo({ image }: { image: CatalogImage }) {
+function photoProps(image: CatalogImage) {
+  return {
+    src: imageUrl(image.storagePath),
+    alt: image.altText,
+    width: 600,
+    height: 450,
+    sizes: PHOTO_SIZES,
+  };
+}
+
+function Photo({ image, onLoad }: { image: CatalogImage; onLoad?: () => void }) {
   return (
     <Image
-      src={imageUrl(image.storagePath)}
+      {...photoProps(image)}
       alt={image.altText}
-      width={600}
-      height={450}
       loading="lazy"
-      unoptimized
+      onLoad={onLoad}
       className={photoClass}
     />
   );
@@ -49,8 +70,24 @@ function Photo({ image }: { image: CatalogImage }) {
 
 export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: string }) {
   const [index, setIndex] = useState(0);
+  const [loadedPath, setLoadedPath] = useState<string | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const count = images.length;
+  const shownPath = images[Math.min(index, count - 1)]?.storagePath;
+
+  // Once the photo on show has loaded, ask for its neighbors.
+  useEffect(() => {
+    if (count < 2 || loadedPath !== shownPath) return;
+    for (const i of photosToPreload(Math.min(index, count - 1), count)) {
+      const { props } = getImageProps(photoProps(images[i]));
+      preload(props.src, {
+        as: "image",
+        imageSrcSet: props.srcSet,
+        imageSizes: props.sizes,
+        fetchPriority: "low",
+      });
+    }
+  }, [count, index, images, loadedPath, shownPath]);
 
   if (count === 0) {
     return (
@@ -59,8 +96,8 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
   }
   if (count === 1) return <Photo image={images[0]} />;
 
-  const current = images[Math.min(index, count - 1)];
-
+  const shown = Math.min(index, count - 1);
+  const current = images[shown];
   return (
     <div className="flex flex-col gap-1" role="group" aria-label={`Fotos de ${name}`}>
       <div
@@ -82,7 +119,11 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
           start.current = null;
         }}
       >
-        <Photo key={current.storagePath} image={current} />
+        <Photo
+          key={current.storagePath}
+          image={current}
+          onLoad={() => setLoadedPath(current.storagePath)}
+        />
         <span
           data-testid="photo-counter"
           className="absolute right-2 top-2 rounded-full border-2 border-brand-night bg-white px-2 text-sm font-semibold text-brand-night"

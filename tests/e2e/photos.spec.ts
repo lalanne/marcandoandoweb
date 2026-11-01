@@ -1,16 +1,14 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { solidPng } from "./png";
 import { ADMIN, supabaseEnv } from "./supabase";
 
 // Spec 002, all of a product's photos on its card (criteria 46 to 51, issue #82).
 // Fake products and tiny generated PNGs, created as the admin and removed after.
 
-// 1x1 transparent PNG.
-const PNG = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
-  "base64",
-);
+// A photo-sized solid-color PNG made in the test.
+const PNG = solidPng(1200, 900);
 
 const run = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const folder = `e2e-fotos-${run}`;
@@ -93,9 +91,19 @@ const next = (card: Locator) => card.getByRole("button", { name: "Foto siguiente
 const previous = (card: Locator) => card.getByRole("button", { name: "Foto anterior" });
 const dots = (card: Locator) => card.getByRole("button", { name: /^Ver foto \d+$/ });
 
+// Photos go through Next's image optimizer: the browser asks for
+// `/_next/image?url=%2Fimg%2F<path>&w=..&q=..`, which reads the `/img/<path>` route.
+function storagePathOf(url: string): string | null {
+  const u = new URL(url, "http://localhost");
+  const source = u.pathname === "/_next/image" ? u.searchParams.get("url") : u.pathname;
+  return source?.startsWith("/img/") ? source.slice("/img/".length) : null;
+}
+
 async function shows(card: Locator, n: number) {
   await expect(photo(card)).toHaveAttribute("alt", many.photos[n - 1].alt);
-  await expect(photo(card)).toHaveAttribute("src", `/img/${many.photos[n - 1].path}`);
+  await expect
+    .poll(async () => storagePathOf((await photo(card).getAttribute("src")) ?? ""))
+    .toBe(many.photos[n - 1].path);
   await expect(counter(card)).toHaveText(`${n} / 4`);
 }
 
@@ -188,22 +196,27 @@ test("[002-AC48] swiping the photo sideways moves to the next or previous photo"
   await shows(card, 4);
 });
 
-test("[002-AC49] only the first photo loads with the page, each photo has its alt text, and the card keeps its size", async ({
+test("[002-AC49] only the first photo loads with the page, then the next and previous ones; each photo has its alt text and the card keeps its size", async ({
   page,
 }) => {
-  const requested = new Set<string>();
+  const requested: string[] = [];
   page.on("request", (req) => {
-    const path = new URL(req.url()).pathname;
-    if (path.startsWith(`/img/${folder}/`)) requested.add(path.slice("/img/".length));
+    const path = storagePathOf(req.url());
+    if (path?.startsWith(`${folder}/cuatro-`) && !requested.includes(path)) requested.push(path);
   });
   const card = await cardOf(page, many.name);
   const img = photo(card);
   await expect
     .poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0))
     .toBe(true);
-  expect([...requested].filter((p) => p.startsWith(`${folder}/cuatro-`))).toEqual([
-    many.photos[0].path,
-  ]);
+  // The first photo is asked for first, with the page...
+  expect(requested[0]).toBe(many.photos[0].path);
+  // ...and once it has loaded the next (2) and the previous (4) are preloaded, and
+  // not the third, all before the visitor presses anything.
+  await expect.poll(() => [...requested].sort()).toEqual(
+    [many.photos[0].path, many.photos[1].path, many.photos[3].path].sort(),
+  );
+  expect(requested).not.toContain(many.photos[2].path);
 
   const before = await card.boundingBox();
   const photoBefore = await card.getByTestId("photo-area").boundingBox();
@@ -213,9 +226,8 @@ test("[002-AC49] only the first photo loads with the page, each photo has its al
     if (n === 1) {
       await next(card).click();
       await shows(card, 2);
-      // Moving to the second photo asks for it, and not yet for the others.
-      await expect.poll(() => requested.has(many.photos[1].path)).toBe(true);
-      expect(requested.has(many.photos[3].path)).toBe(false);
+      // Moving to the second photo now preloads the third.
+      await expect.poll(() => requested.includes(many.photos[2].path)).toBe(true);
       expect(await card.boundingBox()).toEqual(before);
       expect(await card.getByTestId("photo-area").boundingBox()).toEqual(photoBefore);
       continue;
@@ -224,6 +236,44 @@ test("[002-AC49] only the first photo loads with the page, each photo has its al
   }
   expect(alts).toEqual(many.photos.map((p) => p.alt));
   expect(await card.boundingBox()).toEqual(before);
+});
+
+test("[002-AC49] photos are served resized as WebP, and a slow photo shows the brand teal in a box that keeps its size", async ({
+  page,
+}) => {
+  const types: string[] = [];
+  page.on("response", (res) => {
+    if (storagePathOf(res.url())?.startsWith(`${folder}/cuatro-`)) {
+      types.push(res.headers()["content-type"] ?? "");
+    }
+  });
+  // Hold every photo for a moment so the loading state can be looked at.
+  await page.route("**/_next/image*", async (route) => {
+    await new Promise((r) => setTimeout(r, 1500));
+    await route.continue();
+  });
+  await page.goto("/");
+  const card = page.locator("article", { hasText: many.name });
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  await card.scrollIntoViewIfNeeded();
+  const img = photo(card);
+  const loading = await img.evaluate((i: HTMLImageElement) => ({
+    done: i.complete && i.naturalWidth > 0,
+    box: i.getBoundingClientRect().height,
+    background: getComputedStyle(i).backgroundColor,
+  }));
+  expect(loading.done).toBe(false);
+  expect(loading.box).toBeGreaterThan(100);
+  expect(loading.background).not.toBe("rgba(0, 0, 0, 0)");
+  await expect
+    .poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0), {
+      timeout: 15_000,
+    })
+    .toBe(true);
+  const after = await img.evaluate((i: HTMLImageElement) => i.getBoundingClientRect().height);
+  expect(after).toBe(loading.box);
+  expect(types.length).toBeGreaterThan(0);
+  for (const type of types) expect(type).toBe("image/webp");
 });
 
 test("[002-AC50] the photo controls work with the keyboard, show focus, are at least 44 px and fit at 360 px", async ({
