@@ -75,8 +75,8 @@ export function SiteHeader({ base = "" }: { base?: string }) {
             src={logo}
             alt="Marcando Ando, logo con una polera rosada con una M y un tazón morado"
             priority
-            sizes="120px"
-            className="h-14 w-auto"
+            sizes="(min-width: 768px) 352px, 280px"
+            className="h-16 w-auto md:h-20"
           />
         </a>
         <nav aria-label="Secciones">

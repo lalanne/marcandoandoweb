@@ -553,6 +553,17 @@ customers.
     photos, colors, sizes or characteristics, then `/productos/<slug>` still opens
     that product; the slug does not change unless the admin changes it on purpose.
 
+**Bigger logo** (added 2026-10-31, issue #99)
+
+Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
+
+67. Given the home page at 360 px and at 1280 px, when it loads, then the header logo
+    is at least 56 px tall on a phone and 72 px tall on desktop, is served with at
+    least as many pixels as it shows, keeps its Spanish alt text, and the header
+    still has no horizontal scroll and does not change height on reload; and the
+    browser-tab icon is the logo cropped to its drawing (it spans at least 95% of the
+    icon's width), so it reads at 32 px.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -585,6 +596,7 @@ customers.
 | 62, 63 | "Copiar enlace" and its fallback | Unit test for the pure link builder; end to end (Playwright) with clipboard permission granted and denied |
 | 64 | Admin fields: save, order, remove, errors, optional | End to end (Playwright) against local Supabase as a throwaway admin; unit tests for the form parser (spec 001 criteria 24 to 26 share it) |
 | 65 | Responsive, keyboard, contrast, axe, back link | End to end (Playwright) at 360 and 1280 px with axe |
+| 67 | Logo size, sharpness, header fit, tab icon crop | End to end (Playwright) at 360 and 1280 px with axe (header tests) |
 | 66 | The link survives edits | End to end (Playwright), or integration on the slug staying the same after an update |
 | 43, 44, 45 | "Salir" ends on the home page, "Ver sitio", "Volver al sitio" | End to end (Playwright) at 360 and 1280 px against local Supabase, as a throwaway admin (signing out ends every session of that user); criterion 10 and spec 005 criterion 9 keep their tests |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
