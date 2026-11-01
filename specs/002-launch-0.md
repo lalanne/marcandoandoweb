@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) is **draft** until the owner approves it.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -45,8 +45,9 @@ Spec 001 must be approved for the part launch 0 uses. Launch 0 implements only:
   published rows, only the admin writes.
 
 Deferred to later specs: variants, themes, design-to-product links, offers
-(`offer_price_clp`), minimum quantity, materials, sizes and colors, multiple
-categories per product.
+(`offer_price_clp`), minimum quantity, ~~materials, sizes and colors~~ (they come in
+with the 2026-10-31 amendment for issue #87, below: `colors`, `sizes` and
+`characteristics`), multiple categories per product.
 
 A product in launch 0 belongs to one category **(interpretation: the join table
 comes with the multi-category work)**.
@@ -156,7 +157,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 | **Footer** | WhatsApp, Instagram `@marcando_ando`, and the email only if the owner confirms one |
 | **Floating button** | A WhatsApp button always visible (Req §6) |
 
-There are no separate product pages, search or filters at launch.
+There is no search or filters at launch. ~~There are no separate product pages.~~ Each product has its own page since the 2026-10-31 amendment for issue #87 (below).
 
 **2026-10-31 amendment - all of a product's photos on its card (issue #82).** The
 admin could already give a product several photos, in an order, but each card showed
@@ -176,7 +177,55 @@ all of them, and chose option 1 of the design canvas
 - The same applies to products and packs. The rest of the card (name, price,
   availability, "Cotizar") does not change.
 
-A separate product page stays out of launch 0 (issue #87 covers a detail view).
+**2026-10-31 amendment - a page per product, with colors, sizes and a link to share
+(issue #87, draft until the owner approves it).** Javiera's customers keep asking
+which colors a product comes in and she answers with an image; she asked for a detail
+view and a link she can send ("Feedback from Javiera: product details and a link to
+share" in `docs/requirements.md`). From the design canvas
+(https://claude.ai/artifact/7re5R2fp8YvJ4Hxa4Yk99y) the owner chose **A, a page per
+product**, and that colors and sizes are lists (spec 001's amendment of the same
+date). So:
+
+- **The page.** Every published product and pack has a page at `/productos/<slug>`
+  (the slug is spec 001's; it does not change when the name is edited). It shows, in
+  this order: a link "Volver a productos" (or "Volver a packs" for a pack) to the
+  home page's section, the photos (the same previous/next, counter, dots and swipe as
+  the card, criteria 46 to 50), the name, the price ("$7.000 c/u"), the "no
+  disponible por ahora" notice when unavailable, the colors, the sizes, the
+  characteristics, the description, the "Cotizar por WhatsApp" button (same message
+  as the card's) and the "Copiar enlace" button. A heading, list or row shows **only
+  when it has content**: a product with no colors shows no "Colores" heading.
+- **Colors** show as round swatches, each with its name written next to it (never
+  color alone). **Sizes** show as pills. **Characteristics** show as a list, one item
+  per line of the text.
+- **From the card.** Each card gets a "Ver detalles" link (a link, since it goes to
+  another page) after the price. Tapping the photo does not open the page, so swiping
+  through photos stays free (issue #82). A screen reader hears "Ver detalles de
+  <name>".
+- **The link to share.** `https://<site>/productos/<slug>`. "Copiar enlace" on the
+  page copies it and says "Enlace copiado" (announced politely); if the browser
+  refuses, the link shows in a text field, selected, so it can be copied by hand. In
+  the panel's product list, every published product has a "Copiar enlace" button
+  with the same behavior; an unpublished product has none, because its page is a 404.
+- **Preview when shared.** The page has its own title ("<name> | Marcando Ando"), a
+  description that includes the price and what it is, a canonical address, and the
+  Open Graph tags (title, description, image = the cover photo as an absolute address,
+  url) so WhatsApp and Instagram show a preview. Published product pages are listed
+  in the site's sitemap, so Google can find them. The cover photo is served from
+  `/img/<path>`; an unpublished product's photo is never served (criterion 25).
+- **Not published, or unknown.** `/productos/<slug>` of an unpublished or missing
+  product answers 404, as the rest of the public data does.
+- **Admin form.** New optional fields on the product form: **Colores** (rows of a
+  name and a color picker, "Agregar color" and "Quitar" per row), **Tamaños y tallas**
+  (rows of a label, "Agregar" and "Quitar"), and **Características** (a text area,
+  "una por línea"). Entry order is display order. Invalid values (a missing name, a
+  color that is not `#RRGGBB`, more than 20 rows) show a Spanish error and save
+  nothing. All appear on the public site without a deploy.
+- **Out:** stock or inventory per color or size, variant prices, filtering by color or
+  size, and a pop-up or in-card detail (options B and C, not chosen).
+- **Seed and tests** use fake colors and sizes only.
+
+Before this amendment a card showed a photo, name, price and "Cotizar", and nothing opened.
 
 **2026-10-31 amendment - prices without "desde", and a wholesale note (issue #85).**
 The owner asked to drop "desde" from the prices and to tell visitors that "al por
@@ -451,6 +500,59 @@ customers.
     they are followed, then the pre-filled messages are the same as before this
     amendment.
 
+**A page per product, with colors, sizes and a link to share** (added 2026-10-31, issue #87)
+
+56. Given a published product or pack, when the home page loads, then its card has a
+    link "Ver detalles" that goes to `/productos/<slug>`, can be reached and pressed
+    with the keyboard with a visible focus, is at least 44 by 44 px, and is announced
+    as "Ver detalles de <name>"; and pressing the photo itself does not leave the
+    page.
+57. Given a published product with a price of 7000, three photos, colors Rosado
+    (`#E8647F`) and Celeste (`#4FB0B0`), sizes "4", "6" and "8", and two lines of
+    characteristics, when a visitor opens `/productos/<slug>`, then they see the
+    name, "$7.000 c/u", the photos with the controls of criteria 46 to 50, the two
+    colors as swatches with their names written, the three sizes in that order, the
+    characteristics as a list of two items, and the "Cotizar por WhatsApp" button
+    whose message names the product as on the card.
+58. Given a published product with no colors, no sizes, no characteristics and no
+    price, when a visitor opens its page, then it shows no "Colores", "Tamaños y
+    tallas" or "Características" heading and no price, and still shows the name, the
+    photos and the "Cotizar por WhatsApp" button.
+59. Given a published product marked unavailable, when a visitor opens its page,
+    then it shows "no disponible por ahora" and no "Cotizar por WhatsApp" button.
+60. Given an unpublished product, or a slug that does not exist, when a visitor opens
+    `/productos/<slug>`, then the answer is 404 and none of its data or photos is
+    shown (a photo asked at `/img/<path>` is refused, criterion 25).
+61. Given a published product, when its page is requested, then its `<title>` is
+    "<name> | Marcando Ando", it has a description that includes the price when there
+    is one, a canonical address, and the Open Graph tags `og:title`, `og:description`,
+    `og:url` and `og:image`, the last one the absolute address of the cover photo and
+    absent when the product has no photo; and the sitemap lists the page of every
+    published product and none of an unpublished one.
+62. Given a product page, when the visitor presses "Copiar enlace", then
+    `https://<site>/productos/<slug>` is on the clipboard and the text "Enlace
+    copiado" is announced; when the browser refuses to copy, then the link shows in a
+    text field, selected, instead.
+63. Given the admin looking at the product list in the panel, when a product is
+    published, then its row has a "Copiar enlace" button with the behavior of
+    criterion 62; when it is not published, then its row has none.
+64. Given the admin on the product form, when they add the colors Rosado `#E8647F` and
+    Celeste `#4FB0B0`, the sizes "4" and "6", and the characteristics "100% algodón"
+    and "Estampado con vinilo", and save, then the public page shows them in that
+    order without a deploy; when they remove a color and save, it disappears; when
+    they leave a color without a name, choose a color that is not `#RRGGBB` or add a
+    21st row, then a Spanish error shows and nothing is saved; and every one of these
+    fields is optional.
+65. Given a product page at 360 px and at 1280 px, when it loads and is used with the
+    keyboard only, then there is no horizontal scroll, every control can be reached
+    with a visible focus and is at least 44 by 44 px, labels and alt text are in
+    Spanish, text contrast is at least 4.5:1, the color names carry the meaning (the
+    swatches alone do not), axe reports nothing, and "Volver a productos" (or "Volver
+    a packs") leads to that section of the home page.
+66. Given a link already shared, when the admin edits the product's name, price,
+    photos, colors, sizes or characteristics, then `/productos/<slug>` still opens
+    that product; the slug does not change unless the admin changes it on purpose.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -476,6 +578,14 @@ customers.
 | 52, 53 | Price "$7.000 c/u", no "desde", the note once per section | Unit test for the price label helper; end to end (Playwright) at 360 and 1280 px with axe |
 | 54 | Admin price label | End to end (Playwright); the existing price parser unit tests stay |
 | 55 | WhatsApp messages unchanged | The existing unit tests of the message builder stay green |
+| 56 | "Ver detalles" link on the card, photo does not navigate | End to end (Playwright) at 360 and 1280 px, with axe |
+| 57, 58, 59 | Page content, only fields with content, unavailable | End to end (Playwright) at 360 and 1280 px against local Supabase with seeded fake colors, sizes and characteristics; a unit test for the pure helper that turns the characteristics text into items and the list into what the page shows |
+| 60 | 404 for unpublished or unknown | End to end (Playwright); integration for the data being hidden (spec 001 criterion 13) |
+| 61 | Title, description, Open Graph tags, sitemap | Unit test for the pure metadata builder; end to end that reads the tags and the sitemap of the running server |
+| 62, 63 | "Copiar enlace" and its fallback | Unit test for the pure link builder; end to end (Playwright) with clipboard permission granted and denied |
+| 64 | Admin fields: save, order, remove, errors, optional | End to end (Playwright) against local Supabase as a throwaway admin; unit tests for the form parser (spec 001 criteria 24 to 26 share it) |
+| 65 | Responsive, keyboard, contrast, axe, back link | End to end (Playwright) at 360 and 1280 px with axe |
+| 66 | The link survives edits | End to end (Playwright), or integration on the slug staying the same after an update |
 | 43, 44, 45 | "Salir" ends on the home page, "Ver sitio", "Volver al sitio" | End to end (Playwright) at 360 and 1280 px against local Supabase, as a throwaway admin (signing out ends every session of that user); criterion 10 and spec 005 criterion 9 keep their tests |
 | 28, 29, 30 | Label by session: admin, non-admin, after sign-out | End to end (Playwright) against local Supabase, as the throwaway admin and the seeded non-admin; a unit test for the pure function that picks the label and the target |
 | 2, 20, 22, 23, 24 | Production state, console, DNS, SSL, metadata, deploy | Manual checklist on the live site, plus Vercel deploy status |

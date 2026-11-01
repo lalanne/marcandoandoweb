@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) is **draft** until the owner approves it.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -95,12 +95,37 @@ A thing Marcando Ando can personalize and quote.
 | `price_from_clp` | optional integer, whole pesos, `>= 0` when set; shown as a "from" or reference price, not a firm quote (Req §3B). See the 2026-10-25 amendment below |
 | `offer_price_clp` | optional integer; when set it must be lower than `price_from_clp`; this *is* the offer: a product is "on offer" exactly when it is set **(interpretation of "Ofertas", pending Javiera)** |
 | `personalization` | text: what can be personalized and how, such as print size and "tu logo o tu diseño aquí" (Req §3B, §3C) |
-| `materials`, `sizes`, `colors` | optional text, filled "when it applies" (Req §3B) **(interpretation: plain text, not structured)** |
+| ~~`materials`, `sizes`, `colors`~~ | ~~optional text, filled "when it applies" (Req §3B) **(interpretation: plain text, not structured)**~~ Replaced by the three rows below (2026-10-31 amendment, issue #87) |
+| `colors` | optional list, in display order: each color has a `name` and a `hex` (see the 2026-10-31 amendment below). Default: empty |
+| `sizes` | optional list of labels, in display order, for sizes (tamaños) and clothing sizes (tallas) alike: "S", "4", "500 ml". Default: empty |
+| `characteristics` | optional text, one characteristic per line: material, measurements, capacity, care. Replaces `materials` |
 | `min_quantity` | optional integer `>= 1` (Req §3C) |
 | `is_featured` | highlighted on the site (Req §7) |
 | `is_available` | default true; false means "temporarily unavailable" (Req §7) |
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
+
+**2026-10-31 amendment - colors, sizes and characteristics (issue #87, draft until
+the owner approves it).** Javiera asked for a detail view that shows a product's
+colors, sizes and technical characteristics ("Feedback from Javiera: product details
+and a link to share" in `docs/requirements.md`). The owner decided that colors and
+sizes are **lists**, not free text, so the site can draw color swatches and size
+pills, and that the three fields come into launch 0. So:
+
+- **`colors`** is a list of up to 20 colors. Each has a `name` (required, Spanish,
+  1 to 30 characters, such as "Rosado") and a `hex` (required, `#RRGGBB`, the
+  swatch). The order of the list is the display order. The name is always shown, so
+  color is never the only signal.
+- **`sizes`** is a list of up to 20 labels, each 1 to 20 characters, in display
+  order. One list serves both "tamaños" and "tallas"; the admin writes the labels
+  as the customer knows them.
+- **`characteristics`** is optional text (up to 1000 characters), one
+  characteristic per line, shown as a list. It replaces `materials`, which was never
+  built (it was deferred from launch 0).
+- No stock or price per color or size, and no Variant changes: inventory and variant
+  prices stay out (spec 000).
+- Open question 5 below is answered: colors and sizes are structured now.
+- Migration ("expand then contract"): the migration only adds columns with empty defaults; no existing code reads them, so old and new code both work.
 
 **2026-10-25 amendment - price is optional.** The owner decided that
 `price_from_clp` is optional, because the client has not confirmed prices and a
@@ -300,9 +325,26 @@ plan.
     one is returned with its `kind`, and asking for one `kind` returns only the
     published products of that `kind`.
 
-## Verification plan
+**Colors, sizes and characteristics** (added 2026-10-31, issue #87)
 
-Test layers follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
+24. Given a product, when `colors` has an entry with an empty name, a name longer
+    than 30 characters, a `hex` that is not `#RRGGBB`, or more than 20 entries, the
+    write is rejected; when it has `[{"name":"Rosado","hex":"#E8647F"}]` it is
+    accepted; when it is not given, the product is saved with an empty list.
+25. Given a product, when `sizes` has an empty label, a label longer than 20
+    characters, or more than 20 labels, the write is rejected; when it has
+    `["4","6","8"]` it is accepted, in that order; when it is not given, the product
+    is saved with an empty list.
+26. Given a product, when `characteristics` is longer than 1000 characters, the write
+    is rejected; when it is empty or not given, it is accepted.
+27. Given a published product with colors, sizes and characteristics, when the public
+    reads it, all three come back, colors and sizes in the order saved; given an
+    unpublished product, the public gets none of it (criterion 13).
+28. Given the public and a signed-in user who is not the admin, when they try to
+    write these fields, the write is rejected; the admin's write succeeds (criteria
+    18 to 20 extended).
+
+## Verification plan follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
 constraints and the visibility rules run against a real **local Supabase**, never
 a mock of the database.
 
@@ -316,6 +358,8 @@ a mock of the database.
 | 18, 19 | Writes rejected | Integration, as anonymous and as a non-admin user |
 | 20 | Admin writes | Integration, as the admin |
 | 21 | Ordering | Integration |
+| 24, 25, 26 | Colors, sizes and characteristics: shapes, limits, defaults | Integration (local Supabase); a unit test for the pure parser/validator the admin form and the page share |
+| 27, 28 | Public read in order, unpublished hidden, writes only by the admin | Integration, as anonymous, non-admin and admin |
 | 22, 23 | Product type: allowed values, default, public read by `kind` | Integration (local Supabase), as the anonymous role and the admin |
 | 2, 17 | Offer rule | Also a unit test for the pure "is on offer / old and new price" helper |
 
@@ -352,6 +396,8 @@ The owner approved the spec on 2026-10-23 with the proposals below as the workin
    designs ever cost differently?
 5. **Sizes, colors and materials as plain text.** Simple for Javiera to edit. If the
    site later needs to filter by color or size, this becomes structured data.
+   **Answered 2026-10-31 (owner, issue #87):** colors and sizes are lists; the
+   materials become free-text characteristics.
 6. **Offers.** Pending Javiera: is "oferta" a discounted product, or a seasonal
    promotion? A seasonal promotion with dates would need start and end dates.
 7. **Theme depth.** One level of children. Is that enough for the schools section?
