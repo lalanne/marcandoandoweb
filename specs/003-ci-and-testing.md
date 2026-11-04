@@ -84,6 +84,7 @@ GitHub Actions, on every pull request to `main` and on every push to `main`.
 | `traceability` | The criterion-to-test script above |
 | `tests-with-changes` | Fails if `app/`, `src/` or `supabase/migrations/` changed and no test file did. The owner can waive it with a label on that PR |
 | `migrations` | A clean database reset works from the migrations alone |
+| `test-integrity` | Compares the PR with `main` and fails if an existing test was weakened or removed (see "Test integrity", amendment of 2026-11-04) |
 
 Later, not blocking at first: Lighthouse on the Vercel preview, dependency audit,
 Dependabot.
@@ -91,6 +92,28 @@ Dependabot.
 Checks that need a database or a browser are added in the issue that introduces the
 first test of that kind, so the CI is never red for lack of tests or green for an
 empty suite. `static`, `unit`, `traceability` and `tests-with-changes` come first.
+
+## Test integrity
+
+**2026-11-04 amendment (issue #112, draft until the owner approves).** The rule
+"existing tests untouched or strengthened, never weakened" had no enforcement: an
+agent could make a failing test pass by editing the test. `scripts/test-integrity.mjs`
+reads the PR's diff against `main`, limited to test files (`tests/` and
+`*.test|spec.*`), and fails on:
+
+- a deleted or renamed test file;
+- a removed line that is an assertion (`expect(`, `assert`) or a test declaration
+  (`it(`, `test(`, `describe(`) in an existing test file, including one that was
+  edited (an edit is a removal plus an addition; the script cannot tell a
+  weakening from a strengthening) **(interpretation: false positives are
+  accepted, the owner waives them)**;
+- an added `.skip`, `.only`, `.fixme`, `.todo`, `xit`, `xdescribe` or `xtest`.
+
+Added tests, and edits to non-assertion lines (imports, helpers, formatting), pass.
+The owner waives the check on a PR with the label `test-change-reviewed`, for
+example when a spec changed and its tests changed with it. The PR then explains
+the change. CI still cannot prove test-first order (squash hides it); that stays
+with the skills and the PR checklist.
 
 ## Branch rules (GitHub settings for `main`)
 
@@ -138,6 +161,19 @@ covered; revert check done (bugs); issue linked with `Closes #n`.
     deleted.
 12. Given a PR opened from the template, when read, then it shows the checklist.
 
+13. Given a PR that deletes or renames an existing test file, when CI runs, then
+    `test-integrity` fails and names the file.
+14. Given a PR that removes or edits an `expect(`/`assert` line or an
+    `it(`/`test(`/`describe(` line in an existing test, when CI runs, then
+    `test-integrity` fails and names the file and line.
+15. Given a PR that adds `.skip`, `.only`, `.fixme`, `.todo`, `xit`, `xdescribe`
+    or `xtest` to a test, when CI runs, then `test-integrity` fails.
+16. Given a PR that only adds new tests or new files, when CI runs, then
+    `test-integrity` passes.
+17. Given a PR that fails `test-integrity` and carries the label
+    `test-change-reviewed`, when CI runs, then it passes.
+18. Given a push to `main`, when CI runs, then `test-integrity` does nothing.
+
 ## Verification plan
 
 The CI is verified by trying to break it, on a throwaway branch, once per check:
@@ -148,6 +184,8 @@ The CI is verified by trying to break it, on a throwaway branch, once per check:
 | 5 | Exemption | A PR adding an exemption for a criterion with no test |
 | 8, 9, 10, 11 | Branch rules | Attempt each action and read the refusal; settings read back with `gh api repos/lalanne/marcandoandoweb/branches/main/protection` |
 | 12 | Template | Open a PR and read it |
+| 13, 14, 15, 16, 17 | Test integrity | Unit tests of the script's pure function (`tests/unit/test-integrity.test.ts`), plus a throwaway PR that weakens a test, closed without merging |
+| 18 | No-op on push | Read the job's `if` condition and the run on `main` |
 
 ## Rollout
 
