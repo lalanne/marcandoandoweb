@@ -95,7 +95,7 @@ empty suite. `static`, `unit`, `traceability` and `tests-with-changes` come firs
 
 ## Test integrity
 
-**2026-11-04 amendment (issue #112, draft until the owner approves).** The rule
+**2026-11-04 amendment (issue #112, approved by the owner on 2026-11-04).** The rule
 "existing tests untouched or strengthened, never weakened" had no enforcement: an
 agent could make a failing test pass by editing the test. `scripts/test-integrity.mjs`
 reads the PR's diff against `main`, limited to test files (`tests/` and
