@@ -319,6 +319,7 @@ because they become required checks (spec 003). Run each locally before opening 
 | `integration` | Start local Supabase, reset from migrations and seed, run `tests/integration/` | `npx supabase start && npx supabase db reset && npm run test:integration` |
 | `migrations` | A clean reset works from the migrations alone, and leaves no seed rows and no category table or `product.category_id` (dropped in #65) | `npx supabase db reset --no-seed` |
 | `tests-with-changes` | A PR that changes `app/`, `src/` or `supabase/migrations/` also changes a test file, unless it has the label `no-test-needed` (the owner adds it) | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" LABELS='[]' node scripts/tests-with-changes.mjs` |
+| `test-integrity` | A PR does not delete, rename, skip or weaken an existing test (deleted/renamed test file, removed or edited `expect(`/`assert`/`it(`/`test(`/`describe(` line, added `.skip`/`.only`/`.fixme`/`.todo`/`xit`/`xdescribe`/`xtest`), unless it has the label `test-change-reviewed` (the owner adds it). No-op on pushes to `main` | `git diff -U0 origin/main...HEAD \| LABELS='[]' node scripts/test-integrity.mjs` |
 
 | `e2e` | Production build started against local Supabase, Playwright at 360 and 1280 px with axe checks; traces uploaded on failure. **The owner must add `e2e` to the required checks of `main` after the PR that introduced it merges** | `npx supabase start && npx supabase db reset && npm run build && CI=1 npm run test:e2e` |
 
