@@ -25,7 +25,7 @@ async function withAdmin(
 function headerLink(page: Page) {
   return page
     .locator("header")
-    .getByRole("link", { name: /^(Entrar|Mi panel)$/ });
+    .getByRole("link", { name: /^(Admin|Mi panel)$/ });
 }
 
 async function signIn(
@@ -76,12 +76,12 @@ async function addUserSession(
   );
 }
 
-test("[002-AC27] a visitor sees Entrar in the header without scrolling and it goes to /entrar", async ({
+test("[002-AC27] a visitor sees Admin in the header without scrolling and it goes to /entrar", async ({
   page,
 }) => {
   await page.goto("/");
   const link = headerLink(page);
-  await expect(link).toHaveText("Entrar");
+  await expect(link).toHaveText("Admin");
   await expect(link).toBeInViewport();
   await expect(link).toHaveAttribute("href", "/entrar");
   // The section links stay visible next to it.
@@ -106,7 +106,7 @@ test("[002-AC27] the header link is reachable with the keyboard with a visible f
     timeout: 20_000,
   });
   const link = headerLink(page);
-  await expect(link).toHaveText("Entrar");
+  await expect(link).toHaveText("Admin");
   await page.keyboard.press("Tab");
   await link.focus();
   await expect(link).toBeFocused();
@@ -156,7 +156,7 @@ test("[002-AC28] the admin sees Mi panel in the header and it reaches the panel"
   });
 });
 
-test("[002-AC29] a signed-in user who is not the admin sees Entrar and no sign of who they are", async ({
+test("[002-AC29] a signed-in user who is not the admin sees Admin and no sign of who they are", async ({
   page,
   context,
   baseURL,
@@ -167,13 +167,13 @@ test("[002-AC29] a signed-in user who is not the admin sees Entrar and no sign o
   await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
     timeout: 20_000,
   });
-  await expect(link).toHaveText("Entrar");
+  await expect(link).toHaveText("Admin");
   await expect(link).toHaveAttribute("href", "/entrar");
   await expect(page.getByText(NON_ADMIN.email)).toHaveCount(0);
   await expect(page.locator("header")).not.toContainText(NON_ADMIN.email);
 });
 
-test("[002-AC30] after signing out through /salir the link reads Entrar again", async ({
+test("[002-AC30] after signing out through /salir the link reads Admin again", async ({
   page,
 }) => {
   await withAdmin("hdr30", async (admin) => {
@@ -188,12 +188,12 @@ test("[002-AC30] after signing out through /salir the link reads Entrar again", 
     await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
       timeout: 20_000,
     });
-    await expect(headerLink(page)).toHaveText("Entrar");
+    await expect(headerLink(page)).toHaveText("Admin");
     await expect(headerLink(page)).toHaveAttribute("href", "/entrar");
   });
 });
 
-test("[002-AC31] an unreadable session falls back to Entrar and the page still loads", async ({
+test("[002-AC31] an unreadable session falls back to Admin and the page still loads", async ({
   page,
   context,
   baseURL,
@@ -203,7 +203,7 @@ test("[002-AC31] an unreadable session falls back to Entrar and the page still l
   await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
     timeout: 20_000,
   });
-  await expect(headerLink(page)).toHaveText("Entrar");
+  await expect(headerLink(page)).toHaveText("Admin");
   await expect(page.getByText("Marcamos tus ideas").first()).toBeVisible();
 });
 
@@ -221,7 +221,7 @@ test("[002-AC31] the header does not shift when the label changes to Mi panel", 
     return p.evaluate(() => {
       const header = document.querySelector("header")!.getBoundingClientRect();
       const link = [...document.querySelectorAll("header a")]
-        .find((a) => /^(Entrar|Mi panel)$/.test(a.textContent ?? ""))!
+        .find((a) => /^(Admin|Mi panel)$/.test(a.textContent ?? ""))!
         .getBoundingClientRect();
       return {
         x: link.x,
@@ -233,7 +233,7 @@ test("[002-AC31] the header does not shift when the label changes to Mi panel", 
     });
   };
   await page.goto("/");
-  await expect(headerLink(page)).toHaveText("Entrar");
+  await expect(headerLink(page)).toHaveText("Admin");
   const visitor = await box(page);
 
   await withAdmin("hdr31", async (admin) => {

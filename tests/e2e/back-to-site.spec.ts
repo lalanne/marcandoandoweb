@@ -16,7 +16,7 @@ async function signIn(page: Page, admin: { email: string; password: string }) {
 }
 
 const headerAccountLink = (page: Page) =>
-  page.locator("header").getByRole("link", { name: /^(Entrar|Mi panel)$/ });
+  page.locator("header").getByRole("link", { name: /^(Admin|Mi panel)$/ });
 
 test("[002-AC43] Salir ends on the home page, signed out", async ({ page }, testInfo) => {
   const admin = await createTestAdmin(`salir-${testInfo.project.name}`);
@@ -30,7 +30,7 @@ test("[002-AC43] Salir ends on the home page, signed out", async ({ page }, test
     expect((await response).status()).toBe(303);
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByText("Marcamos tus ideas").first()).toBeVisible();
-    await expect(headerAccountLink(page)).toHaveText("Entrar");
+    await expect(headerAccountLink(page)).toHaveText("Admin");
     await expect(headerAccountLink(page)).toHaveAttribute("href", "/entrar");
 
     await page.goto("/panel");

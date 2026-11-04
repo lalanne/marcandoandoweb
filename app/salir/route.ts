@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // drops everything the browser kept in memory, including the panel pages that
 // Next keeps hidden for the back button, so none of the panel stays around.
 // It ends on the home page (spec 002, criterion 43), where the header then
-// offers "Entrar" again.
+// offers "Admin" again.
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   await supabase.auth.signOut();
