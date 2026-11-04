@@ -85,7 +85,7 @@ three of these (2026-10-31):
 
 - **"Salir" ends on the home page.** Sign-out stays a form POST to `/salir` and a
   full page load, but it now lands on `/` (it landed on `/entrar`), where the header
-  link reads "Entrar" (criterion 43).
+  link reads "Admin" (criterion 43).
 - **"Ver sitio" in the panel header**, next to the panel's own links: it opens the
   home page and the admin stays signed in, so the header link there reads "Mi
   panel" (criterion 44).
@@ -147,7 +147,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
-| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107): "Catálogos empresas" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
+| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Admin" for visitors (was "Entrar" until 2026-11-04), "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107): "Catálogos empresas" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
 | **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, price if set (amended 2026-10-31: "$7.000 c/u", no longer "desde $7.000"), and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
 | **Packs** | Added 2026-10-31. Published products of type "Pack", shown and ordered exactly like the Products section. Section heading "Packs", anchor `#packs` |
@@ -478,17 +478,23 @@ rules are, and they do not change. The link is shown to everyone, including
 customers.
 
 27. Given a visitor who is not signed in, when the home page loads, then the header
-    shows a link labelled "Entrar" that goes to `/entrar`, visible without scrolling
+    shows a link labelled "Admin" that goes to `/entrar`, visible without scrolling
     at 360 px and at 1280 px, reachable with the keyboard with a visible focus.
 28. Given the admin signed in, when the home page loads, then the header link reads
     "Mi panel" and goes to `/panel`.
 29. Given a user who is signed in but is not the admin, when the home page loads,
-    then the header link reads "Entrar", and nothing reveals who is signed in.
+    then the header link reads "Admin", and nothing reveals who is signed in.
 30. Given the admin who signs out through `/salir`, when they return to the home
-    page, then the link reads "Entrar" again.
+    page, then the link reads "Admin" again.
 31. Given the home page, when the session cannot be read or takes long, then the link
-    shows "Entrar", the hero and the other sections are not delayed or broken, and
+    shows "Admin", the hero and the other sections are not delayed or broken, and
     the header does not shift the layout when the label changes to "Mi panel".
+
+**2026-11-04 amendment - "Admin" label (issue #109).** Only the admin signs in, so
+"Entrar" invited customers to click something that is not for them. The owner asked
+for the visitor's header link to read "Admin" instead. Criteria 27, 29, 30, 31 and 43
+now say "Admin"; "Mi panel" for the admin is unchanged. The `/entrar` page (its
+heading, title and "Entrar" submit button) and the route are unchanged.
 
 **Productos and Packs** (added 2026-10-31, issue #63)
 
@@ -547,7 +553,7 @@ customers.
 
 43. Given the admin signed in, when they press "Salir" in the panel, then they land
     on the home page (`/`) after a full page load, signed out: the header link reads
-    "Entrar", and opening `/panel` sends them to `/entrar`.
+    "Admin", and opening `/panel` sends them to `/entrar`.
 44. Given the admin signed in, when they open the panel at 360 px or 1280 px, then
     its header has a link "Ver sitio" that can be reached with the keyboard; when
     they follow it, then they reach the home page still signed in, and its header

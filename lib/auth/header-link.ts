@@ -2,11 +2,11 @@ import { isAdminUser } from "./admin";
 
 export type HeaderLink = { label: string; href: string };
 
-const SIGN_IN: HeaderLink = { label: "Entrar", href: "/entrar" };
+const SIGN_IN: HeaderLink = { label: "Admin", href: "/entrar" };
 const PANEL: HeaderLink = { label: "Mi panel", href: "/panel" };
 
 // The home page header link: "Mi panel" for the admin (same rule as
-// public.is_admin()), "Entrar" for everyone else, including a visitor and a
+// public.is_admin()), "Admin" for everyone else, including a visitor and a
 // signed-in customer. Nothing here says who the user is.
 export function headerLinkFor(
   user:

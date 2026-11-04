@@ -141,7 +141,7 @@ test("[002-AC35] the header links are exactly Productos, Packs, Cómo pedir and 
     .evaluateAll((els) =>
       els
         .map((el) => ({ text: el.textContent?.trim() ?? "", href: el.getAttribute("href") }))
-        .filter((l) => !/^(Entrar|Mi panel)$/.test(l.text)),
+        .filter((l) => !/^(Admin|Mi panel)$/.test(l.text)),
     );
   expect(links).toEqual([
     { text: "Productos", href: "#productos" },
