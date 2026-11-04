@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) is a draft awaiting the owner's approval.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -104,6 +104,34 @@ A thing Marcando Ando can personalize and quote.
 | `is_available` | default true; false means "temporarily unavailable" (Req §7) |
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
+| `audience` | required, `personas` or `empresas`, default `personas`; any other value is rejected. Decides which catalog the product or pack belongs to (2026-11-04 amendment below, draft) |
+
+**2026-11-04 amendment - two catalogs, Personas and Empresas (issue #107, draft).**
+Javiera wants a catalog for companies next to today's catalog for people ("Feedback
+from Javiera: a catalog for companies" in `docs/requirements.md`). The owner decided
+(2026-11-04) that each product or pack belongs to **exactly one** catalog, and that
+both catalogs have products and packs. So the audience is a second fixed field on
+the product, independent of `kind`:
+
+|              | `producto` | `pack` |
+|--------------|------------|--------|
+| `personas`   | "Productos" on the home page | "Packs" on the home page |
+| `empresas`   | "Productos" on `/empresas` | "Packs" on `/empresas` |
+
+- **`audience`** is `personas` or `empresas`, required, default `personas`, with a
+  database check like `kind`'s. Adding a third audience is a spec change, not an
+  admin task. Code keeps the list in one place, as it does for `kind`.
+- One audience per row: an item for both catalogs is two rows (the admin duplicates
+  it). No join table **(owner decision, 2026-11-04)**.
+- Everything else about a product (photos, colors, sizes, characteristics,
+  publishing, availability, highlights, slug) is the same for both audiences. The
+  price is still stored for a company item, but the public site does not show it
+  (spec 002); it stays in the data so the admin can note a reference price.
+- Visibility does not change: the public reads published rows of both audiences;
+  the audience only decides where they are listed.
+- Migration ("expand then contract"): one migration adds the column with default
+  `personas` and its check. Every existing row becomes `personas`, so the live site
+  looks the same, and code that does not read the column keeps working.
 
 **2026-10-31 amendment - colors, sizes and characteristics (issue #87, approved by
 the owner on 2026-10-31).** Javiera asked for a detail view that shows a product's
@@ -201,7 +229,7 @@ Amended 2026-10-31: Category and ProductCategory are removed; `kind` is a column
 of Product.
 
 ```
-                                 Product (kind) ──< Variant
+                        Product (kind, audience) ──< Variant
                                     │ │
 Theme ──< ProductTheme >────────────┘ └──< Image (product or variant)
   │
@@ -230,6 +258,9 @@ storage; their access rules belong to spec 005.
 
 - **Group (added 2026-10-31):** a product with `kind` `producto` is listed under
   "Productos", one with `kind` `pack` under "Packs".
+- **Catalog (added 2026-11-04, draft):** a product with `audience` `personas` is
+  listed in the people's catalog (the home page), one with `empresas` in the company
+  catalog (`/empresas`); within each, `kind` decides "Productos" or "Packs".
 - **On offer:** `offer_price_clp` is set. The offers view lists the published
   products on offer, available or not. The old price is `price_from_clp`.
 - **Quote enabled:** a product is quotable when it is published and available.
@@ -344,6 +375,23 @@ plan.
     write these fields, the write is rejected; the admin's write succeeds (criteria
     18 to 20 extended).
 
+**Catalog: Personas or Empresas** (added 2026-11-04, issue #107, draft)
+
+29. Given a product, when `audience` is set to anything other than `personas` or
+    `empresas`, or set to null, the write is rejected; when it is not given, the
+    product is saved with `audience` `personas`.
+30. Given the migration that adds `audience` applied to a database with products,
+    when the products are read, then every existing product has `audience`
+    `personas` and its other fields are unchanged.
+31. Given published products of both audiences and both kinds, when the public
+    reads products, each one is returned with its `audience`, and asking for one
+    `audience` and one `kind` returns only the published products of that pair;
+    an unpublished product of either audience is not returned (criterion 13).
+32. Given the public and a signed-in user who is not the admin, when they try to
+    set or change `audience`, the write is rejected; the admin's write succeeds,
+    including moving a product from `personas` to `empresas` (criteria 18 to 20
+    extended).
+
 ## Verification plan
 
 Test layers follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
@@ -364,6 +412,8 @@ a mock of the database.
 | 27, 28 | Public read in order, unpublished hidden, writes only by the admin | Integration, as anonymous, non-admin and admin |
 | 22, 23 | Product type: allowed values, default, public read by `kind` | Integration (local Supabase), as the anonymous role and the admin |
 | 2, 17 | Offer rule | Also a unit test for the pure "is on offer / old and new price" helper |
+| 29, 31, 32 | Audience: allowed values, default, public read by audience and kind, writes only by the admin | Integration (local Supabase), as anonymous, non-admin and admin; a unit test for the shared audience list and its guard |
+| 30 | Existing rows become `personas` | Integration: the `migrations` CI job resets from the migrations alone, and an integration test reads the seeded products after `db reset` and checks the default |
 
 A criterion is checked off here when its test exists, failed first for the right
 reason, and now passes.
@@ -371,7 +421,8 @@ reason, and now passes.
 ## Seed data (proposal)
 
 For local development and tests: ~~the ten categories of Req §3B~~ (removed
-2026-10-31) products of both kinds (at least one `pack`), a few themes taken
+2026-10-31) products of both kinds (at least one `pack`) and of both audiences (at
+least one `empresas` product and one `empresas` pack, added 2026-11-04), a few themes taken
 from the requirements and the Instagram account (Christmas, Colegios y cursos with
 a couple of children, Equipos deportivos, Día del Padre), a handful of sample
 products with variants and designs, one admin, one non-admin user. Seed prices and

@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69, #85; first approved by the owner on 2026-10-23)
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69, #85; first approved by the owner on 2026-10-23). The 2026-11-04 amendment for issue #107 (a catalog for companies) is a draft awaiting the owner's approval.
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -36,6 +36,7 @@ out of scope until it does.
 |-----|--------------|
 | **Visitor / customer** | Browses on a phone, tablet or computer, finds a product or an idea, asks for a quote on WhatsApp. |
 | **Parent or course representative** | A visitor with a specific goal: group gifts for a class, generation, graduation or farewell (Req §3E). The schools section is for them. |
+| **Company buyer** | Added 2026-11-04 (issue #107). Someone buying for a company (B2B): polos, hoodies, mugs or gifts with the company's logo, usually in volume. Uses the company catalog, "Catálogos empresas", and quotes on WhatsApp. |
 | **Admin (Javiera)** | Keeps the catalog, prices, photos and gallery up to date. Not technical. |
 
 Decision for v1 (owner, 2026-10-23): **one admin role** (Req open question 7).
@@ -58,9 +59,10 @@ and hosting are part of delivery (Req §4, §8).
 | **WhatsApp quote:** a pre-filled message with product, variant or design, quantity and personalization (Req §5) | Reviews and testimonials |
 | **Gallery of designs and finished work:** grouped by theme, new designs added constantly, each design linked to one or more products (Req §3D) | Multiple languages (Spanish only) |
 | **Schools and courses section** (Req §3E) | Blog, newsletter, email marketing |
+| **Company catalog, "Catálogos empresas"** (added 2026-11-04, issue #107, draft): two catalogs, one for people ("Personas", today's Productos and Packs) and one for companies ("Empresas", its own Productos and Packs on the page `/empresas`, linked from the header). Each product or pack belongs to one of them, chosen in the admin. Company items show no price and quote on WhatsApp (spec 002) | Company accounts, online quotes, invoicing or volume price tables |
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |
-| **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); highlighted products; ~~designs in the gallery~~ (postponed 2026-10-31, issue #69: no "Diseños" in the panel for now); available or temporarily unavailable (Req §7) | Roles beyond a single admin |
+| **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); each product's catalog, Personas or Empresas (amended 2026-11-04, issue #107, draft); highlighted products; ~~designs in the gallery~~ (postponed 2026-10-31, issue #69: no "Diseños" in the panel for now); available or temporarily unavailable (Req §7) | Roles beyond a single admin |
 | **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | **Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5) |
 | **Offers ("Ofertas"):** a product can be flagged "en oferta" with its old and new price, and appears in a filtered view reached from the menu (Req §3A; interpretation, see decisions) | |
 | **Delivery:** domain, hosting, forms, training for Javiera, handover of accounts and ownership, cost information (Req §8) | |
@@ -167,6 +169,16 @@ number refers to that document's numbering.
    but launch is blocked until they are answered.
 5. **Reference site (Q11).** `uniformesgirasol.cl` has not been reviewed; it may
    change the catalog layout or the quote flow.
+6. **Company catalog (issue #107).** Minimum orders, lead times and invoicing
+   ("factura") for companies are not known, so the site says nothing about them
+   until Javiera confirms them. Her father's business may have a catalog worth
+   reading for structure (not to copy); none has been shared yet.
+
+**Decided by the owner, 2026-11-04 (issue #107, draft until the amendment is approved)**
+
+7. **Two catalogs, Personas and Empresas,** in v1. Each product or pack belongs
+   to exactly one. Company items show no price; company buttons use the same
+   WhatsApp number with a message for companies. Details in specs 001 and 002.
 
 ## Definition of done for v1
 
