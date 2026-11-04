@@ -73,6 +73,25 @@ jobs:
           export CHANGED_FILES
           node scripts/tests-with-changes.mjs
 
+  test-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Check that no existing test was weakened or removed
+        # Only meaningful on pull requests; on pushes to main it is a no-op.
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          git diff -U0 "origin/${BASE_REF}...HEAD" > "$RUNNER_TEMP/pr.diff"
+          DIFF_FILE="$RUNNER_TEMP/pr.diff" node scripts/test-integrity.mjs
+
   # Spec 003. Local Supabase in Docker (the CLI is a devDependency). Only the
   # services the tests need are started, to keep the job fast.
   integration:

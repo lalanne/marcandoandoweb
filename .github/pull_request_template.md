@@ -12,6 +12,7 @@ Fill this in honestly. CI cannot prove that a test was written first.
 - [ ] Failing test seen first, and for which reason: <!-- name the test and its failure message -->
 - [ ] Layers covered: <!-- unit / integration / acceptance / end to end, or "docs only" -->
 - [ ] Revert check done (bug fixes): <!-- result, or "not a bug fix" -->
+- [ ] No existing test deleted, skipped or weakened (`test-integrity` checks this; if a change is deliberate, explain it here and ask for the `test-change-reviewed` label)
 - [ ] Issue linked above with `Closes #n`
 
 ## How it was tested
