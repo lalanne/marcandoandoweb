@@ -98,18 +98,6 @@ function messageOf(href: string | null): string {
   return new URL(href ?? "").searchParams.get("text") ?? "";
 }
 
-function contrast(fg: string, bg: string): number {
-  const lum = (css: string) => {
-    const [r, g, b] = (css.match(/[\d.]+/g) ?? []).slice(0, 3).map((v) => {
-      const c = Number(v) / 255;
-      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
-  return (a + 0.05) / (b + 0.05);
-}
-
 test("[002-AC68] the home page lists only Personas items", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Botella de ejemplo").first()).toBeVisible({
@@ -191,8 +179,8 @@ test("[002-AC71] /empresas shows the heading, intro, button, then Productos and 
   expect(names.indexOf(SEED_PRODUCT.name)).toBe(0);
   expect(names).toContain("Taza corporativa de ejemplo");
   expect(names).not.toContain("Botella de ejemplo");
-  await expect(page.locator("#packs").getByText(SEED_PACK.name)).toBeVisible();
-  await expect(page.locator("#packs").getByText("Pack regalo de ejemplo")).toHaveCount(0);
+  await expect(page.locator("#packs").getByRole("heading", { name: SEED_PACK.name })).toBeVisible();
+  await expect(page.locator("#packs").getByRole("heading", { name: "Pack regalo de ejemplo" })).toHaveCount(0);
   // No draft.
   await expect(page.getByText("Producto de empresa de ejemplo (borrador)")).toHaveCount(0);
   await expect(page.getByText("Pack de empresa de ejemplo (borrador)")).toHaveCount(0);
@@ -214,18 +202,36 @@ test("[002-AC73] no Empresas card or page shows a price, and each section has th
       .getByRole("heading", { level: 2 })
       .evaluate((h) => h.nextElementSibling?.textContent ?? "");
     expect(next).toBe(NOTE);
-    const colors = await section.getByText(NOTE, { exact: true }).evaluate((el) => {
-      let bg = "";
-      for (let n: Element | null = el; n; n = n.parentElement) {
-        const c = getComputedStyle(n).backgroundColor;
-        if (c !== "rgba(0, 0, 0, 0)") {
-          bg = c;
-          break;
-        }
+    // Colors can come as oklab(): draw them on a canvas to read plain RGB, and
+    // lay a translucent background over the ones behind it.
+    const ratio = await section.getByText(NOTE, { exact: true }).evaluate((el) => {
+      const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+      const rgba = (css: string) => {
+        ctx.clearRect(0, 0, 1, 1);
+        ctx.fillStyle = css;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+        return [r, g, b, a / 255];
+      };
+      let bg = [255, 255, 255];
+      const chain: Element[] = [];
+      for (let n: Element | null = el; n; n = n.parentElement) chain.unshift(n);
+      for (const n of chain) {
+        const [r, g, b, a] = rgba(getComputedStyle(n).backgroundColor);
+        bg = [r * a + bg[0] * (1 - a), g * a + bg[1] * (1 - a), b * a + bg[2] * (1 - a)];
       }
-      return { fg: getComputedStyle(el).color, bg: bg || "rgb(255, 255, 255)" };
+      const fg = rgba(getComputedStyle(el).color).slice(0, 3);
+      const lum = (c: number[]) => {
+        const [r, g, b] = c.map((v) => {
+          const x = v / 255;
+          return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const [hi, lo] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
     });
-    expect(contrast(colors.fg, colors.bg)).toBeGreaterThanOrEqual(4.5);
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
   }
 
   await page.goto(`/productos/${SEED_PRODUCT.slug}`);

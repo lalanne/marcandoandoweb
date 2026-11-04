@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
 
 const linkClass =
-  "rounded-full px-3 py-1 text-sm font-medium hover:bg-brand-yellow/40";
+  "rounded-full px-2 py-1 text-sm font-medium hover:bg-brand-yellow/40 sm:px-3";
 
 // "Productos" and "Packs" only show when their section exists, so no link points
 // at a hidden section (spec 002, criteria 34 and 35). There is no link to the
@@ -101,7 +101,7 @@ export function SiteHeader({
           />
         </a>
         <nav aria-label="Secciones">
-          <ul className="flex flex-wrap items-center">
+          <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
             <Suspense fallback={null}>
               <CatalogLinks base={base} current={current} />
             </Suspense>

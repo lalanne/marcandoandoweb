@@ -118,9 +118,9 @@ test("[002-AC78] saving a published item as Empresas moves it from the home page
     await expect(page.locator("#productos article").first()).toBeVisible({ timeout: PAGE_TIMEOUT });
     return page.locator("#packs article", { hasText: name });
   };
+  const edit = page.url();
   await expect(await onHome()).toBeVisible();
 
-  const edit = page.url();
   await page.goto(edit);
   await catalogGroup(page).getByRole("radio", { name: "Empresas" }).check();
   await expect(page.getByText("En Catálogos empresas no se muestra el precio.")).toBeVisible();

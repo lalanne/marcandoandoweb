@@ -157,7 +157,9 @@ test("[002-AC35] the header links are exactly Productos, Packs, Catálogos empre
   await expect(page.locator("header").getByRole("link", { name: /Trabajos/ })).toHaveCount(0);
   // Each link leads to its section.
   for (const { href } of links) {
-    await expect(page.locator(href ?? "")).toHaveCount(1);
+    // "Catálogos empresas" leads to another page, not to a section of this one.
+    if (!href?.startsWith("#")) continue;
+    await expect(page.locator(href)).toHaveCount(1);
   }
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
