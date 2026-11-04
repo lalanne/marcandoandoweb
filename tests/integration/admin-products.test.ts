@@ -35,6 +35,7 @@ function values(overrides: Partial<ProductValues> = {}): ProductValues {
     description: null,
     price_from_clp: 7000,
     kind: "producto",
+    audience: "personas",
     is_featured: false,
     is_available: true,
     is_published: false,

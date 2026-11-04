@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { formatClp, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
-import { groupByKind } from "@/lib/catalog/group";
+import { AUDIENCE_LABEL, AUDIENCES, isAudience } from "@/lib/catalog/audience";
+import { COMPANY_PRICE_NOTE, formatClp, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
+import { groupByAudience, groupByKind } from "@/lib/catalog/group";
 import { imagePathFromSegments, imageUrl, panelImageUrl } from "@/lib/catalog/images";
 import { isProductKind, KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
 import type { CatalogProduct } from "@/lib/catalog/types";
@@ -16,6 +17,7 @@ const prod = (
   description: null,
   priceFromClp: null,
   kind,
+  audience: "personas",
   isFeatured: false,
   isAvailable: true,
   images: [],
@@ -117,5 +119,59 @@ describe("priceLabel", () => {
     expect(WHOLESALE_NOTE).toBe(
       "Precios por unidad. Al por mayor es otro precio: cotiza por WhatsApp.",
     );
+  });
+});
+
+describe("audiences", () => {
+  it("[001-AC29] has exactly the two catalogs, personas first, with Spanish labels", () => {
+    expect(AUDIENCES).toEqual(["personas", "empresas"]);
+    expect(AUDIENCE_LABEL).toEqual({ personas: "Personas", empresas: "Empresas" });
+    expect(isAudience("personas")).toBe(true);
+    expect(isAudience("empresas")).toBe(true);
+    expect(isAudience("Empresas")).toBe(false);
+    expect(isAudience("")).toBe(false);
+    expect(isAudience(null)).toBe(false);
+    expect(isAudience("ambos")).toBe(false);
+  });
+});
+
+describe("groupByAudience", () => {
+  const mixedCatalog = [
+    prod("polera", "producto"),
+    prod("pack-cole", "pack"),
+    prod("empresa-polo", "producto", { audience: "empresas" }),
+    prod("empresa-taza", "producto", { audience: "empresas", isFeatured: true }),
+    prod("empresa-pack", "pack", { audience: "empresas" }),
+  ];
+
+  it("[002-AC68] keeps the Personas items apart from the Empresas ones", () => {
+    const groups = groupByAudience(mixedCatalog);
+    expect(groups.personas.producto.map((p) => p.slug)).toEqual(["polera"]);
+    expect(groups.personas.pack.map((p) => p.slug)).toEqual(["pack-cole"]);
+    expect(
+      [...groups.personas.producto, ...groups.personas.pack].some((p) => p.audience === "empresas"),
+    ).toBe(false);
+  });
+
+  it("[002-AC71] lists each Empresas type apart, highlighted first, and leaves a type with none empty", () => {
+    const groups = groupByAudience(mixedCatalog);
+    expect(groups.empresas.producto.map((p) => p.slug)).toEqual(["empresa-taza", "empresa-polo"]);
+    expect(groups.empresas.pack.map((p) => p.slug)).toEqual(["empresa-pack"]);
+    const onlyPeople = groupByAudience([prod("polera", "producto")]);
+    expect(onlyPeople.empresas).toEqual({ producto: [], pack: [] });
+  });
+});
+
+describe("price label by audience", () => {
+  it("[002-AC73] gives no price label for an Empresas item, even with a price", () => {
+    expect(priceLabel(7000, "empresas")).toBeNull();
+    expect(priceLabel(null, "empresas")).toBeNull();
+    expect(priceLabel(7000, "personas")).toBe("$7.000 c/u");
+    expect(priceLabel(7000)).toBe("$7.000 c/u");
+  });
+
+  it("[002-AC73] has the company note, and it is not the wholesale note", () => {
+    expect(COMPANY_PRICE_NOTE).toBe("Precios según cantidad: cotiza por WhatsApp.");
+    expect(COMPANY_PRICE_NOTE).not.toBe(WHOLESALE_NOTE);
   });
 });

@@ -11,6 +11,7 @@ import {
   type ImageKind,
   type Result,
 } from "./images";
+import type { Audience } from "@/lib/catalog/audience";
 import type { ProductKind } from "@/lib/catalog/kind";
 import type { ProductValues } from "./product-input";
 
@@ -33,6 +34,7 @@ export type ProductListItem = {
   is_available: boolean;
   is_published: boolean;
   kind: ProductKind;
+  audience: Audience;
 };
 
 export type CreateResult =
@@ -55,7 +57,7 @@ export async function listProducts(client: SupabaseClient): Promise<ProductListI
   const { data, error } = await client
     .from("product")
     .select(
-      "id, name, slug, price_from_clp, is_featured, is_available, is_published, kind",
+      "id, name, slug, price_from_clp, is_featured, is_available, is_published, kind, audience",
     )
     .order("name");
   if (error) throw new Error(error.message);
@@ -69,7 +71,7 @@ export async function getProduct(
   const { data, error } = await client
     .from("product")
     .select(
-      `id, name, slug, description, price_from_clp, kind, is_featured, is_available, is_published, colors, sizes, characteristics,${IMAGE_COLUMNS}`,
+      `id, name, slug, description, price_from_clp, kind, audience, is_featured, is_available, is_published, colors, sizes, characteristics,${IMAGE_COLUMNS}`,
     )
     .eq("id", id)
     .maybeSingle();

@@ -1,9 +1,11 @@
+import type { Audience } from "@/lib/catalog/audience";
 import { generalWhatsappUrl } from "@/lib/catalog/whatsapp";
 
-export function FloatingWhatsapp() {
+// On /empresas and on an Empresas product page it carries the company message.
+export function FloatingWhatsapp({ audience = "personas" }: { audience?: Audience }) {
   return (
     <a
-      href={generalWhatsappUrl()}
+      href={generalWhatsappUrl(audience)}
       aria-label="WhatsApp"
       className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-night bg-brand-teal text-brand-night shadow-[3px_3px_0_var(--brand-night)] hover:bg-brand-yellow"
     >

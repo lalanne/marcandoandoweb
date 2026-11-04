@@ -1,3 +1,4 @@
+import type { Audience } from "./audience";
 import type { ProductKind } from "./kind";
 
 export type CatalogImage = { storagePath: string; altText: string };
@@ -12,6 +13,8 @@ export type CatalogProduct = {
   /** Null when the owner has not confirmed a price: nothing is shown then. */
   priceFromClp: number | null;
   kind: ProductKind;
+  /** The catalog it belongs to: the home page or /empresas. */
+  audience: Audience;
   isFeatured: boolean;
   isAvailable: boolean;
   /** Every photo in the admin's order; the first is the cover. */
@@ -33,7 +36,9 @@ export type CatalogDesign = {
 };
 
 export type Catalog = {
-  /** Published products by type, highlighted first (spec 002, criterion 33). */
+  /** Published Personas products by type, highlighted first (spec 002, criteria 33 and 68). */
   products: Record<ProductKind, CatalogProduct[]>;
+  /** The same for the company catalog, /empresas (criteria 71 and 72). */
+  empresas: Record<ProductKind, CatalogProduct[]>;
   designs: CatalogDesign[];
 };

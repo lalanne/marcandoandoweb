@@ -130,7 +130,7 @@ test("[002-AC33] a pack has the same card as a product: price and a page whose W
   expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
 });
 
-test("[002-AC35] the header links are exactly Productos, Packs, Cómo pedir and Colegios y grupos", async ({
+test("[002-AC35] the header links are exactly Productos, Packs, Catálogos empresas, Cómo pedir and Colegios y grupos", async ({
   page,
 }) => {
   await open(page);
@@ -146,6 +146,8 @@ test("[002-AC35] the header links are exactly Productos, Packs, Cómo pedir and 
   expect(links).toEqual([
     { text: "Productos", href: "#productos" },
     { text: "Packs", href: "#packs" },
+    // Added 2026-11-04 (issue #107): shown because the seed has Empresas items.
+    { text: "Catálogos empresas", href: "/empresas" },
     { text: "Cómo pedir", href: "#como-pedir" },
     { text: "Colegios y grupos", href: "#colegios" },
   ]);

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseColors, parseSizes } from "./details";
-import { groupByKind } from "./group";
+import { isAudience } from "./audience";
+import { groupByAudience } from "./group";
 import { isProductKind } from "./kind";
 import { photosInOrder } from "./photos";
 import type {
@@ -16,7 +17,7 @@ type ImageRow = {
 };
 
 const PRODUCT_COLUMNS =
-  "id, slug, name, description, price_from_clp, kind, is_featured, is_available, colors, sizes, characteristics, image(storage_path, alt_text, position)";
+  "id, slug, name, description, price_from_clp, kind, audience, is_featured, is_available, colors, sizes, characteristics, image(storage_path, alt_text, position)";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toCatalogProduct(p: any): CatalogProduct {
@@ -27,6 +28,7 @@ function toCatalogProduct(p: any): CatalogProduct {
     description: p.description,
     priceFromClp: p.price_from_clp,
     kind: p.kind,
+    audience: p.audience,
     isFeatured: p.is_featured,
     isAvailable: p.is_available,
     images: photosInOrder(p.image as ImageRow[]),
@@ -52,7 +54,7 @@ export async function getProductBySlug(
     .eq("is_published", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data || !isProductKind(data.kind)) return null;
+  if (!data || !isProductKind(data.kind) || !isAudience(data.audience)) return null;
   return toCatalogProduct(data);
 }
 
@@ -110,8 +112,10 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
     if (result.error) throw new Error(result.error.message);
   }
 
-  // The database only allows the two types; anything else is not shown.
-  const rows = (products.data ?? []).filter((p) => isProductKind(p.kind));
+  // The database only allows the two types and the two catalogs; anything else is not shown.
+  const rows = (products.data ?? []).filter(
+    (p) => isProductKind(p.kind) && isAudience(p.audience),
+  );
   const productList: CatalogProduct[] = rows.map(toCatalogProduct);
 
   const designList: CatalogDesign[] = (designs.data ?? []).map((d) => ({
@@ -122,8 +126,10 @@ export async function getCatalog(client: SupabaseClient): Promise<Catalog> {
     images: photosInOrder(d.image as ImageRow[]),
   }));
 
+  const byAudience = groupByAudience(productList);
   return {
-    products: groupByKind(productList),
+    products: byAudience.personas,
+    empresas: byAudience.empresas,
     designs: designList,
   };
 }

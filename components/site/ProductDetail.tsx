@@ -11,7 +11,7 @@ const headingClass = "text-xl font-semibold";
 // or row shows only when it has content.
 export function ProductDetail({ product }: { product: CatalogProduct }) {
   const view = productPageView(product);
-  const back = backLink(product.kind);
+  const back = backLink(product.kind, product.audience);
   return (
     <article className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
       <Link
@@ -87,7 +87,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
 
           {product.isAvailable ? (
             <a
-              href={productWhatsappUrl(product.name)}
+              href={productWhatsappUrl(product.name, product.audience)}
               className={`${buttonClass} self-start text-center text-base`}
             >
               Pedir por WhatsApp

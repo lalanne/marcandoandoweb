@@ -49,6 +49,15 @@ insert into public.product (slug, name, description, price_from_clp, kind, is_fe
   ('demo-pack-curso', 'Pack curso de ejemplo', 'Pack falso para desarrollo.', 1000, 'pack', false, true, true),
   ('demo-pack-borrador', 'Pack de ejemplo (borrador)', 'Pack falso sin publicar.', 1000, 'pack', false, true, false);
 
+-- Fake company catalog (audience 'empresas', spec 001 criterion 29): a published
+-- product and pack, plus a draft of each. The price is set but never shown.
+insert into public.product (slug, name, description, price_from_clp, kind, audience, is_featured, is_available, is_published) values
+  ('demo-empresa-polera', 'Polera corporativa de ejemplo', 'Producto falso para el catálogo de empresas.', 2000, 'producto', 'empresas', true, true, true),
+  ('demo-empresa-taza', 'Taza corporativa de ejemplo', 'Producto falso para el catálogo de empresas.', 2000, 'producto', 'empresas', false, true, true),
+  ('demo-empresa-borrador', 'Producto de empresa de ejemplo (borrador)', 'Producto falso sin publicar.', 2000, 'producto', 'empresas', false, true, false),
+  ('demo-empresa-pack', 'Pack bienvenida de ejemplo', 'Pack falso para el catálogo de empresas.', 2000, 'pack', 'empresas', false, true, true),
+  ('demo-empresa-pack-borrador', 'Pack de empresa de ejemplo (borrador)', 'Pack falso sin publicar.', 2000, 'pack', 'empresas', false, true, false);
+
 insert into public.design (slug, title, description, is_published) values
   ('demo-diseno-estrellas', 'Diseño de ejemplo: estrellas', 'Diseño falso para desarrollo.', true),
   ('demo-diseno-borrador', 'Diseño de ejemplo (borrador)', 'Diseño falso sin publicar.', false);

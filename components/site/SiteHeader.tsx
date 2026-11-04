@@ -5,6 +5,7 @@ import {
   headerLinkFor,
   type HeaderLink,
 } from "@/lib/auth/header-link";
+import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
 import { KIND_SECTION } from "./CatalogSections";
@@ -17,8 +18,11 @@ const linkClass =
 // "Productos" and "Packs" only show when their section exists, so no link points
 // at a hidden section (spec 002, criteria 34 and 35). There is no link to the
 // "Trabajos reales" section (owner decision, 2026-10-31).
-async function CatalogLinks({ base }: { base: string }) {
-  const { products } = await loadCatalog();
+// "Catálogos empresas" goes after "Packs" and only shows when an Empresas item is
+// published (spec 002, criteria 69 and 70); on /empresas it is the current page.
+async function CatalogLinks({ base, current }: { base: string; current?: "empresas" }) {
+  const { products, empresas } = await loadCatalog();
+  const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
   return (
     <>
       {PRODUCT_KINDS.filter((kind) => products[kind].length > 0).map((kind) => (
@@ -28,6 +32,17 @@ async function CatalogLinks({ base }: { base: string }) {
           </a>
         </li>
       ))}
+      {hasEmpresas ? (
+        <li>
+          <a
+            className={linkClass}
+            href={EMPRESAS_PATH}
+            aria-current={current === "empresas" ? "page" : undefined}
+          >
+            Catálogos empresas
+          </a>
+        </li>
+      ) : null}
     </>
   );
 }
@@ -66,7 +81,13 @@ async function SessionLink() {
 
 // `base` is "" on the home page (the links are anchors on the page) and "/" on
 // other pages (the links go to the home page's sections).
-export function SiteHeader({ base = "" }: { base?: string }) {
+export function SiteHeader({
+  base = "",
+  current,
+}: {
+  base?: string;
+  current?: "empresas";
+}) {
   return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
@@ -82,7 +103,7 @@ export function SiteHeader({ base = "" }: { base?: string }) {
         <nav aria-label="Secciones">
           <ul className="flex flex-wrap items-center">
             <Suspense fallback={null}>
-              <CatalogLinks base={base} />
+              <CatalogLinks base={base} current={current} />
             </Suspense>
             <li>
               <a className={linkClass} href={`${base}#como-pedir`}>

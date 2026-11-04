@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: PageProps<"/productos/[slu
         <ProductDetail product={product} />
       </main>
       <SiteFooter />
-      <FloatingWhatsapp />
+      <FloatingWhatsapp audience={product.audience} />
     </>
   );
 }

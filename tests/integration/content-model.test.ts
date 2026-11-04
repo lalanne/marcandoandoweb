@@ -585,3 +585,124 @@ describe("categories are gone", () => {
     expect(error?.code).toBe("42703");
   });
 });
+
+// Spec 001, criteria 29 to 32 (amendment of 2026-11-04, issue #107): the catalog a
+// product belongs to, Personas or Empresas.
+describe("product audience", () => {
+  it("[001-AC29] saves a product with no audience as personas", async () => {
+    const p = await newProduct();
+    expect(p.audience).toBe("personas");
+  });
+
+  it("[001-AC29] accepts personas and empresas", async () => {
+    expect((await newProduct({ audience: "personas" })).audience).toBe("personas");
+    expect((await newProduct({ audience: "empresas" })).audience).toBe("empresas");
+  });
+
+  it("[001-AC29] rejects any other audience, and null, on insert and on update", async () => {
+    for (const audience of ["Empresas", "empresa", "ambos", ""]) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Catálogo malo", audience });
+      expect(error?.code, `audience "${audience}"`).toBe("23514");
+    }
+    const nullAudience = await admin
+      .from("product")
+      .insert({ slug: uniqueSlug("p"), name: "Sin catálogo", audience: null });
+    expect(nullAudience.error?.code).toBe("23502");
+
+    const p = await newProduct({ audience: "empresas" });
+    const bad = await admin.from("product").update({ audience: "otro" }).eq("id", p.id);
+    expect(bad.error?.code).toBe("23514");
+    const toNull = await admin.from("product").update({ audience: null }).eq("id", p.id);
+    expect(toNull.error?.code).toBe("23502");
+    expect(
+      ok(await admin.from("product").select("audience").eq("id", p.id).single()).audience,
+    ).toBe("empresas");
+  });
+
+  it("[001-AC30] leaves every seeded product as personas except the seeded company items, other fields intact", async () => {
+    // The migrations job resets from the migrations alone; here the seeded rows
+    // (inserted without an audience, then some set to empresas) are read back.
+    const rows = ok(
+      await admin
+        .from("product")
+        .select("slug, name, kind, price_from_clp, audience")
+        .like("slug", "demo-%"),
+    );
+    const personas = rows.filter((r: { audience: string }) => r.audience === "personas");
+    expect(personas.length).toBeGreaterThanOrEqual(7);
+    const botella = rows.find((r: { slug: string }) => r.slug === "demo-botella-ejemplo");
+    expect(botella).toEqual({
+      slug: "demo-botella-ejemplo",
+      name: "Botella de ejemplo",
+      kind: "producto",
+      price_from_clp: 1000,
+      audience: "personas",
+    });
+  });
+
+  it("[001-AC31] returns each published product with its audience, and filters by audience and kind", async () => {
+    const pp = await newProduct({ audience: "personas", kind: "producto", is_published: true });
+    const pk = await newProduct({ audience: "personas", kind: "pack", is_published: true });
+    const ep = await newProduct({ audience: "empresas", kind: "producto", is_published: true });
+    const ek = await newProduct({ audience: "empresas", kind: "pack", is_published: true });
+    const draftE = await newProduct({ audience: "empresas", kind: "pack", is_published: false });
+    const draftP = await newProduct({ audience: "personas", kind: "pack", is_published: false });
+    const ids = [pp.id, pk.id, ep.id, ek.id, draftE.id, draftP.id];
+
+    const all = ok(
+      await anon.from("product").select("id, audience, kind").in("id", ids).order("id"),
+    );
+    expect(all).toHaveLength(4);
+    const byId = Object.fromEntries(
+      all.map((r: { id: string; audience: string; kind: string }) => [r.id, r]),
+    );
+    expect(byId[pp.id]).toMatchObject({ audience: "personas", kind: "producto" });
+    expect(byId[ek.id]).toMatchObject({ audience: "empresas", kind: "pack" });
+
+    const companyPacks = ok(
+      await anon
+        .from("product")
+        .select("id")
+        .eq("audience", "empresas")
+        .eq("kind", "pack")
+        .in("id", ids),
+    );
+    expect(companyPacks).toEqual([{ id: ek.id }]);
+    const peoplePacks = ok(
+      await anon
+        .from("product")
+        .select("id")
+        .eq("audience", "personas")
+        .eq("kind", "pack")
+        .in("id", ids),
+    );
+    expect(peoplePacks).toEqual([{ id: pk.id }]);
+  });
+
+  it("[001-AC32] refuses the public and a non-admin user, and lets the admin move a product between catalogs", async () => {
+    const p = await newProduct({ is_published: true });
+
+    for (const client of [anon, nonAdmin]) {
+      const res = await client
+        .from("product")
+        .update({ audience: "empresas" })
+        .eq("id", p.id)
+        .select();
+      expect(res.error !== null || (res.data ?? []).length === 0).toBe(true);
+    }
+    const insert = await nonAdmin
+      .from("product")
+      .insert({ slug: uniqueSlug("p"), name: "No admin", audience: "empresas" });
+    expect(insert.error).not.toBeNull();
+    expect(
+      ok(await admin.from("product").select("audience").eq("id", p.id).single()).audience,
+    ).toBe("personas");
+
+    const moved = ok(
+      await admin.from("product").update({ audience: "empresas" }).eq("id", p.id).select(),
+    );
+    expect(moved[0].audience).toBe("empresas");
+  });
+});
