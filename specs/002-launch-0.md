@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** draft (the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, awaits the owner's approval; the rest of the spec is approved). Before that: approved (by the owner, 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -147,7 +147,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
-| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107, draft): "Catálogos empresas" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
+| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Entrar" for visitors, "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107): "Catálogos empresas" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
 | **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, price if set (amended 2026-10-31: "$7.000 c/u", no longer "desde $7.000"), and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
 | **Packs** | Added 2026-10-31. Published products of type "Pack", shown and ordered exactly like the Products section. Section heading "Packs", anchor `#packs` |
@@ -273,7 +273,7 @@ mayor es otro precio". From the options on the design canvas
 Before this amendment the cards read "desde $7.000" (the Products row above).
 
 **2026-11-04 amendment - "Catálogos empresas", a catalog for companies (issue #107,
-draft).** Javiera: "Arriba, dónde sale producto" "Quiero otra sección que diga:
+approved by the owner on 2026-11-04).** Javiera: "Arriba, dónde sale producto" "Quiero otra sección que diga:
 catálogos empresas" (her words in `docs/requirements.md`). The site has served
 people (B2C); she also wants to sell to companies (B2B). The owner decided on
 2026-11-04 (spec 000, decision 7; spec 001, `audience`):
@@ -699,7 +699,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     browser-tab icon is the logo cropped to its drawing (it spans at least 95% of the
     icon's width), so it reads at 32 px.
 
-**Catálogos empresas** (added 2026-11-04, issue #107, draft)
+**Catálogos empresas** (added 2026-11-04, issue #107)
 
 68. Given published Personas and Empresas items of both kinds, when the home page
     loads, then its "Productos" and "Packs" sections list only the Personas items,

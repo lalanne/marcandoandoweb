@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) is a draft awaiting the owner's approval.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -104,9 +104,9 @@ A thing Marcando Ando can personalize and quote.
 | `is_available` | default true; false means "temporarily unavailable" (Req §7) |
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
-| `audience` | required, `personas` or `empresas`, default `personas`; any other value is rejected. Decides which catalog the product or pack belongs to (2026-11-04 amendment below, draft) |
+| `audience` | required, `personas` or `empresas`, default `personas`; any other value is rejected. Decides which catalog the product or pack belongs to (2026-11-04 amendment below) |
 
-**2026-11-04 amendment - two catalogs, Personas and Empresas (issue #107, draft).**
+**2026-11-04 amendment - two catalogs, Personas and Empresas (issue #107, approved by the owner on 2026-11-04).**
 Javiera wants a catalog for companies next to today's catalog for people ("Feedback
 from Javiera: a catalog for companies" in `docs/requirements.md`). The owner decided
 (2026-11-04) that each product or pack belongs to **exactly one** catalog, and that
@@ -258,7 +258,7 @@ storage; their access rules belong to spec 005.
 
 - **Group (added 2026-10-31):** a product with `kind` `producto` is listed under
   "Productos", one with `kind` `pack` under "Packs".
-- **Catalog (added 2026-11-04, draft):** a product with `audience` `personas` is
+- **Catalog (added 2026-11-04):** a product with `audience` `personas` is
   listed in the people's catalog (the home page), one with `empresas` in the company
   catalog (`/empresas`); within each, `kind` decides "Productos" or "Packs".
 - **On offer:** `offer_price_clp` is set. The offers view lists the published
@@ -375,7 +375,7 @@ plan.
     write these fields, the write is rejected; the admin's write succeeds (criteria
     18 to 20 extended).
 
-**Catalog: Personas or Empresas** (added 2026-11-04, issue #107, draft)
+**Catalog: Personas or Empresas** (added 2026-11-04, issue #107)
 
 29. Given a product, when `audience` is set to anything other than `personas` or
     `empresas`, or set to null, the write is rejected; when it is not given, the
