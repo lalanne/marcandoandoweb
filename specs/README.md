@@ -15,9 +15,9 @@ The client's own words live in [`../docs/requirements.md`](../docs/requirements.
 
 | # | Spec | Status |
 |---|------|--------|
-| 000 | [Product overview & v1 scope](000-overview.md) | approved |
-| 001 | [Content model](001-content-model.md) | approved (the amendment for #87, criteria 24 to 28, was approved by the owner on 2026-10-31 and is implemented in the PR for #88) |
-| 002 | [Launch 0: first public release](002-launch-0.md) | approved (the amendment for #87, criteria 56 to 66, was approved by the owner on 2026-10-31 and is implemented in the PR for #88) |
+| 000 | [Product overview & v1 scope](000-overview.md) | approved (the amendment for #107, a catalog for companies, was approved by the owner on 2026-11-04) |
+| 001 | [Content model](001-content-model.md) | approved (the amendment for #87, criteria 24 to 28, was approved by the owner on 2026-10-31 and is implemented in the PR for #88). The amendment for #107, `audience` (criteria 29 to 32), was approved by the owner on 2026-11-04; implementation in #108 |
+| 002 | [Launch 0: first public release](002-launch-0.md) | approved (the amendment for #107, "Catálogos empresas", criteria 68 to 81, was approved by the owner on 2026-11-04; implementation in #108. The amendment for #87, criteria 56 to 66, was approved by the owner on 2026-10-31 and is implemented in the PR for #88) |
 | 003 | [CI and testing policy](003-ci-and-testing.md) | approved |
 | 004 | [Deployment pipeline](004-deployment.md) | approved |
 | 005 | [Google sign-in for the admin](005-google-sign-in.md) | approved |

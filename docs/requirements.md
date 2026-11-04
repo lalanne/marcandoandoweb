@@ -171,6 +171,36 @@ keep their words. Owner decision on 2026-10-31: each home-page card has one acti
 "Ver", which opens the product page (the separate "Ver detalles" link goes away).
 Spec 002 carries the change (issue #101).
 
+## Feedback from Javiera: a catalog for companies (2026-11-04)
+
+Javiera sent this to the owner, who relayed it. Her words, verbatim, in the order she
+sent them:
+
+> "Arriba, dónde sale producto"
+>
+> "Quiero otra sección que diga: catálogos empresas"
+>
+> "Estoy apuntando a b2c"
+>
+> "Y quiero hacerlo como mi papá b2b"
+
+**Summary (English).** Up in the header, where "Productos" is, she wants another
+section called "Catálogos empresas". Today the site is aimed at people (B2C: names,
+school courses, gifts); she also wants to sell to companies (B2B), as her father
+does. The owner explained the intent on 2026-11-04: the site tells two kinds of
+customer apart, people and companies, and each has its own catalog. People keep
+today's catalog of products and packs; companies get a different one, also with
+products and packs; and the admin can upload products and packs for each.
+
+Owner decisions on 2026-11-04 that fill the gaps: each product or pack belongs to
+exactly one catalog, "Personas" or "Empresas"; the company catalog is its own page,
+`/empresas`, reached from a header link "Catálogos empresas" placed after "Packs";
+company prices are not shown (companies buy in volume, so they quote on WhatsApp);
+company buttons use the same WhatsApp number with a message saying the customer
+writes for a company. Still open: minimum orders, lead times and invoicing
+("factura"), and whether her father's business has a catalog to look at for
+structure. Specs 000, 001 and 002 carry the change (issue #107).
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
