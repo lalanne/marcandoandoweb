@@ -13,6 +13,7 @@ const base = {
   description: "",
   price: "7.000",
   kind: "producto",
+  audience: "personas",
 };
 
 describe("parseProductForm", () => {
@@ -25,6 +26,7 @@ describe("parseProductForm", () => {
       description: null,
       price_from_clp: null,
       kind: "producto",
+      audience: "personas",
       is_featured: false,
       is_available: false,
       is_published: true,
@@ -75,6 +77,33 @@ describe("parseProductForm", () => {
   it("[002-AC32] no longer reads a category", () => {
     const r = parseProductForm(form({ ...base, category_id: "c-1" }));
     expect(r.values).not.toHaveProperty("category_id");
+  });
+});
+
+describe("parseProductForm: catálogo", () => {
+  it("[002-AC78] reads the catalog: personas or empresas", () => {
+    expect(parseProductForm(form({ ...base, audience: "empresas" })).values?.audience).toBe(
+      "empresas",
+    );
+    expect(parseProductForm(form({ ...base, audience: "personas" })).values?.audience).toBe(
+      "personas",
+    );
+  });
+
+  it("[002-AC78] requires the catalog and accepts only the two values", () => {
+    for (const audience of ["", "Empresas", "ambos", "empresa"]) {
+      const r = parseProductForm(form({ ...base, audience }));
+      expect(r.values, `audience "${audience}"`).toBeNull();
+      expect(r.errors.audience).toBe("Elige el catálogo: personas o empresas.");
+    }
+    const { audience: _omit, ...noAudience } = base;
+    void _omit;
+    expect(parseProductForm(form(noAudience)).errors.audience).toMatch(/catálogo/i);
+  });
+
+  it("[002-AC78] keeps the price for an Empresas item", () => {
+    const r = parseProductForm(form({ ...base, audience: "empresas", price: "7.000" }));
+    expect(r.values?.price_from_clp).toBe(7000);
   });
 });
 

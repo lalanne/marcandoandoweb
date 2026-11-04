@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { productPath } from "@/lib/catalog/details";
-import { priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
+import type { Audience } from "@/lib/catalog/audience";
+import { COMPANY_PRICE_NOTE, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
 import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
 import { loadCatalog } from "@/lib/catalog/load";
@@ -27,8 +28,8 @@ function ProductCard({ product }: { product: CatalogProduct }) {
     <article className="flex flex-col gap-3 rounded-3xl border-2 border-brand-night bg-white p-3">
       <ProductPhotos images={product.images} name={product.name} />
       <h3 className="text-lg font-semibold">{product.name}</h3>
-      {product.priceFromClp !== null && (
-        <p className="font-medium">{priceLabel(product.priceFromClp)}</p>
+      {priceLabel(product.priceFromClp, product.audience) !== null && (
+        <p className="font-medium">{priceLabel(product.priceFromClp, product.audience)}</p>
       )}
       {!product.isAvailable && (
         <p className="mt-auto rounded-full bg-brand-night/10 px-4 py-2 text-center font-medium">
@@ -53,14 +54,20 @@ export const KIND_SECTION: Record<ProductKind, { id: string; title: string }> = 
   pack: { id: "packs", title: "Packs" },
 };
 
+// The Productos and Packs sections of one catalog: the home page lists Personas,
+// /empresas lists Empresas, whose sections carry the company note in place of
+// prices (spec 002, criteria 68, 71 and 73).
 async function KindSection({
   kind,
+  audience,
   className,
 }: {
   kind: ProductKind;
+  audience: Audience;
   className: string;
 }) {
-  const products = (await loadCatalog()).products[kind];
+  const catalog = await loadCatalog();
+  const products = (audience === "empresas" ? catalog.empresas : catalog.products)[kind];
   if (products.length === 0) return null;
   const { id, title } = KIND_SECTION[kind];
   return (
@@ -69,7 +76,9 @@ async function KindSection({
         <h2 id={`${id}-title`} className="text-3xl font-bold">
           {title}
         </h2>
-        <p className="mt-2 text-brand-night">{WHOLESALE_NOTE}</p>
+        <p className="mt-2 text-brand-night">
+          {audience === "empresas" ? COMPANY_PRICE_NOTE : WHOLESALE_NOTE}
+        </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -80,12 +89,34 @@ async function KindSection({
   );
 }
 
-export function ProductsSection() {
-  return <KindSection kind="producto" className="bg-brand-cream" />;
+export function ProductsSection({ audience = "personas" }: { audience?: Audience }) {
+  return <KindSection kind="producto" audience={audience} className="bg-brand-cream" />;
 }
 
-export function PacksSection() {
-  return <KindSection kind="pack" className="bg-brand-yellow/20" />;
+export function PacksSection({ audience = "personas" }: { audience?: Audience }) {
+  return <KindSection kind="pack" audience={audience} className="bg-brand-yellow/20" />;
+}
+
+/**
+ * Both company sections, or the "preparing" line when there is no published
+ * Empresas item, so a link already sent never leads to a blank page
+ * (spec 002, criterion 72).
+ */
+export async function EmpresasSections() {
+  const { producto, pack } = (await loadCatalog()).empresas;
+  if (producto.length === 0 && pack.length === 0) {
+    return (
+      <p className="mx-auto max-w-5xl px-4 py-12 text-lg">
+        Estamos preparando el catálogo para empresas. Escríbenos y te contamos.
+      </p>
+    );
+  }
+  return (
+    <>
+      <ProductsSection audience="empresas" />
+      <PacksSection audience="empresas" />
+    </>
+  );
 }
 
 export async function RealWorkSection() {

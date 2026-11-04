@@ -20,6 +20,7 @@ export default async function NewProductPage() {
           description: "",
           price: "",
           kind: "producto",
+          audience: "personas",
           is_featured: false,
           is_available: true,
           is_published: false,

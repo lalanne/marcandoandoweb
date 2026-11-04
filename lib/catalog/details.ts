@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Audience } from "./audience";
 import { priceLabel } from "./format";
 import { imageUrl } from "./images";
 import type { ProductKind } from "./kind";
@@ -40,12 +41,15 @@ export function characteristicsItems(text: string | null | undefined): string[] 
 /** What the page shows; a part with no content is empty, so it gets no heading. */
 export function productPageView(product: CatalogProduct) {
   return {
-    price: priceLabel(product.priceFromClp),
+    price: priceLabel(product.priceFromClp, product.audience),
     colors: product.colors,
     sizes: product.sizes,
     characteristics: characteristicsItems(product.characteristics),
   };
 }
+
+/** The page of the company catalog (spec 002, "Catálogos empresas"). */
+export const EMPRESAS_PATH = "/empresas";
 
 export function productPath(slug: string): string {
   return `/productos/${encodeURIComponent(slug)}`;
@@ -56,8 +60,17 @@ export function productUrl(origin: string, slug: string): string {
   return `${origin.replace(/\/+$/, "")}${productPath(slug)}`;
 }
 
-/** The link back to the section of the product's type on the home page. */
-export function backLink(kind: ProductKind): { label: string; href: string } {
+/** The link back to the section of the product's type in its catalog. */
+export function backLink(
+  kind: ProductKind,
+  audience: Audience = "personas",
+): { label: string; href: string } {
+  if (audience === "empresas") {
+    return {
+      label: "Volver a catálogos empresas",
+      href: `${EMPRESAS_PATH}#${kind === "pack" ? "packs" : "productos"}`,
+    };
+  }
   return kind === "pack"
     ? { label: "Volver a packs", href: "/#packs" }
     : { label: "Volver a productos", href: "/#productos" };
@@ -66,7 +79,7 @@ export function backLink(kind: ProductKind): { label: string; href: string } {
 /** Title, description, canonical address and Open Graph tags of a product page. */
 export function productMetadata(product: CatalogProduct, origin: string): Metadata {
   const title = `${product.name} | Marcando Ando`;
-  const price = priceLabel(product.priceFromClp);
+  const price = priceLabel(product.priceFromClp, product.audience);
   const what = product.kind === "pack" ? "pack" : "producto";
   const description = `${product.name}: ${what} personalizado en Marcando Ando.${
     price ? ` ${price}.` : ""
@@ -94,6 +107,28 @@ export function productMetadata(product: CatalogProduct, origin: string): Metada
             ],
           }
         : {}),
+    },
+  };
+}
+
+const EMPRESAS_TITLE = "Catálogos empresas | Marcando Ando";
+const EMPRESAS_DESCRIPTION =
+  "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.";
+
+/** Title, description, canonical address and Open Graph tags of /empresas (criterion 76). */
+export function empresasMetadata(origin: string): Metadata {
+  const url = `${origin.replace(/\/+$/, "")}${EMPRESAS_PATH}`;
+  return {
+    title: EMPRESAS_TITLE,
+    description: EMPRESAS_DESCRIPTION,
+    alternates: { canonical: url },
+    openGraph: {
+      title: EMPRESAS_TITLE,
+      description: EMPRESAS_DESCRIPTION,
+      url,
+      type: "website",
+      locale: "es_CL",
+      siteName: "Marcando Ando",
     },
   };
 }

@@ -33,6 +33,7 @@ export type RawProduct = {
   description: string;
   price: string;
   kind: string;
+  audience: string;
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
@@ -60,6 +61,7 @@ export async function saveProduct(
     description: text(formData, "description"),
     price: text(formData, "price"),
     kind: text(formData, "kind"),
+    audience: text(formData, "audience"),
     is_featured: formData.get("is_featured") === "on",
     is_available: formData.get("is_available") === "on",
     is_published: formData.get("is_published") === "on",

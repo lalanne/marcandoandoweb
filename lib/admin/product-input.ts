@@ -1,3 +1,4 @@
+import { isAudience, type Audience } from "@/lib/catalog/audience";
 import { isProductKind, type ProductKind } from "@/lib/catalog/kind";
 import { parsePriceClp } from "./price";
 import { isValidSlug, slugify } from "./slug";
@@ -16,6 +17,7 @@ export type ProductValues = {
   description: string | null;
   price_from_clp: number | null;
   kind: ProductKind;
+  audience: Audience;
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
@@ -29,6 +31,7 @@ export type ProductField =
   | "slug"
   | "price"
   | "kind"
+  | "audience"
   | "colors"
   | "sizes"
   | "characteristics";
@@ -123,6 +126,11 @@ export function parseProductForm(data: FormData): ProductFormResult {
   const kind = text(data, "kind");
   if (!isProductKind(kind)) errors.kind = "Elige el tipo: producto o pack.";
 
+  // Personas or Empresas only (spec 001 criterion 29, spec 002 criterion 78). The
+  // form starts on Personas.
+  const audience = text(data, "audience");
+  if (!isAudience(audience)) errors.audience = "Elige el catálogo: personas o empresas.";
+
   const colors = checkColors(readColorRows(data));
   if (colors.error) errors.colors = colors.error;
   const sizes = checkSizes(readSizeRows(data));
@@ -132,7 +140,7 @@ export function parseProductForm(data: FormData): ProductFormResult {
     errors.characteristics = "Las características pueden tener hasta 1.000 letras.";
   }
 
-  if (Object.keys(errors).length > 0 || !price.ok || !isProductKind(kind)) {
+  if (Object.keys(errors).length > 0 || !price.ok || !isProductKind(kind) || !isAudience(audience)) {
     return { values: null, errors };
   }
 
@@ -144,6 +152,7 @@ export function parseProductForm(data: FormData): ProductFormResult {
       description: text(data, "description").trim() || null,
       price_from_clp: price.value,
       kind,
+      audience,
       is_featured: data.get("is_featured") === "on",
       is_available: data.get("is_available") === "on",
       is_published: data.get("is_published") === "on",

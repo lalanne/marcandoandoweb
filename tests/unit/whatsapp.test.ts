@@ -49,3 +49,30 @@ describe("WhatsApp links", () => {
     expect(messageOf(productWhatsappUrl("Botella de ejemplo"))).not.toMatch(/desde|c\/u|mayor/);
   });
 });
+
+describe("WhatsApp links for companies", () => {
+  it("[002-AC75] uses the company general message on the same number", () => {
+    const url = generalWhatsappUrl("empresas");
+    expect(url.startsWith("https://wa.me/56982661835?text=")).toBe(true);
+    expect(messageOf(url)).toBe(
+      "Hola, Marcando Ando. Escribo por mi empresa y quiero cotizar. Te cuento qué necesitamos:",
+    );
+  });
+
+  it("[002-AC74] names the product in the company product message", () => {
+    const url = productWhatsappUrl("Polera corporativa", "empresas");
+    expect(url.startsWith("https://wa.me/56982661835?text=")).toBe(true);
+    expect(messageOf(url)).toBe(
+      "Hola, Marcando Ando. Escribo por mi empresa y quiero cotizar: Polera corporativa. Te cuento qué necesitamos:",
+    );
+  });
+
+  it("[002-AC75] leaves the Personas messages unchanged", () => {
+    expect(messageOf(generalWhatsappUrl("personas"))).toBe(
+      "Hola, Marcando Ando. Quiero cotizar. Te cuento mi idea:",
+    );
+    expect(messageOf(productWhatsappUrl("Botella", "personas"))).toBe(
+      "Hola, Marcando Ando. Quiero cotizar: Botella. Te cuento mi idea:",
+    );
+  });
+});

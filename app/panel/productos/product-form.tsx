@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { formatPriceInput, parsePriceClp } from "@/lib/admin/price";
 import { slugify } from "@/lib/admin/slug";
+import { AUDIENCE_LABEL, AUDIENCES } from "@/lib/catalog/audience";
 import { KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { MAX_COLORS, MAX_SIZES } from "@/lib/admin/product-input";
 import { saveProduct, type ProductFormState, type RawProduct } from "./actions";
@@ -37,6 +38,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
   const [price, setPrice] = useState(start.price);
   const [description, setDescription] = useState(start.description);
   const [kind, setKind] = useState(start.kind);
+  const [audience, setAudience] = useState(start.audience);
   const [isFeatured, setIsFeatured] = useState(start.is_featured);
   const [isAvailable, setIsAvailable] = useState(start.is_available);
   const [isPublished, setIsPublished] = useState(start.is_published);
@@ -132,7 +134,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
           }}
           inputMode="numeric"
           autoComplete="off"
-          aria-describedby={errors.price ? "price-error" : "price-hint"}
+          aria-describedby={`${errors.price ? "price-error" : "price-hint"}${audience === "empresas" ? " price-empresas-hint" : ""}`}
           aria-invalid={errors.price ? true : undefined}
           className={inputClass}
         />
@@ -140,6 +142,11 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
           Con punto para los miles, por ejemplo 7.000. Déjalo vacío si aún no
           hay un precio confirmado.
         </p>
+        {audience === "empresas" ? (
+          <p id="price-empresas-hint" className="text-sm font-medium">
+            En Catálogos empresas no se muestra el precio.
+          </p>
+        ) : null}
         {error("price")}
       </div>
 
@@ -168,6 +175,35 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
         </p>
         {error("kind")}
       </div>
+
+      <fieldset
+        aria-describedby={errors.audience ? "audience-hint audience-error" : "audience-hint"}
+        className="flex flex-col gap-2"
+      >
+        <legend className="font-medium">Catálogo</legend>
+        <div className="flex flex-wrap gap-3">
+          {AUDIENCES.map((a) => (
+            <label
+              key={a}
+              className="flex min-h-11 items-center gap-3 rounded-xl border-2 border-brand-night bg-white px-4"
+            >
+              <input
+                type="radio"
+                name="audience"
+                value={a}
+                checked={audience === a}
+                onChange={() => setAudience(a)}
+                className="size-6"
+              />
+              {AUDIENCE_LABEL[a]}
+            </label>
+          ))}
+        </div>
+        <p id="audience-hint" className="text-sm">
+          «Personas» se muestra en la página principal y «Empresas» en Catálogos empresas.
+        </p>
+        {error("audience")}
+      </fieldset>
 
       <fieldset
         aria-describedby={errors.colors ? "colors-hint colors-error" : "colors-hint"}

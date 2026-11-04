@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { parseKindFilter, productListView, type KindFilter } from "@/lib/admin/product-list";
+import {
+  parseCatalogFilter,
+  parseKindFilter,
+  productListHref,
+  productListView,
+  type CatalogFilter,
+  type KindFilter,
+} from "@/lib/admin/product-list";
 import { listProducts, type ProductListItem } from "@/lib/admin/products";
 import { formatClp } from "@/lib/catalog/format";
 import { createClient } from "@/lib/supabase/server";
@@ -48,11 +55,34 @@ function PackBadge() {
   );
 }
 
-const FILTERS: { value: KindFilter; label: string; href: string }[] = [
-  { value: "todos", label: "Todos", href: "/panel/productos" },
-  { value: "producto", label: "Productos", href: "/panel/productos?tipo=producto" },
-  { value: "pack", label: "Packs", href: "/panel/productos?tipo=pack" },
+// Spec 002, criterion 79: a filled teal pill with dark text, after "Pack".
+function EmpresasBadge() {
+  return (
+    <span
+      data-testid="empresas-badge"
+      className="rounded-full border-2 border-brand-night bg-brand-teal px-3 py-0.5 text-sm font-semibold text-brand-night"
+    >
+      Empresas
+    </span>
+  );
+}
+
+const KIND_FILTERS: { value: KindFilter; label: string }[] = [
+  { value: "todos", label: "Todos" },
+  { value: "producto", label: "Productos" },
+  { value: "pack", label: "Packs" },
 ];
+
+const CATALOG_FILTERS: { value: CatalogFilter; label: string }[] = [
+  { value: "todos", label: "Todos los catálogos" },
+  { value: "personas", label: "Personas" },
+  { value: "empresas", label: "Empresas" },
+];
+
+const filterClass = (current: boolean) =>
+  `inline-flex min-h-11 items-center rounded-full border-2 border-brand-night px-4 py-1.5 font-semibold ${
+    current ? "bg-brand-night text-white" : "bg-white text-brand-night"
+  }`;
 
 function ProductRow({ p }: { p: ProductListItem }) {
   const isPack = p.kind === "pack";
@@ -69,6 +99,7 @@ function ProductRow({ p }: { p: ProductListItem }) {
       <p>{isPack ? price : <><span>Producto</span> · {price}</>}</p>
       <p data-testid="badges" className="flex flex-wrap gap-2">
         {isPack ? <PackBadge /> : null}
+        {p.audience === "empresas" ? <EmpresasBadge /> : null}
         <Badge tone={p.is_published ? "on" : "off"}>
           {p.is_published ? "Publicado" : "Sin publicar"}
         </Badge>
@@ -88,12 +119,17 @@ function ProductRow({ p }: { p: ProductListItem }) {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ aviso?: string; tipo?: string | string[] }>;
+  searchParams: Promise<{
+    aviso?: string;
+    tipo?: string | string[];
+    catalogo?: string | string[];
+  }>;
 }) {
-  const { aviso, tipo } = await searchParams;
+  const { aviso, tipo, catalogo } = await searchParams;
   const products = await listProducts(await createClient());
-  // Spec 002, criteria 39 to 41: counts, the filter from the address, groups.
-  const view = productListView(products, parseKindFilter(tipo));
+  // Spec 002, criteria 39 to 41 and 79 to 80: counts, the filters from the
+  // address, groups.
+  const view = productListView(products, parseKindFilter(tipo), parseCatalogFilter(catalogo));
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-6">
@@ -106,18 +142,34 @@ export default async function ProductsPage({
       <Notice code={aviso} />
       {/* Plain links: the choice lives in the address, works without
           JavaScript and survives a reload (criteria 40 and 42). */}
+      <nav aria-label="Filtrar por catálogo">
+        <ul className="flex flex-wrap gap-2">
+          {CATALOG_FILTERS.map((f) => {
+            const current = view.catalog === f.value;
+            return (
+              <li key={f.value}>
+                <Link
+                  href={productListHref(f.value, view.filter)}
+                  aria-current={current ? "page" : undefined}
+                  className={filterClass(current)}
+                >
+                  {f.label} ({view.catalogCounts[f.value]})
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
       <nav aria-label="Filtrar por tipo">
         <ul className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => {
+          {KIND_FILTERS.map((f) => {
             const current = view.filter === f.value;
             return (
               <li key={f.value}>
                 <Link
-                  href={f.href}
+                  href={productListHref(view.catalog, f.value)}
                   aria-current={current ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center rounded-full border-2 border-brand-night px-4 py-1.5 font-semibold ${
-                    current ? "bg-brand-night text-white" : "bg-white text-brand-night"
-                  }`}
+                  className={filterClass(current)}
                 >
                   {f.label} ({view.counts[f.value]})
                 </Link>

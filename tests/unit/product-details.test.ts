@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   backLink,
+  EMPRESAS_PATH,
+  empresasMetadata,
   characteristicsItems,
   parseColors,
   parseSizes,
@@ -18,6 +20,7 @@ const base: CatalogProduct = {
   description: "Producto falso.",
   priceFromClp: 7000,
   kind: "producto",
+  audience: "personas",
   isFeatured: false,
   isAvailable: true,
   images: [
@@ -141,5 +144,56 @@ describe("productMetadata", () => {
   it("[002-AC61] says what it is: a pack or a product", () => {
     expect(productMetadata({ ...base, kind: "pack" }, origin).description).toContain("pack");
     expect(productMetadata(base, origin).description).toContain("producto");
+  });
+});
+
+describe("Empresas product page", () => {
+  const company: CatalogProduct = { ...base, audience: "empresas" };
+
+  it("[002-AC73] shows no price for an Empresas item", () => {
+    expect(productPageView(base).price).toBe("$7.000 c/u");
+    expect(productPageView(company).price).toBeNull();
+  });
+
+  it("[002-AC73] puts no price in an Empresas item's description or Open Graph tags", () => {
+    const meta = productMetadata(company, "https://marcandoando.cl");
+    for (const text of [meta.description, meta.openGraph?.description]) {
+      expect(text).not.toContain("$");
+      expect(text).not.toContain("c/u");
+    }
+    expect(productMetadata(base, "https://marcandoando.cl").description).toContain("$7.000");
+  });
+
+  it("[002-AC74] links back to the company catalog, to the section of its kind", () => {
+    expect(backLink("producto", "empresas")).toEqual({
+      label: "Volver a catálogos empresas",
+      href: "/empresas#productos",
+    });
+    expect(backLink("pack", "empresas")).toEqual({
+      label: "Volver a catálogos empresas",
+      href: "/empresas#packs",
+    });
+  });
+
+  it("[002-AC74] keeps the Personas back links", () => {
+    expect(backLink("producto", "personas").href).toBe("/#productos");
+    expect(backLink("pack", "personas").href).toBe("/#packs");
+    expect(backLink("pack").label).toBe("Volver a packs");
+  });
+});
+
+describe("/empresas metadata", () => {
+  it("[002-AC76] has the title, a description without price, the canonical address and the Open Graph tags", () => {
+    const meta = empresasMetadata("https://marcandoando.cl/");
+    expect(EMPRESAS_PATH).toBe("/empresas");
+    expect(meta.title).toBe("Catálogos empresas | Marcando Ando");
+    expect(typeof meta.description).toBe("string");
+    expect(meta.description).not.toContain("$");
+    expect(meta.alternates?.canonical).toBe("https://marcandoando.cl/empresas");
+    expect(meta.openGraph).toMatchObject({
+      title: "Catálogos empresas | Marcando Ando",
+      description: meta.description,
+      url: "https://marcandoando.cl/empresas",
+    });
   });
 });
