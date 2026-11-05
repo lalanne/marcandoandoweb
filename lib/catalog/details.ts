@@ -48,7 +48,7 @@ export function productPageView(product: CatalogProduct) {
   };
 }
 
-/** The page of the company catalog (spec 002, "Catálogos empresas"). */
+/** The page of the company catalog (spec 002, "Catálogo empresa"). */
 export const EMPRESAS_PATH = "/empresas";
 
 export function productPath(slug: string): string {
@@ -67,7 +67,7 @@ export function backLink(
 ): { label: string; href: string } {
   if (audience === "empresas") {
     return {
-      label: "Volver a catálogos empresas",
+      label: "Volver a catálogo empresa",
       href: `${EMPRESAS_PATH}#${kind === "pack" ? "packs" : "productos"}`,
     };
   }
@@ -111,7 +111,7 @@ export function productMetadata(product: CatalogProduct, origin: string): Metada
   };
 }
 
-const EMPRESAS_TITLE = "Catálogos empresas | Marcando Ando";
+const EMPRESAS_TITLE = "Catálogo empresa | Marcando Ando";
 const EMPRESAS_DESCRIPTION =
   "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.";
 

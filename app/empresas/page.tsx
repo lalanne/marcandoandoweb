@@ -9,7 +9,7 @@ import { empresasMetadata } from "@/lib/catalog/details";
 import { generalWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { siteUrl } from "@/lib/site";
 
-// The company catalog (spec 002, "Catálogos empresas", criteria 71 to 77). Like
+// The company catalog (spec 002, "Catálogo empresa", criteria 71 to 77). Like
 // the home page: the heading, intro and button are prerendered and the items are
 // read at request time inside Suspense, so changes in the panel show without a
 // deploy.
@@ -26,7 +26,7 @@ export default function EmpresasPage() {
         >
           <div className="mx-auto max-w-5xl">
             <h1 id="empresas-title" className="text-4xl font-bold leading-tight sm:text-5xl">
-              Catálogos empresas
+              Catálogo empresa
             </h1>
             <p className="mt-4 max-w-2xl text-lg sm:text-xl">
               Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa.

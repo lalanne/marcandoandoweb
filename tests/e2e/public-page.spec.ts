@@ -130,7 +130,7 @@ test("[002-AC33] a pack has the same card as a product: price and a page whose W
   expect(new URL(href ?? "").searchParams.get("text")).toContain("Pack regalo de ejemplo");
 });
 
-test("[002-AC35] the header links are exactly Productos, Packs, Catálogos empresas, Cómo pedir and Colegios y grupos", async ({
+test("[002-AC35] the header links are exactly Productos, Packs, Catálogo empresa, Cómo pedir and Colegios y grupos", async ({
   page,
 }) => {
   await open(page);
@@ -147,7 +147,7 @@ test("[002-AC35] the header links are exactly Productos, Packs, Catálogos empre
     { text: "Productos", href: "#productos" },
     { text: "Packs", href: "#packs" },
     // Added 2026-11-04 (issue #107): shown because the seed has Empresas items.
-    { text: "Catálogos empresas", href: "/empresas" },
+    { text: "Catálogo empresa", href: "/empresas" },
     { text: "Cómo pedir", href: "#como-pedir" },
     { text: "Colegios y grupos", href: "#colegios" },
   ]);
@@ -157,7 +157,7 @@ test("[002-AC35] the header links are exactly Productos, Packs, Catálogos empre
   await expect(page.locator("header").getByRole("link", { name: /Trabajos/ })).toHaveCount(0);
   // Each link leads to its section.
   for (const { href } of links) {
-    // "Catálogos empresas" leads to another page, not to a section of this one.
+    // "Catálogo empresa" leads to another page, not to a section of this one.
     if (!href?.startsWith("#")) continue;
     await expect(page.locator(href)).toHaveCount(1);
   }

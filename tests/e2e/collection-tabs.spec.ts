@@ -313,7 +313,7 @@ test("[002-AC89] with a special tab chosen, the header links are the same and Pr
   expect(texts).toEqual([
     "Productos",
     "Packs",
-    "Catálogos empresas",
+    "Catálogo empresa",
     "Cómo pedir",
     "Colegios y grupos",
   ]);

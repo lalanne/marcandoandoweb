@@ -147,7 +147,7 @@ One page in Chilean Spanish (informal "tú"), reading from the database:
 
 | Section | Content |
 |---------|---------|
-| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Admin" for visitors (was "Entrar" until 2026-11-04), "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107): "Catálogos empresas" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
+| **Header** | Logo, links that scroll to the sections, and a sign-in link: "Admin" for visitors (was "Entrar" until 2026-11-04), "Mi panel" for the signed-in admin (see criteria 27 to 31). Amended 2026-10-31: the section links are exactly "Productos", "Packs", "Cómo pedir" and "Colegios y grupos", in that order; "Productos" and "Packs" only show when their section is shown; there is no "Trabajos" link (criteria 34 and 35). Amended 2026-11-04 (issue #107): "Catálogo empresa" after "Packs", to `/empresas`, only when an Empresas item is published (criteria 69 and 70) |
 | **Hero** | Logo or main image, the tagline "Marcamos tus ideas", a short line on what Marcando Ando personalizes, and a "Cotizar por WhatsApp" button (Req §3A) |
 | **Products** | Published products of type "Producto" (amended 2026-10-31; before, all published products grouped by category): cover photo, name, price if set (amended 2026-10-31: "$7.000 c/u", no longer "desde $7.000"), and a "no disponible por ahora" notice with no button when unavailable. Highlighted products first. Each available product links to WhatsApp with a message naming it. Section heading "Productos", anchor `#productos` |
 | **Packs** | Added 2026-10-31. Published products of type "Pack", shown and ordered exactly like the Products section. Section heading "Packs", anchor `#packs` |
@@ -272,7 +272,7 @@ mayor es otro precio". From the options on the design canvas
 
 Before this amendment the cards read "desde $7.000" (the Products row above).
 
-**2026-11-04 amendment - "Catálogos empresas", a catalog for companies (issue #107,
+**2026-11-04 amendment - "Catálogo empresa", a catalog for companies (issue #107,
 approved by the owner on 2026-11-04).** Javiera: "Arriba, dónde sale producto" "Quiero otra sección que diga:
 catálogos empresas" (her words in `docs/requirements.md`). The site has served
 people (B2C); she also wants to sell to companies (B2B). The owner decided on
@@ -283,13 +283,13 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   Personas items, so the home page looks as it does today. Every existing item is
   Personas after the migration.
 - **The header.** On every public page (home, `/productos/<slug>`, `/empresas`) the
-  section links read exactly **Productos · Packs · Catálogos empresas · Cómo pedir ·
+  section links read exactly **Productos · Packs · Catálogo empresa · Cómo pedir ·
   Colegios y grupos**. "Productos" and "Packs" keep their rule (shown only when the
-  home page has that section; they now count Personas items only). "Catálogos
-  empresas" goes to `/empresas` and shows only when at least one Empresas item is
+  home page has that section; they now count Personas items only). "Catálogo
+  empresa" goes to `/empresas` and shows only when at least one Empresas item is
   published, so no link leads to an empty catalog. On `/empresas` it is marked as
   the current page (`aria-current="page"`).
-- **The page `/empresas`.** In this order: the heading "Catálogos empresas"; one
+- **The page `/empresas`.** In this order: the heading "Catálogo empresa"; one
   intro line, **"Poleras, polerones, tazones, botellas y regalos con el logo de tu
   empresa. Cotiza por volumen por WhatsApp."** (proposed copy, to confirm with
   Javiera; it names only products the business already makes); a "Cotizar por
@@ -299,7 +299,7 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   items is hidden. If no Empresas item is published, the page still answers with the
   heading, the intro line, the button and the line "Estamos preparando el catálogo
   para empresas. Escríbenos y te contamos." (so a link already sent never breaks),
-  but the header has no link to it. The page has its own title ("Catálogos empresas
+  but the header has no link to it. The page has its own title ("Catálogo empresa
   | Marcando Ando"), description, canonical address and Open Graph tags, and is in the
   sitemap.
 - **No prices for companies.** An Empresas card and page show no price and no "c/u",
@@ -309,7 +309,7 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   no price either.
 - **Product page of an Empresas item.** Same page as today at `/productos/<slug>`
   (the slug is unique across both catalogs), with no price; the back link reads
-  "Volver a catálogos empresas" and goes to `/empresas#productos` (or `#packs` for a
+  "Volver a catálogo empresa" and goes to `/empresas#productos` (or `#packs` for a
   pack); the order button reads "Pedir por WhatsApp" and uses the company product
   message. A Personas item's page is unchanged.
 - **WhatsApp messages for companies.** Same number. The general company message:
@@ -320,7 +320,7 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   everywhere else every message stays as it is (criterion 55).
 - **Admin.** The product form gets a required field **"Catálogo"**, with the options
   "Personas" and "Empresas" (radio buttons, like "Tipo"); a new product starts as
-  "Personas". Next to the price field a hint says "En Catálogos empresas no se
+  "Personas". Next to the price field a hint says "En Catálogo empresa no se
   muestra el precio." when "Empresas" is chosen. In the product list, each Empresas
   item carries an "Empresas" badge (a filled brand-yellow pill with dark text, after the
   "Pack" badge when it has one; yellow since 2026-11-05, issue #118, see the amendment below); Personas items carry none. Above the type filters,
@@ -348,6 +348,8 @@ palette token) with the same dark text and outline, so it differs from the teal 
 gray status badges and the deep-purple "Pack" badge. Text, position (after "Pack")
 and `data-testid="empresas-badge"` do not change. Criterion 79 now says yellow
 instead of leaving the color open; the contrast of at least 4.5:1 stays.
+
+**2026-11-05 amendment - rename "Catálogos empresas" to "Catálogo empresa" (issue #119, approved by the owner on 2026-11-05).** The visible name of the company catalog is now the singular, with the accent: "Catálogo empresa". Every mention in this spec and in spec 000 is changed (header link, `/empresas` heading, page title "Catálogo empresa | Marcando Ando", back link "Volver a catálogo empresa", the two hints in the product form). The URL `/empresas`, the audience value "Empresas" and the criteria numbers do not change; Javiera's original words in `docs/requirements.md` stay as she wrote them.
 
 **2026-11-05 amendment - collection tabs on the home page: "Todos", "Especial Navidad", "Especial escolar" (issue #120, approved by the owner on 2026-11-05).**
 Javiera: "Necesito secciones en la pagina principal de marcando ando, la actual que
@@ -384,8 +386,8 @@ that the specials hold packs as well as products, and chose on 2026-11-05 the de
 - **Everything is in "Todos".** An item in a collection is also in "Todos". An item
   in both collections appears in both tabs. An item in none appears only in "Todos".
   Unpublished items appear nowhere.
-- **The header does not change.** The links stay "Productos · Packs · Catálogos
-  empresas · Cómo pedir · Colegios y grupos" under the rules of criteria 35 and 69;
+- **The header does not change.** The links stay "Productos · Packs · Catálogo
+  empresa · Cómo pedir · Colegios y grupos" under the rules of criteria 35 and 69;
   they point to the sections of "Todos" (a visitor on a special tab who uses one
   returns to the page as it is without `coleccion`).
 - **Empresas.** `/empresas` has no tabs and ignores `?coleccion=`; an Empresas item
@@ -770,22 +772,22 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     browser-tab icon is the logo cropped to its drawing (it spans at least 95% of the
     icon's width), so it reads at 32 px.
 
-**Catálogos empresas** (added 2026-11-04, issue #107)
+**Catálogo empresa** (added 2026-11-04, issue #107)
 
 68. Given published Personas and Empresas items of both kinds, when the home page
     loads, then its "Productos" and "Packs" sections list only the Personas items,
     and no Empresas item appears on the home page.
 69. Given at least one published Empresas item, when the home page, a product page
     or `/empresas` loads, then the header's section links are exactly "Productos",
-    "Packs", "Catálogos empresas", "Cómo pedir" and "Colegios y grupos", in that
-    order; "Catálogos empresas" goes to `/empresas`; on `/empresas` it has
+    "Packs", "Catálogo empresa", "Cómo pedir" and "Colegios y grupos", in that
+    order; "Catálogo empresa" goes to `/empresas`; on `/empresas` it has
     `aria-current="page"`; and the links fit without horizontal scroll at 360 px and
     1280 px. (Criterion 35 is extended: the links are those five when an Empresas item
     is published, and its four otherwise.)
 70. Given no published Empresas item, when any public page loads, then the header has
-    no "Catálogos empresas" link, and the other links follow criteria 34 and 35.
+    no "Catálogo empresa" link, and the other links follow criteria 34 and 35.
 71. Given published Empresas items of both kinds, when a visitor opens `/empresas`,
-    then they see, in order, the heading "Catálogos empresas", the intro line, a
+    then they see, in order, the heading "Catálogo empresa", the intro line, a
     "Cotizar por WhatsApp" button, a "Productos" section with only the Empresas
     products and a "Packs" section with only the Empresas packs, highlighted items
     first in each; and a kind with no published Empresas item has no section.
@@ -800,7 +802,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     WhatsApp." with a contrast of at least 4.5:1, and not the home page's wholesale
     note.
 74. Given an available Empresas item, when a visitor opens its page, then the back
-    link reads "Volver a catálogos empresas" and goes to `/empresas#productos` (or
+    link reads "Volver a catálogo empresa" and goes to `/empresas#productos` (or
     `/empresas#packs` for a pack), and "Pedir por WhatsApp" opens
     `https://wa.me/56982661835` with the message "Hola, Marcando Ando. Escribo por mi
     empresa y quiero cotizar: <name>. Te cuento qué necesitamos:"; an unavailable one
@@ -810,7 +812,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     `https://wa.me/56982661835` with "Hola, Marcando Ando. Escribo por mi empresa y
     quiero cotizar. Te cuento qué necesitamos:"; and on the home page and on a
     Personas product page every WhatsApp message is unchanged (criterion 55).
-76. Given `/empresas`, when its head is read, then its title is "Catálogos empresas |
+76. Given `/empresas`, when its head is read, then its title is "Catálogo empresa |
     Marcando Ando" and it has a description, a canonical address and the Open Graph
     tags `og:title`, `og:description` and `og:url`; and the sitemap lists `/empresas`
     and the page of every published Empresas item, and none of an unpublished one.
@@ -822,7 +824,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 78. Given the admin creating or editing a product or pack, when they open the form,
     then it has a required "Catálogo" field with the options "Personas" and
     "Empresas", a new item starts as "Personas", and choosing "Empresas" shows the
-    hint "En Catálogos empresas no se muestra el precio." next to the price; when they
+    hint "En Catálogo empresa no se muestra el precio." next to the price; when they
     save a published item as "Empresas", then it appears on `/empresas` in the section
     of its kind and no longer on the home page, without a deploy; and moving it back
     to "Personas" reverses that.
@@ -975,12 +977,13 @@ message to the business number. Then delete the test product.
 4. The pre-filled WhatsApp message: a fixed greeting naming the product, asking them
    to tell their idea. Proposed; confirm.
 5. Does Javiera sign in with an email she owns? Which one?
-6. **Catálogos empresas (issue #107), open with Javiera:** the intro line on
+6. **Catálogo empresa (issue #107), open with Javiera:** the intro line on
    `/empresas` is proposed copy, to confirm; minimum orders, lead times and invoicing
    ("factura") for companies are unknown and stay off the site until she confirms
    them; her father's catalog, if there is one, could be read for structure (not
-   copied). The header label "Catálogos empresas" is hers; "Empresas" alone would be
-   shorter if the header gets tight at 360 px.
+   copied). Her words were "catálogos empresas"; the owner renamed it "Catálogo empresa" on
+   2026-11-05 (issue #119). "Empresas" alone would be shorter if the header gets
+   tight at 360 px.
 7. **Collection tabs (issue #120), approved by the owner on 2026-11-05; still open with Javiera:** the exact names
    and capitalization ("Especial navidad" in her message, "Especial Navidad" in the
    mockup); whether an item may be in both specials (the approved spec says yes, with a list

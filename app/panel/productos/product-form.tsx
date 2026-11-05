@@ -146,7 +146,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
         </p>
         {audience === "empresas" ? (
           <p id="price-empresas-hint" className="text-sm font-medium">
-            En Catálogos empresas no se muestra el precio.
+            En Catálogo empresa no se muestra el precio.
           </p>
         ) : null}
         {error("price")}
@@ -202,7 +202,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
           ))}
         </div>
         <p id="audience-hint" className="text-sm">
-          «Personas» se muestra en la página principal y «Empresas» en Catálogos empresas.
+          «Personas» se muestra en la página principal y «Empresas» en Catálogo empresa.
         </p>
         {error("audience")}
       </fieldset>
