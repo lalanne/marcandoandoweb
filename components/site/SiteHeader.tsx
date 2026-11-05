@@ -18,7 +18,7 @@ const linkClass =
 // "Productos" and "Packs" only show when their section exists, so no link points
 // at a hidden section (spec 002, criteria 34 and 35). There is no link to the
 // "Trabajos reales" section (owner decision, 2026-10-31).
-// "Catálogos empresas" goes after "Packs" and only shows when an Empresas item is
+// "Catálogo empresa" goes after "Packs" and only shows when an Empresas item is
 // published (spec 002, criteria 69 and 70); on /empresas it is the current page.
 // On the home page with a special collection chosen, "Productos" and "Packs" lead to
 // the sections of the page without `coleccion` (spec 002, criterion 89).
@@ -53,7 +53,7 @@ async function CatalogLinks({
             href={EMPRESAS_PATH}
             aria-current={current === "empresas" ? "page" : undefined}
           >
-            Catálogos empresas
+            Catálogo empresa
           </a>
         </li>
       ) : null}

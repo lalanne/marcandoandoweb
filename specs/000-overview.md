@@ -36,7 +36,7 @@ out of scope until it does.
 |-----|--------------|
 | **Visitor / customer** | Browses on a phone, tablet or computer, finds a product or an idea, asks for a quote on WhatsApp. |
 | **Parent or course representative** | A visitor with a specific goal: group gifts for a class, generation, graduation or farewell (Req §3E). The schools section is for them. |
-| **Company buyer** | Added 2026-11-04 (issue #107). Someone buying for a company (B2B): polos, hoodies, mugs or gifts with the company's logo, usually in volume. Uses the company catalog, "Catálogos empresas", and quotes on WhatsApp. |
+| **Company buyer** | Added 2026-11-04 (issue #107). Someone buying for a company (B2B): polos, hoodies, mugs or gifts with the company's logo, usually in volume. Uses the company catalog, "Catálogo empresa", and quotes on WhatsApp. |
 | **Admin (Javiera)** | Keeps the catalog, prices, photos and gallery up to date. Not technical. |
 
 Decision for v1 (owner, 2026-10-23): **one admin role** (Req open question 7).
@@ -59,7 +59,7 @@ and hosting are part of delivery (Req §4, §8).
 | **WhatsApp quote:** a pre-filled message with product, variant or design, quantity and personalization (Req §5) | Reviews and testimonials |
 | **Gallery of designs and finished work:** grouped by theme, new designs added constantly, each design linked to one or more products (Req §3D) | Multiple languages (Spanish only) |
 | **Schools and courses section** (Req §3E) | Blog, newsletter, email marketing |
-| **Company catalog, "Catálogos empresas"** (added 2026-11-04, issue #107, approved by the owner on 2026-11-04): two catalogs, one for people ("Personas", today's Productos and Packs) and one for companies ("Empresas", its own Productos and Packs on the page `/empresas`, linked from the header). Each product or pack belongs to one of them, chosen in the admin. Company items show no price and quote on WhatsApp (spec 002) | Company accounts, online quotes, invoicing or volume price tables |
+| **Company catalog, "Catálogo empresa"** (added 2026-11-04, issue #107, approved by the owner on 2026-11-04): two catalogs, one for people ("Personas", today's Productos and Packs) and one for companies ("Empresas", its own Productos and Packs on the page `/empresas`, linked from the header). Each product or pack belongs to one of them, chosen in the admin. Company items show no price and quote on WhatsApp (spec 002) | Company accounts, online quotes, invoicing or volume price tables |
 | **Home page collections** (added 2026-11-05, issue #120, approved by the owner on 2026-11-05): tabs above the Productos and Packs sections of the home page, "Todos" (today's page), "Especial Navidad" and "Especial escolar"; choosing one filters products and packs together. Each product or pack can be in zero, one or both specials, chosen in the admin (specs 001 and 002) | Collections the admin creates or renames, a page per collection, other seasonal specials |
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |

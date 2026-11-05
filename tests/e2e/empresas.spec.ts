@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
 import { createTestAdmin, supabaseEnv } from "./supabase";
 
-// Spec 002, "Catálogos empresas" (criteria 68 to 77, issue #107). Reads the
+// Spec 002, "Catálogo empresa" (criteria 68 to 77, issue #107). Reads the
 // seeded fake company items (supabase/seed.sql: all priced 2000, which must never
 // show) and a few throwaway items made as a throwaway admin and removed after.
 // The cases with no published Empresas item are in isolated/empresas-empty.spec.ts.
@@ -117,7 +117,7 @@ test("[002-AC69] with an Empresas item published, the header links are the five,
   const expected = (base: string) => [
     { text: "Productos", href: `${base}#productos` },
     { text: "Packs", href: `${base}#packs` },
-    { text: "Catálogos empresas", href: "/empresas" },
+    { text: "Catálogo empresa", href: "/empresas" },
     { text: "Cómo pedir", href: `${base}#como-pedir` },
     { text: "Colegios y grupos", href: `${base}#colegios` },
   ];
@@ -128,7 +128,7 @@ test("[002-AC69] with an Empresas item published, the header links are the five,
     ["/empresas", "/"],
   ] as const) {
     await page.goto(path);
-    await expect(nav(page).getByRole("link", { name: "Catálogos empresas" })).toBeVisible({
+    await expect(nav(page).getByRole("link", { name: "Catálogo empresa" })).toBeVisible({
       timeout: PAGE_TIMEOUT,
     });
     expect(await headerLinks(page), path).toEqual(expected(base));
@@ -138,11 +138,11 @@ test("[002-AC69] with an Empresas item published, the header links are the five,
 
 test("[002-AC69] on /empresas the link is the current page, and only there", async ({ page }) => {
   await page.goto("/empresas");
-  const link = nav(page).getByRole("link", { name: "Catálogos empresas" });
+  const link = nav(page).getByRole("link", { name: "Catálogo empresa" });
   await expect(link).toHaveAttribute("aria-current", "page", { timeout: PAGE_TIMEOUT });
   await expect(nav(page).locator('[aria-current="page"]')).toHaveCount(1);
   await page.goto("/");
-  await expect(nav(page).getByRole("link", { name: "Catálogos empresas" })).not.toHaveAttribute(
+  await expect(nav(page).getByRole("link", { name: "Catálogo empresa" })).not.toHaveAttribute(
     "aria-current",
     "page",
   );
@@ -152,7 +152,7 @@ test("[002-AC71] /empresas shows the heading, intro, button, then Productos and 
   page,
 }) => {
   await openEmpresas(page);
-  await expect(page.getByRole("heading", { level: 1, name: "Catálogos empresas" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Catálogo empresa" })).toBeVisible();
   await expect(page.getByText(INTRO, { exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" })).toBeVisible();
 
@@ -259,7 +259,7 @@ test("[002-AC74] an available Empresas page links back to its section and orders
   page,
 }) => {
   await page.goto(`/productos/${SEED_PRODUCT.slug}`);
-  const back = page.getByRole("main").getByRole("link", { name: "Volver a catálogos empresas" });
+  const back = page.getByRole("main").getByRole("link", { name: "Volver a catálogo empresa" });
   await expect(back).toHaveAttribute("href", "/empresas#productos", { timeout: PAGE_TIMEOUT });
   const order = page.getByRole("link", { name: "Pedir por WhatsApp" });
   const href = await order.getAttribute("href");
@@ -270,7 +270,7 @@ test("[002-AC74] an available Empresas page links back to its section and orders
 
   await page.goto(`/productos/${SEED_PACK.slug}`);
   await expect(
-    page.getByRole("main").getByRole("link", { name: "Volver a catálogos empresas" }),
+    page.getByRole("main").getByRole("link", { name: "Volver a catálogo empresa" }),
   ).toHaveAttribute("href", "/empresas#packs", { timeout: PAGE_TIMEOUT });
 
 });
@@ -321,13 +321,13 @@ test("[002-AC76] /empresas has its title, description, canonical address and Ope
   page,
 }) => {
   await page.goto("/empresas");
-  await expect(page).toHaveTitle("Catálogos empresas | Marcando Ando");
+  await expect(page).toHaveTitle("Catálogo empresa | Marcando Ando");
   const description = await page.locator('meta[name="description"]').getAttribute("content");
   expect(description?.length).toBeGreaterThan(20);
   const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
   expect(canonical?.endsWith("/empresas")).toBe(true);
   expect(await page.locator('meta[property="og:title"]').getAttribute("content")).toBe(
-    "Catálogos empresas | Marcando Ando",
+    "Catálogo empresa | Marcando Ando",
   );
   expect(await page.locator('meta[property="og:description"]').getAttribute("content")).toBe(
     description,
@@ -387,7 +387,7 @@ test("[002-AC77] an Empresas product page fits the screen, has 44 px controls an
     const box = await link.boundingBox();
     expect(box!.height).toBeGreaterThanOrEqual(44);
   }
-  const back = page.getByRole("link", { name: "Volver a catálogos empresas" });
+  const back = page.getByRole("link", { name: "Volver a catálogo empresa" });
   await back.focus();
   await expect(back).toBeFocused();
   expect(await back.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe("none");

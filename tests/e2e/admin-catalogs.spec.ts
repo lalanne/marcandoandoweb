@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
 import { createTestAdmin, supabaseEnv } from "./supabase";
 
-// Spec 002, "Catálogos empresas" in the panel (criteria 78 to 81, issue #107):
+// Spec 002, "Catálogo empresa" in the panel (criteria 78 to 81, issue #107):
 // the "Catálogo" field, the Empresas badge and the catalog filters. Every test
 // makes its own products, named with the project and a run id (both viewports
 // run at once on one database); they are removed afterwards.
@@ -89,7 +89,7 @@ test("[002-AC78] the form has a required Catálogo field with Personas and Empre
   await expect(group.getByRole("radio", { name: "Personas" })).toBeChecked();
   await expect(group.getByRole("radio", { name: "Empresas" })).not.toBeChecked();
   await expect(group.getByRole("radio").first()).toHaveAccessibleName("Personas");
-  const hint = page.getByText("En Catálogos empresas no se muestra el precio.");
+  const hint = page.getByText("En Catálogo empresa no se muestra el precio.");
   await expect(hint).toHaveCount(0);
   await group.getByRole("radio", { name: "Empresas" }).check();
   await expect(hint).toBeVisible();
@@ -123,7 +123,7 @@ test("[002-AC78] saving a published item as Empresas moves it from the home page
 
   await page.goto(edit);
   await catalogGroup(page).getByRole("radio", { name: "Empresas" }).check();
-  await expect(page.getByText("En Catálogos empresas no se muestra el precio.")).toBeVisible();
+  await expect(page.getByText("En Catálogo empresa no se muestra el precio.")).toBeVisible();
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Producto guardado." })).toBeVisible({
     timeout: PAGE_TIMEOUT,
