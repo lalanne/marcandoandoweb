@@ -18,6 +18,7 @@ const prod = (
   priceFromClp: null,
   kind,
   audience: "personas",
+  collections: [],
   isFeatured: false,
   isAvailable: true,
   images: [],

@@ -1,4 +1,5 @@
 import type { Audience } from "./audience";
+import type { Collection } from "./collection";
 import type { ProductKind } from "./kind";
 
 export type CatalogImage = { storagePath: string; altText: string };
@@ -15,6 +16,8 @@ export type CatalogProduct = {
   kind: ProductKind;
   /** The catalog it belongs to: the home page or /empresas. */
   audience: Audience;
+  /** The special tabs of the home page it also appears in; empty means only "Todos". */
+  collections: Collection[];
   isFeatured: boolean;
   isAvailable: boolean;
   /** Every photo in the admin's order; the first is the cover. */

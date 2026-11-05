@@ -1,4 +1,5 @@
 import { isAudience, type Audience } from "@/lib/catalog/audience";
+import { parseCollections, type Collection } from "@/lib/catalog/collection";
 import { isProductKind, type ProductKind } from "@/lib/catalog/kind";
 import { parsePriceClp } from "./price";
 import { isValidSlug, slugify } from "./slug";
@@ -18,6 +19,7 @@ export type ProductValues = {
   price_from_clp: number | null;
   kind: ProductKind;
   audience: Audience;
+  collections: Collection[];
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
@@ -153,6 +155,7 @@ export function parseProductForm(data: FormData): ProductFormResult {
       price_from_clp: price.value,
       kind,
       audience,
+      collections: parseCollections(texts(data, "collections")),
       is_featured: data.get("is_featured") === "on",
       is_available: data.get("is_available") === "on",
       is_published: data.get("is_published") === "on",

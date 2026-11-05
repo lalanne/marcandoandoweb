@@ -39,7 +39,7 @@ export default async function EditProductPage({
 
       <ProductForm
         // A new key after each save, so the form shows what is stored.
-        key={`${product.id}:${JSON.stringify([product.name, product.slug, product.price_from_clp, product.is_published, product.is_available, product.is_featured, product.kind, product.audience, product.description, product.colors, product.sizes, product.characteristics])}`}
+        key={`${product.id}:${JSON.stringify([product.name, product.slug, product.price_from_clp, product.is_published, product.is_available, product.is_featured, product.kind, product.audience, product.collections, product.description, product.colors, product.sizes, product.characteristics])}`}
         productId={product.id}
         submitLabel="Guardar cambios"
         initial={{
@@ -49,6 +49,7 @@ export default async function EditProductPage({
           price: formatPriceInput(product.price_from_clp),
           kind: product.kind,
           audience: product.audience,
+          collections: product.collections,
           is_featured: product.is_featured,
           is_available: product.is_available,
           is_published: product.is_published,

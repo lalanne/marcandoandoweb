@@ -4,7 +4,8 @@ import type { Audience } from "@/lib/catalog/audience";
 import { COMPANY_PRICE_NOTE, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/format";
 import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
-import { loadCatalog } from "@/lib/catalog/load";
+import { COLLECTION_LABEL, listForCollection } from "@/lib/catalog/collection";
+import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
@@ -61,13 +62,22 @@ async function KindSection({
   kind,
   audience,
   className,
+  searchParams,
 }: {
   kind: ProductKind;
   audience: Audience;
   className: string;
+  searchParams?: SearchParams;
 }) {
-  const catalog = await loadCatalog();
-  const products = (audience === "empresas" ? catalog.empresas : catalog.products)[kind];
+  // Only the home page has collections; /empresas ignores `?coleccion=`.
+  let products: CatalogProduct[];
+  if (audience === "empresas" || !searchParams) {
+    const catalog = await loadCatalog();
+    products = (audience === "empresas" ? catalog.empresas : catalog.products)[kind];
+  } else {
+    const { catalog, collection } = await loadCollectionView(searchParams);
+    products = listForCollection(catalog.products, collection)[kind];
+  }
   if (products.length === 0) return null;
   const { id, title } = KIND_SECTION[kind];
   return (
@@ -89,12 +99,77 @@ async function KindSection({
   );
 }
 
-export function ProductsSection({ audience = "personas" }: { audience?: Audience }) {
-  return <KindSection kind="producto" audience={audience} className="bg-brand-cream" />;
+export function ProductsSection({
+  audience = "personas",
+  searchParams,
+}: {
+  audience?: Audience;
+  searchParams?: SearchParams;
+}) {
+  return (
+    <KindSection
+      kind="producto"
+      audience={audience}
+      className="bg-brand-cream"
+      searchParams={searchParams}
+    />
+  );
 }
 
-export function PacksSection({ audience = "personas" }: { audience?: Audience }) {
-  return <KindSection kind="pack" audience={audience} className="bg-brand-yellow/20" />;
+export function PacksSection({
+  audience = "personas",
+  searchParams,
+}: {
+  audience?: Audience;
+  searchParams?: SearchParams;
+}) {
+  return (
+    <KindSection
+      kind="pack"
+      audience={audience}
+      className="bg-brand-yellow/20"
+      searchParams={searchParams}
+    />
+  );
+}
+
+const tabClass =
+  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border-2 border-brand-night px-5 py-2 text-base font-semibold";
+
+/**
+ * The tabs "Todos", "Especial Navidad" and "Especial escolar" above the Productos
+ * and Packs sections (spec 002, criteria 82 to 87). Plain links that load the home
+ * page with the choice in the address, so they work without JavaScript and can be
+ * shared. Not shown when no published Personas item is in a collection.
+ */
+export async function CollectionTabs({ searchParams }: { searchParams: SearchParams }) {
+  const { available, collection } = await loadCollectionView(searchParams);
+  if (available.length === 0) return null;
+  const tab = (href: string, label: string, chosen: boolean) => (
+    <li key={href}>
+      <a
+        href={href}
+        aria-current={chosen ? "page" : undefined}
+        className={`${tabClass} ${
+          chosen ? "bg-brand-night text-brand-cream" : "bg-white text-brand-night hover:bg-brand-yellow/40"
+        }`}
+      >
+        {label}
+      </a>
+    </li>
+  );
+  return (
+    <div className="bg-brand-cream px-4 pt-8">
+      <nav aria-label="Colecciones" id="colecciones" className="mx-auto max-w-5xl">
+        <ul className="flex flex-wrap gap-3">
+          {tab("/", "Todos", collection === null)}
+          {available.map((c) =>
+            tab(`/?coleccion=${c}#colecciones`, COLLECTION_LABEL[c], collection === c),
+          )}
+        </ul>
+      </nav>
+    </div>
+  );
 }
 
 /**

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { formatPriceInput, parsePriceClp } from "@/lib/admin/price";
 import { slugify } from "@/lib/admin/slug";
 import { AUDIENCE_LABEL, AUDIENCES } from "@/lib/catalog/audience";
+import { COLLECTION_LABEL, COLLECTIONS } from "@/lib/catalog/collection";
 import { KIND_LABEL, PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { MAX_COLORS, MAX_SIZES } from "@/lib/admin/product-input";
 import { saveProduct, type ProductFormState, type RawProduct } from "./actions";
@@ -39,6 +40,7 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
   const [description, setDescription] = useState(start.description);
   const [kind, setKind] = useState(start.kind);
   const [audience, setAudience] = useState(start.audience);
+  const [collections, setCollections] = useState(start.collections);
   const [isFeatured, setIsFeatured] = useState(start.is_featured);
   const [isAvailable, setIsAvailable] = useState(start.is_available);
   const [isPublished, setIsPublished] = useState(start.is_published);
@@ -203,6 +205,35 @@ export function ProductForm({ productId, initial, submitLabel }: Props) {
           «Personas» se muestra en la página principal y «Empresas» en Catálogos empresas.
         </p>
         {error("audience")}
+      </fieldset>
+
+      <fieldset aria-describedby="collections-hint" className="flex flex-col gap-2">
+        <legend className="font-medium">Colecciones</legend>
+        <div className="flex flex-wrap gap-3">
+          {COLLECTIONS.map((c) => (
+            <label
+              key={c}
+              className="flex min-h-11 items-center gap-3 rounded-xl border-2 border-brand-night bg-white px-4"
+            >
+              <input
+                type="checkbox"
+                name="collections"
+                value={c}
+                checked={collections.includes(c)}
+                onChange={(e) =>
+                  setCollections((now) =>
+                    e.target.checked ? [...now, c] : now.filter((x) => x !== c),
+                  )
+                }
+                className="size-6"
+              />
+              {COLLECTION_LABEL[c]}
+            </label>
+          ))}
+        </div>
+        <p id="collections-hint" className="text-sm">
+          Todos los productos salen siempre en «Todos».
+        </p>
       </fieldset>
 
       <fieldset

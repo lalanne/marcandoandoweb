@@ -28,6 +28,20 @@ describe("getCatalog (anonymous, real database)", () => {
     expect(products.producto[0].slug).toBe("demo-botella-ejemplo");
   });
 
+  it("[001-AC35] gives each published product its collections, and the seeded draft in a collection stays out", async () => {
+    const { products, empresas } = await getCatalog(anonClient());
+    const all = [...products.producto, ...products.pack];
+    const bySlug = (slug: string) => all.find((p) => p.slug === slug);
+    expect(bySlug("demo-navidad-producto")?.collections).toEqual(["navidad"]);
+    expect(bySlug("demo-navidad-pack")?.collections).toEqual(["navidad"]);
+    expect(bySlug("demo-escolar-producto")?.collections).toEqual(["escolar"]);
+    expect(bySlug("demo-navidad-escolar-producto")?.collections).toEqual(["navidad", "escolar"]);
+    expect(bySlug("demo-botella-ejemplo")?.collections).toEqual([]);
+    expect(bySlug("demo-navidad-borrador")).toBeUndefined();
+    const company = [...empresas.producto, ...empresas.pack];
+    expect(company.find((p) => p.slug === "demo-empresa-navidad")?.collections).toEqual(["navidad"]);
+  });
+
   it("[002-AC12] keeps unavailable products, flagged as unavailable", async () => {
     const { products } = await getCatalog(anonClient());
     const all = [...products.producto, ...products.pack];
