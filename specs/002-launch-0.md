@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, is a **draft** awaiting the owner's approval; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -340,7 +340,7 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
 Before this amendment there was one catalog and the header had four section links
 (criterion 35).
 
-**2026-11-05 amendment - collection tabs on the home page: "Todos", "Especial Navidad", "Especial escolar" (issue #120, draft, awaiting the owner's approval).**
+**2026-11-05 amendment - collection tabs on the home page: "Todos", "Especial Navidad", "Especial escolar" (issue #120, approved by the owner on 2026-11-05).**
 Javiera: "Necesito secciones en la pagina principal de marcando ando, la actual que
 dice "productos", es la seccion todos, tb deberia haber una seccion, "especial
 navidad""especial escolar"" (her words in `docs/requirements.md`). The owner added
@@ -831,7 +831,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     can be reached and chosen with a visible focus, the chosen one has
     `aria-current="page"`, and at 360 px the filters wrap with no horizontal scroll.
 
-**Collection tabs** (added 2026-11-05, issue #120, draft)
+**Collection tabs** (added 2026-11-05, issue #120)
 
 82. Given published Personas items: a product and a pack in "Especial Navidad", a
     product in "Especial escolar", and a product and a pack in no collection, when a
@@ -970,9 +970,9 @@ message to the business number. Then delete the test product.
    them; her father's catalog, if there is one, could be read for structure (not
    copied). The header label "Catálogos empresas" is hers; "Empresas" alone would be
    shorter if the header gets tight at 360 px.
-7. **Collection tabs (issue #120), open with the owner and Javiera:** the exact names
+7. **Collection tabs (issue #120), approved by the owner on 2026-11-05; still open with Javiera:** the exact names
    and capitalization ("Especial navidad" in her message, "Especial Navidad" in the
-   mockup); whether an item may be in both specials (this draft says yes, with a list
+   mockup); whether an item may be in both specials (the approved spec says yes, with a list
    on the row and no join table); whether "Todos" should be renamed. Proposed, to
    confirm: the label "Colecciones" for the row of tabs and the admin hint "Todos
    los productos salen siempre en «Todos»."

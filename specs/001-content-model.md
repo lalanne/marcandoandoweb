@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) is a **draft** and awaits the owner's approval.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) was approved by the owner on 2026-11-05.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -105,7 +105,7 @@ A thing Marcando Ando can personalize and quote.
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
 | `audience` | required, `personas` or `empresas`, default `personas`; any other value is rejected. Decides which catalog the product or pack belongs to (2026-11-04 amendment below) |
-| `collections` | required list, default empty; each value is `navidad` or `escolar`, any other value is rejected. Decides under which special tabs of the home page the item also appears (2026-11-05 amendment below, **draft**) |
+| `collections` | required list, default empty; each value is `navidad` or `escolar`, any other value is rejected. Decides under which special tabs of the home page the item also appears (2026-11-05 amendment below) |
 
 **2026-11-04 amendment - two catalogs, Personas and Empresas (issue #107, approved by the owner on 2026-11-04).**
 Javiera wants a catalog for companies next to today's catalog for people ("Feedback
@@ -134,7 +134,7 @@ the product, independent of `kind`:
   `personas` and its check. Every existing row becomes `personas`, so the live site
   looks the same, and code that does not read the column keeps working.
 
-**2026-11-05 amendment - special collections, "Especial Navidad" and "Especial escolar" (issue #120, draft, awaiting the owner's approval).**
+**2026-11-05 amendment - special collections, "Especial Navidad" and "Especial escolar" (issue #120, approved by the owner on 2026-11-05).**
 Javiera wants sections on the home page next to "Todos" (see "Feedback from Javiera:
 collections on the home page" in `docs/requirements.md`). The owner chose on
 2026-11-05 to build them as tabs. This spec adds the data they need:
@@ -287,7 +287,7 @@ storage; their access rules belong to spec 005.
 - **Catalog (added 2026-11-04):** a product with `audience` `personas` is
   listed in the people's catalog (the home page), one with `empresas` in the company
   catalog (`/empresas`); within each, `kind` decides "Productos" or "Packs".
-- **Collection (added 2026-11-05, draft):** on the home page, "Todos" lists every
+- **Collection (added 2026-11-05):** on the home page, "Todos" lists every
   published `personas` item; a special tab lists the published `personas` items
   whose `collections` contain its value, products under "Productos" and packs under
   "Packs".
@@ -422,7 +422,7 @@ plan.
     including moving a product from `personas` to `empresas` (criteria 18 to 20
     extended).
 
-**Special collections** (added 2026-11-05, issue #120, draft)
+**Special collections** (added 2026-11-05, issue #120)
 
 33. Given a product, when `collections` is set to a list with any value other than
     `navidad` or `escolar`, or set to null, the write is rejected; when it is set to
