@@ -706,3 +706,123 @@ describe("product audience", () => {
     expect(moved[0].audience).toBe("empresas");
   });
 });
+
+// Spec 001, criteria 33 to 36 (amendment of 2026-11-05, issue #120): the special
+// collections of the home page, a list on the product.
+describe("product collections", () => {
+  it("[001-AC33] saves a product with no collections as the empty list", async () => {
+    const p = await newProduct();
+    expect(p.collections).toEqual([]);
+  });
+
+  it("[001-AC33] saves navidad, escolar and both as given", async () => {
+    expect((await newProduct({ collections: ["navidad"] })).collections).toEqual(["navidad"]);
+    expect((await newProduct({ collections: ["escolar"] })).collections).toEqual(["escolar"]);
+    expect((await newProduct({ collections: ["navidad", "escolar"] })).collections).toEqual([
+      "navidad",
+      "escolar",
+    ]);
+    expect((await newProduct({ collections: [] })).collections).toEqual([]);
+  });
+
+  it("[001-AC33] rejects any other value, and null, on insert and on update", async () => {
+    for (const collections of [["otra"], ["Navidad"], ["navidad", "todos"], [""], ["escolar", null]]) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Colección mala", collections });
+      expect(error?.code, JSON.stringify(collections)).toBe("23514");
+    }
+    const nullList = await admin
+      .from("product")
+      .insert({ slug: uniqueSlug("p"), name: "Sin colecciones", collections: null });
+    expect(nullList.error?.code).toBe("23502");
+
+    const p = await newProduct({ collections: ["navidad"] });
+    const bad = await admin.from("product").update({ collections: ["otra"] }).eq("id", p.id);
+    expect(bad.error?.code).toBe("23514");
+    const toNull = await admin.from("product").update({ collections: null }).eq("id", p.id);
+    expect(toNull.error?.code).toBe("23502");
+    expect(
+      ok(await admin.from("product").select("collections").eq("id", p.id).single()).collections,
+    ).toEqual(["navidad"]);
+  });
+
+  it("[001-AC34] leaves the seeded products that are in no collection with the empty list, other fields intact", async () => {
+    // The `migrations` job resets from the migrations alone; here the seeded rows
+    // (inserted without collections) are read back.
+    const row = ok(
+      await admin
+        .from("product")
+        .select("slug, name, kind, price_from_clp, audience, collections")
+        .eq("slug", "demo-botella-ejemplo")
+        .single(),
+    );
+    expect(row).toEqual({
+      slug: "demo-botella-ejemplo",
+      name: "Botella de ejemplo",
+      kind: "producto",
+      price_from_clp: 1000,
+      audience: "personas",
+      collections: [],
+    });
+  });
+
+  it("[001-AC35] returns each published product with its collections, and not the unpublished one", async () => {
+    const pub = await newProduct({ collections: ["navidad", "escolar"], is_published: true });
+    const pack = await newProduct({ collections: ["escolar"], kind: "pack", is_published: true });
+    const plain = await newProduct({ is_published: true });
+    const draft = await newProduct({ collections: ["navidad"], is_published: false });
+
+    const rows = ok(
+      await anon
+        .from("product")
+        .select("id, collections")
+        .in("id", [pub.id, pack.id, plain.id, draft.id]),
+    );
+    const byId = Object.fromEntries(
+      rows.map((r: { id: string; collections: string[] }) => [r.id, r.collections]),
+    );
+    expect(Object.keys(byId).sort()).toEqual([pub.id, pack.id, plain.id].sort());
+    expect(byId[pub.id]).toEqual(["navidad", "escolar"]);
+    expect(byId[pack.id]).toEqual(["escolar"]);
+    expect(byId[plain.id]).toEqual([]);
+
+    const inNavidad = ok(
+      await anon
+        .from("product")
+        .select("id")
+        .contains("collections", ["navidad"])
+        .in("id", [pub.id, pack.id, plain.id, draft.id]),
+    );
+    expect(inNavidad).toEqual([{ id: pub.id }]);
+  });
+
+  it("[001-AC36] refuses the public and a non-admin user, and lets the admin add and remove a collection", async () => {
+    const p = await newProduct({ is_published: true });
+
+    for (const client of [anon, nonAdmin]) {
+      const res = await client
+        .from("product")
+        .update({ collections: ["navidad"] })
+        .eq("id", p.id)
+        .select();
+      expect(res.error !== null || (res.data ?? []).length === 0).toBe(true);
+    }
+    const insert = await nonAdmin
+      .from("product")
+      .insert({ slug: uniqueSlug("p"), name: "No admin", collections: ["navidad"] });
+    expect(insert.error).not.toBeNull();
+    expect(
+      ok(await admin.from("product").select("collections").eq("id", p.id).single()).collections,
+    ).toEqual([]);
+
+    const added = ok(
+      await admin.from("product").update({ collections: ["navidad"] }).eq("id", p.id).select(),
+    );
+    expect(added[0].collections).toEqual(["navidad"]);
+    const removed = ok(
+      await admin.from("product").update({ collections: [] }).eq("id", p.id).select(),
+    );
+    expect(removed[0].collections).toEqual([]);
+  });
+});

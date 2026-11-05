@@ -27,6 +27,7 @@ describe("parseProductForm", () => {
       price_from_clp: null,
       kind: "producto",
       audience: "personas",
+      collections: [],
       is_featured: false,
       is_available: false,
       is_published: true,
@@ -104,6 +105,32 @@ describe("parseProductForm: catálogo", () => {
   it("[002-AC78] keeps the price for an Empresas item", () => {
     const r = parseProductForm(form({ ...base, audience: "empresas", price: "7.000" }));
     expect(r.values?.price_from_clp).toBe(7000);
+  });
+});
+
+describe("parseProductForm: colecciones", () => {
+  function withCollections(values: string[]): FormData {
+    const data = form(base);
+    for (const v of values) data.append("collections", v);
+    return data;
+  }
+
+  it("[002-AC88] no checkbox checked saves the empty list", () => {
+    expect(parseProductForm(form(base)).values?.collections).toEqual([]);
+  });
+
+  it("[002-AC88] reads one or both checked collections, in the fixed order", () => {
+    expect(parseProductForm(withCollections(["navidad"])).values?.collections).toEqual(["navidad"]);
+    expect(parseProductForm(withCollections(["escolar"])).values?.collections).toEqual(["escolar"]);
+    expect(
+      parseProductForm(withCollections(["escolar", "navidad"])).values?.collections,
+    ).toEqual(["navidad", "escolar"]);
+  });
+
+  it("[001-AC33] ignores values that are not a collection, and repeated ones", () => {
+    expect(
+      parseProductForm(withCollections(["navidad", "navidad", "otra", "todos"])).values?.collections,
+    ).toEqual(["navidad"]);
   });
 });
 

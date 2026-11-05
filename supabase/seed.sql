@@ -58,6 +58,18 @@ insert into public.product (slug, name, description, price_from_clp, kind, audie
   ('demo-empresa-pack', 'Pack bienvenida de ejemplo', 'Pack falso para el catálogo de empresas.', 2000, 'pack', 'empresas', false, true, true),
   ('demo-empresa-pack-borrador', 'Pack de empresa de ejemplo (borrador)', 'Pack falso sin publicar.', 2000, 'pack', 'empresas', false, true, false);
 
+-- Fake special collections of the home page (spec 001 criterion 33, spec 002
+-- criteria 82 to 89). Personas items in "navidad", "escolar" and both, a draft in
+-- "navidad", and an Empresas item in "navidad" (never on the home page). None is
+-- highlighted, so the order of the other seeded items does not change.
+insert into public.product (slug, name, description, price_from_clp, kind, audience, collections, is_featured, is_available, is_published) values
+  ('demo-navidad-producto', 'Adorno navideño de ejemplo', 'Producto falso para la colección de Navidad.', 1000, 'producto', 'personas', '{navidad}', false, true, true),
+  ('demo-navidad-pack', 'Pack navideño de ejemplo', 'Pack falso para la colección de Navidad.', 1000, 'pack', 'personas', '{navidad}', false, true, true),
+  ('demo-escolar-producto', 'Cuaderno escolar de ejemplo', 'Producto falso para la colección escolar.', 1000, 'producto', 'personas', '{escolar}', false, true, true),
+  ('demo-navidad-escolar-producto', 'Taza regalo de ejemplo', 'Producto falso en las dos colecciones.', 1000, 'producto', 'personas', '{navidad,escolar}', false, true, true),
+  ('demo-navidad-borrador', 'Adorno de ejemplo (borrador)', 'Producto falso sin publicar, en Navidad.', 1000, 'producto', 'personas', '{navidad}', false, true, false),
+  ('demo-empresa-navidad', 'Regalo de empresa navideño de ejemplo', 'Producto falso de empresas, en Navidad.', 2000, 'producto', 'empresas', '{navidad}', false, true, true);
+
 insert into public.design (slug, title, description, is_published) values
   ('demo-diseno-estrellas', 'Diseño de ejemplo: estrellas', 'Diseño falso para desarrollo.', true),
   ('demo-diseno-borrador', 'Diseño de ejemplo (borrador)', 'Diseño falso sin publicar.', false);

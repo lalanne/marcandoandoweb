@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseColors, parseSizes } from "./details";
 import { isAudience } from "./audience";
+import { parseCollections } from "./collection";
 import { groupByAudience } from "./group";
 import { isProductKind } from "./kind";
 import { photosInOrder } from "./photos";
@@ -17,7 +18,7 @@ type ImageRow = {
 };
 
 const PRODUCT_COLUMNS =
-  "id, slug, name, description, price_from_clp, kind, audience, is_featured, is_available, colors, sizes, characteristics, image(storage_path, alt_text, position)";
+  "id, slug, name, description, price_from_clp, kind, audience, collections, is_featured, is_available, colors, sizes, characteristics, image(storage_path, alt_text, position)";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toCatalogProduct(p: any): CatalogProduct {
@@ -29,6 +30,7 @@ function toCatalogProduct(p: any): CatalogProduct {
     priceFromClp: p.price_from_clp,
     kind: p.kind,
     audience: p.audience,
+    collections: parseCollections(p.collections),
     isFeatured: p.is_featured,
     isAvailable: p.is_available,
     images: photosInOrder(p.image as ImageRow[]),

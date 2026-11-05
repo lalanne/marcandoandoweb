@@ -21,6 +21,7 @@ const base: CatalogProduct = {
   priceFromClp: 7000,
   kind: "producto",
   audience: "personas",
+  collections: [],
   isFeatured: false,
   isAvailable: true,
   images: [

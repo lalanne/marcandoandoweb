@@ -34,6 +34,7 @@ export type RawProduct = {
   price: string;
   kind: string;
   audience: string;
+  collections: string[];
   is_featured: boolean;
   is_available: boolean;
   is_published: boolean;
@@ -62,6 +63,7 @@ export async function saveProduct(
     price: text(formData, "price"),
     kind: text(formData, "kind"),
     audience: text(formData, "audience"),
+    collections: formData.getAll("collections").filter((v): v is string => typeof v === "string"),
     is_featured: formData.get("is_featured") === "on",
     is_available: formData.get("is_available") === "on",
     is_published: formData.get("is_published") === "on",

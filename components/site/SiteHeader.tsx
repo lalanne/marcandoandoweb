@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/header-link";
 import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
-import { loadCatalog } from "@/lib/catalog/load";
+import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
 import { KIND_SECTION } from "./CatalogSections";
 import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
@@ -20,8 +20,22 @@ const linkClass =
 // "Trabajos reales" section (owner decision, 2026-10-31).
 // "Catálogos empresas" goes after "Packs" and only shows when an Empresas item is
 // published (spec 002, criteria 69 and 70); on /empresas it is the current page.
-async function CatalogLinks({ base, current }: { base: string; current?: "empresas" }) {
+// On the home page with a special collection chosen, "Productos" and "Packs" lead to
+// the sections of the page without `coleccion` (spec 002, criterion 89).
+async function CatalogLinks({
+  base: pageBase,
+  current,
+  searchParams,
+}: {
+  base: string;
+  current?: "empresas";
+  searchParams?: SearchParams;
+}) {
   const { products, empresas } = await loadCatalog();
+  const onCollection = searchParams
+    ? (await loadCollectionView(searchParams)).collection !== null
+    : false;
+  const base = onCollection ? "/" : pageBase;
   const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
   return (
     <>
@@ -84,9 +98,11 @@ async function SessionLink() {
 export function SiteHeader({
   base = "",
   current,
+  searchParams,
 }: {
   base?: string;
   current?: "empresas";
+  searchParams?: SearchParams;
 }) {
   return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
@@ -103,7 +119,7 @@ export function SiteHeader({
         <nav aria-label="Secciones">
           <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
             <Suspense fallback={null}>
-              <CatalogLinks base={base} current={current} />
+              <CatalogLinks base={base} current={current} searchParams={searchParams} />
             </Suspense>
             <li>
               <a className={linkClass} href={`${base}#como-pedir`}>
