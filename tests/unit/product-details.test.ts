@@ -167,11 +167,11 @@ describe("Empresas product page", () => {
 
   it("[002-AC74] links back to the company catalog, to the section of its kind", () => {
     expect(backLink("producto", "empresas")).toEqual({
-      label: "Volver a catálogos empresas",
+      label: "Volver a catálogo empresa",
       href: "/empresas#productos",
     });
     expect(backLink("pack", "empresas")).toEqual({
-      label: "Volver a catálogos empresas",
+      label: "Volver a catálogo empresa",
       href: "/empresas#packs",
     });
   });
@@ -187,12 +187,12 @@ describe("/empresas metadata", () => {
   it("[002-AC76] has the title, a description without price, the canonical address and the Open Graph tags", () => {
     const meta = empresasMetadata("https://marcandoando.cl/");
     expect(EMPRESAS_PATH).toBe("/empresas");
-    expect(meta.title).toBe("Catálogos empresas | Marcando Ando");
+    expect(meta.title).toBe("Catálogo empresa | Marcando Ando");
     expect(typeof meta.description).toBe("string");
     expect(meta.description).not.toContain("$");
     expect(meta.alternates?.canonical).toBe("https://marcandoando.cl/empresas");
     expect(meta.openGraph).toMatchObject({
-      title: "Catálogos empresas | Marcando Ando",
+      title: "Catálogo empresa | Marcando Ando",
       description: meta.description,
       url: "https://marcandoando.cl/empresas",
     });

@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createTestAdmin, supabaseEnv } from "../supabase";
 
 // Spec 002, criteria 70 and 72: with no published Empresas item the header has no
-// "Catálogos empresas" link and /empresas still answers with its empty state.
+// "Catálogo empresa" link and /empresas still answers with its empty state.
 // This hides every published Empresas item for a moment, so it would break the
 // tests that read the seeded catalog at the same time. That is why it lives in
 // tests/e2e/isolated/ (see playwright.config.ts). Every item it unpublishes is
@@ -48,7 +48,7 @@ async function hideEmpresas(): Promise<() => Promise<void>> {
 
 const nav = (page: Page) => page.getByRole("navigation", { name: "Secciones" });
 
-test("[002-AC70] with no published Empresas item, no page has the Catálogos empresas link, and the others follow criteria 34 and 35", async ({
+test("[002-AC70] with no published Empresas item, no page has the Catálogo empresa link, and the others follow criteria 34 and 35", async ({
   page,
 }) => {
   const restore = await hideEmpresas();
@@ -60,7 +60,7 @@ test("[002-AC70] with no published Empresas item, no page has the Catálogos emp
       await expect(nav(page).getByRole("link", { name: "Packs", exact: true })).toBeVisible({
         timeout: 20_000,
       });
-      await expect(nav(page).getByRole("link", { name: "Catálogos empresas" })).toHaveCount(0);
+      await expect(nav(page).getByRole("link", { name: "Catálogo empresa" })).toHaveCount(0);
       const texts = await nav(page)
         .locator("a")
         .allInnerTexts()
@@ -79,7 +79,7 @@ test("[002-AC72] with no published Empresas item, /empresas answers 200 with the
   try {
     const response = await page.goto("/empresas");
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("heading", { level: 1, name: "Catálogos empresas" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Catálogo empresa" })).toBeVisible();
     await expect(
       page.getByText(
         "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.",
