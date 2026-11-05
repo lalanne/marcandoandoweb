@@ -322,8 +322,8 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   "Personas" and "Empresas" (radio buttons, like "Tipo"); a new product starts as
   "Personas". Next to the price field a hint says "En Catálogos empresas no se
   muestra el precio." when "Empresas" is chosen. In the product list, each Empresas
-  item carries an "Empresas" badge (a filled teal pill with dark text, after the
-  "Pack" badge when it has one); Personas items carry none. Above the type filters,
+  item carries an "Empresas" badge (a filled brand-yellow pill with dark text, after the
+  "Pack" badge when it has one; yellow since 2026-11-05, issue #118, see the amendment below); Personas items carry none. Above the type filters,
   a second row of filters, **"Todos los catálogos (n)", "Personas (n)" and "Empresas
   (n)"**, lives in the address as `?catalogo=personas` or `?catalogo=empresas` (none,
   or any other value, is all), works without JavaScript and combines with `?tipo=`:
@@ -339,6 +339,15 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
 
 Before this amendment there was one catalog and the header had four section links
 (criterion 35).
+
+**2026-11-05 amendment - the "Empresas" badge is brand yellow (issue #118, approved by the owner on 2026-11-05).**
+Javiera said the "Empresas" badge was sometimes too like the other badges. It was a
+filled teal pill, close to the light-teal "Publicado" and "Disponible" status badges.
+It is now a filled brand-yellow pill (`--brand-yellow`, `#F0B242`, the existing
+palette token) with the same dark text and outline, so it differs from the teal and
+gray status badges and the deep-purple "Pack" badge. Text, position (after "Pack")
+and `data-testid="empresas-badge"` do not change. Criterion 79 now says yellow
+instead of leaving the color open; the contrast of at least 4.5:1 stays.
 
 **2026-11-05 amendment - collection tabs on the home page: "Todos", "Especial Navidad", "Especial escolar" (issue #120, approved by the owner on 2026-11-05).**
 Javiera: "Necesito secciones en la pagina principal de marcando ando, la actual que
@@ -819,7 +828,9 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     to "Personas" reverses that.
 79. Given 3 Personas items and 2 Empresas items, one of them a pack, published or not,
     when the admin opens the product list, then each Empresas item shows an "Empresas"
-    badge (after "Pack" when it is a pack) with a text contrast of at least 4.5:1 and
+    badge (after "Pack" when it is a pack) that is a filled brand-yellow pill (the
+    `--brand-yellow` color, not teal, purple or gray, so it stands apart from the
+    status and Pack badges) with a text contrast of at least 4.5:1 and
     no Personas item shows one; and the catalog filters read "Todos los catálogos
     (5)", "Personas (3)" and "Empresas (2)".
 80. Given the product list, when the admin chooses "Empresas" (or "Personas"), then
