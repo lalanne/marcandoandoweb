@@ -136,31 +136,41 @@ describe("design images as the admin", () => {
     expect(down.error).toBeNull();
   });
 
-  it("[002-AC8] refuses a missing alt text, a wrong type and a file above 5 MiB, storing nothing", async () => {
+  it("[002-AC90] [002-AC91] a design photo without alt text gets \"Foto de {title}\", also when the text is emptied", async () => {
+    const id = await make({ title: "Dino" });
+    expect((await add(id, "")).ok).toBe(true);
+    expect((await add(id, "Dino verde")).ok).toBe(true);
+    const images = (await getDesign(admin, id))!.images;
+    expect(images.map((i) => i.alt_text)).toEqual(["Foto de Dino", "Dino verde"]);
+
+    expect((await updateImage(admin, images[1].id, { altText: "  ", kind: "photo" })).ok).toBe(true);
+    expect((await getDesign(admin, id))!.images[1].alt_text).toBe("Foto de Dino");
+  });
+
+  it("[002-AC8] refuses a wrong type and a file above 5 MiB, storing nothing", async () => {
     const id = await make();
-    const noAlt = await add(id, "  ");
     const gif = await add(id, "Un gif", "photo", file("image/gif"));
     const big = await add(id, "Muy grande", "photo", {
       type: "image/png",
       size: 5 * 1024 * 1024 + 1,
       body: PNG,
     });
-    expect([noAlt.ok, gif.ok, big.ok]).toEqual([false, false, false]);
-    if (!noAlt.ok) expect(noAlt.error).toMatch(/texto alternativo/i);
+    expect([gif.ok, big.ok]).toEqual([false, false]);
     if (!big.ok) expect(big.error).toMatch(/5 MB/);
     expect((await getDesign(admin, id))?.images).toEqual([]);
     const listed = await admin.storage.from("images").list(`design/${id}`);
     expect(listed.data ?? []).toEqual([]);
   });
 
-  it("edits alt text and kind, and refuses an empty alt text", async () => {
+  it("edits alt text and kind, and an emptied alt text becomes the default", async () => {
     const id = await make();
     await add(id, "Antes");
     const [image] = (await getDesign(admin, id))!.images;
     expect((await updateImage(admin, image.id, { altText: "Después", kind: "graphic" })).ok).toBe(true);
     const after = (await getDesign(admin, id))!.images[0];
     expect([after.alt_text, after.kind]).toEqual(["Después", "graphic"]);
-    expect((await updateImage(admin, image.id, { altText: " ", kind: "photo" })).ok).toBe(false);
+    expect((await updateImage(admin, image.id, { altText: " ", kind: "photo" })).ok).toBe(true);
+    expect((await getDesign(admin, id))!.images[0].alt_text).toBe("Foto de Diseño de prueba");
   });
 
   it("moves an image up and down inside its design only", async () => {

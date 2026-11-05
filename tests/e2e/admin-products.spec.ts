@@ -280,12 +280,16 @@ test("[002-AC7] deleting a published product removes it, its photos and its file
 });
 
 test.describe("[002-AC8] photos the form refuses", () => {
-  test("[002-AC8] a photo without alt text is refused with a clear message and is not saved", async ({
+  test("[002-AC90] [002-AC92] a photo without alt text is saved with \"Foto de {name}\" and the field is optional", async ({
     page,
   }, testInfo) => {
     const name = productName("sinalt", testInfo.project.name);
     await signIn(page);
-    await createProduct(page, { name, price: "1.000" });
+    await createProduct(page, { name, price: "1.000", published: true });
+
+    const altField = page.getByLabel("Texto alternativo de la foto nueva");
+    await expect(altField).not.toHaveAttribute("aria-required", "true");
+    await expect(page.getByText("Opcional. Si lo dejas vacío")).toBeVisible();
 
     await page.getByLabel("Archivo de imagen").setInputFiles({
       name: "foto.png",
@@ -293,19 +297,15 @@ test.describe("[002-AC8] photos the form refuses", () => {
       buffer: PNG,
     });
     await page.getByRole("button", { name: "Subir foto", exact: true }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "texto alternativo" })).toBeVisible();
-    await expect(page.getByLabel("Texto alternativo de la foto nueva")).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
+    await expect(page.getByRole("img", { name: `Foto de ${name}` })).toBeVisible({
+      timeout: PAGE_TIMEOUT,
+    });
+    await expect(page.getByRole("alert").filter({ hasText: "alternativo" })).toHaveCount(0);
 
-    // Blank spaces are not text.
-    await page.getByLabel("Texto alternativo de la foto nueva").fill("   ");
-    await page.getByRole("button", { name: "Subir foto", exact: true }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "texto alternativo" })).toBeVisible();
-
-    await expect(page.getByRole("list", { name: "Fotos del producto" })).toHaveCount(0);
-    await expect(page.getByText("Todavía no hay fotos.")).toBeVisible();
+    // The public card uses the default as its alt.
+    await expect(
+      (await publicCard(page, name)).getByRole("img", { name: `Foto de ${name}` }),
+    ).toBeVisible({ timeout: PAGE_TIMEOUT });
   });
 
   test("[002-AC8] a photo above 5 MB is refused with a clear message and is not saved", async ({
@@ -379,16 +379,19 @@ test("the admin edits alt text, reorders and deletes photos one at a time", asyn
   await expect(page.getByLabel("Tipo de la foto 1")).toHaveValue("graphic");
   await expect.poll(alts).toEqual(["Foto tres corregida", "Foto uno", "Foto dos"]);
 
-  // Saving with the alt text emptied is refused.
+  // [002-AC91] Saving with the alt text emptied is allowed and uses the default.
   await page.getByLabel("Texto alternativo de la foto 1").fill("");
   await page.getByRole("button", { name: "Guardar foto 1" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "texto alternativo" })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Foto guardada." })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await expect.poll(alts).toEqual([`Foto de ${name}`, "Foto uno", "Foto dos"]);
 
   await page.getByRole("button", { name: "Eliminar la foto 2" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Foto eliminada." })).toBeVisible({
     timeout: PAGE_TIMEOUT,
   });
-  await expect.poll(alts).toEqual(["Foto tres corregida", "Foto dos"]);
+  await expect.poll(alts).toEqual([`Foto de ${name}`, "Foto dos"]);
 });
 
 test("the form shows Spanish errors, keeps what was typed, and refuses a repeated address", async ({
