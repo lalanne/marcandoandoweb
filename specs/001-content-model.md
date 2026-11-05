@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) is a **draft** and awaits the owner's approval.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -105,6 +105,7 @@ A thing Marcando Ando can personalize and quote.
 | `is_published` | default false; unpublished products are hidden from the public. Lets the admin prepare a product before it goes live **(interpretation)** |
 | `kind` | required, `producto` or `pack`, default `producto`; any other value is rejected. Decides whether the product is listed under "Productos" or "Packs" (2026-10-31 amendment under Category) |
 | `audience` | required, `personas` or `empresas`, default `personas`; any other value is rejected. Decides which catalog the product or pack belongs to (2026-11-04 amendment below) |
+| `collections` | required list, default empty; each value is `navidad` or `escolar`, any other value is rejected. Decides under which special tabs of the home page the item also appears (2026-11-05 amendment below, **draft**) |
 
 **2026-11-04 amendment - two catalogs, Personas and Empresas (issue #107, approved by the owner on 2026-11-04).**
 Javiera wants a catalog for companies next to today's catalog for people ("Feedback
@@ -132,6 +133,31 @@ the product, independent of `kind`:
 - Migration ("expand then contract"): one migration adds the column with default
   `personas` and its check. Every existing row becomes `personas`, so the live site
   looks the same, and code that does not read the column keeps working.
+
+**2026-11-05 amendment - special collections, "Especial Navidad" and "Especial escolar" (issue #120, draft, awaiting the owner's approval).**
+Javiera wants sections on the home page next to "Todos" (see "Feedback from Javiera:
+collections on the home page" in `docs/requirements.md`). The owner chose on
+2026-11-05 to build them as tabs. This spec adds the data they need:
+
+- **`collections`** is a list on the product with zero, one or two values from a
+  fixed set: `navidad` ("Especial Navidad") and `escolar` ("Especial escolar"). The
+  default is the empty list, which means "only in Todos". The set is fixed in code
+  and in a database check, like `kind` and `audience`: a third collection is a spec
+  change, not an admin task. Code keeps the list in one place.
+- **Todos is not a value.** Every published item is in "Todos" whatever its
+  collections; a collection only adds it to a tab.
+- **One list on the row, no join table** (proposal, to confirm with the owner; it
+  follows the 2026-11-04 decision for `audience`, and unlike `audience` it lets an
+  item be in more than one collection, so a Christmas mug that is also a school gift
+  needs no duplicate row).
+- It applies to products and packs alike (`kind` is independent of it). It is
+  stored for Personas and Empresas items, but only the home page uses it; `/empresas`
+  ignores it (spec 002).
+- Visibility does not change: the public reads published rows; `collections` only
+  decides where they are listed.
+- Migration ("expand then contract"): one migration adds the column with default
+  the empty list and its check. Every existing row gets the empty list, so the live
+  site looks the same, and code that does not read the column keeps working.
 
 **2026-10-31 amendment - colors, sizes and characteristics (issue #87, approved by
 the owner on 2026-10-31).** Javiera asked for a detail view that shows a product's
@@ -261,6 +287,10 @@ storage; their access rules belong to spec 005.
 - **Catalog (added 2026-11-04):** a product with `audience` `personas` is
   listed in the people's catalog (the home page), one with `empresas` in the company
   catalog (`/empresas`); within each, `kind` decides "Productos" or "Packs".
+- **Collection (added 2026-11-05, draft):** on the home page, "Todos" lists every
+  published `personas` item; a special tab lists the published `personas` items
+  whose `collections` contain its value, products under "Productos" and packs under
+  "Packs".
 - **On offer:** `offer_price_clp` is set. The offers view lists the published
   products on offer, available or not. The old price is `price_from_clp`.
 - **Quote enabled:** a product is quotable when it is published and available.
@@ -392,6 +422,24 @@ plan.
     including moving a product from `personas` to `empresas` (criteria 18 to 20
     extended).
 
+**Special collections** (added 2026-11-05, issue #120, draft)
+
+33. Given a product, when `collections` is set to a list with any value other than
+    `navidad` or `escolar`, or set to null, the write is rejected; when it is set to
+    `navidad`, to `escolar` or to both, it is saved as given; when it is not given,
+    the product is saved with the empty list.
+34. Given the migration that adds `collections` applied to a database with products,
+    when the products are read, then every existing product has the empty list and
+    its other fields are unchanged.
+35. Given published products and packs with different collections, and an
+    unpublished one in a collection, when the public reads products, each published
+    one is returned with its `collections`, and the unpublished one is not returned
+    (criterion 13).
+36. Given the public and a signed-in user who is not the admin, when they try to set
+    or change `collections`, the write is rejected; the admin's write succeeds,
+    including adding a product to a collection and taking it out again (criteria 18
+    to 20 extended).
+
 ## Verification plan
 
 Test layers follow `CLAUDE.md` and `duplaweb`'s `TESTING.md`. The database
@@ -414,6 +462,8 @@ a mock of the database.
 | 2, 17 | Offer rule | Also a unit test for the pure "is on offer / old and new price" helper |
 | 29, 31, 32 | Audience: allowed values, default, public read by audience and kind, writes only by the admin | Integration (local Supabase), as anonymous, non-admin and admin; a unit test for the shared audience list and its guard |
 | 30 | Existing rows become `personas` | Integration: the `migrations` CI job resets from the migrations alone, and an integration test reads the seeded products after `db reset` and checks the default |
+| 33, 35, 36 | Collections: allowed values, default, public read, writes only by the admin | Integration (local Supabase), as anonymous, non-admin and admin; a unit test for the shared collection list and its guard |
+| 34 | Existing rows get the empty list | Integration: the `migrations` CI job resets from the migrations alone, and an integration test reads the seeded products after `db reset` and checks the default |
 
 A criterion is checked off here when its test exists, failed first for the right
 reason, and now passes.

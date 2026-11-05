@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, is a **draft** awaiting the owner's approval; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -339,6 +339,62 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
 
 Before this amendment there was one catalog and the header had four section links
 (criterion 35).
+
+**2026-11-05 amendment - collection tabs on the home page: "Todos", "Especial Navidad", "Especial escolar" (issue #120, draft, awaiting the owner's approval).**
+Javiera: "Necesito secciones en la pagina principal de marcando ando, la actual que
+dice "productos", es la seccion todos, tb deberia haber una seccion, "especial
+navidad""especial escolar"" (her words in `docs/requirements.md`). The owner added
+that the specials hold packs as well as products, and chose on 2026-11-05 the design
+"Option A": tabs above the Productos and Packs sections.
+
+- **The tabs.** On the home page, between the hero and the "Productos" section, a row
+  of three links under the label "Colecciones" (`<nav aria-label="Colecciones">`,
+  anchor `#colecciones`): **Todos**, **Especial Navidad**, **Especial escolar**, in
+  that order. Chosen tab: a dark filled pill, with `aria-current="page"`; the others,
+  white pills with a dark outline. Each is at least 44 px tall, in the site's rounded
+  style.
+- **What each tab shows.** "Todos" (`/`) is the page as it is today: every published
+  Personas product under "Productos" and every published Personas pack under "Packs".
+  A special tab (`/?coleccion=navidad`, `/?coleccion=escolar`) shows only the
+  published Personas items whose `collections` (spec 001) contain that collection,
+  products under "Productos" and packs under "Packs", ordered as always
+  (highlighted first). The headings, anchors (`#productos`, `#packs`) and the
+  wholesale note do not change. A section with no item in the chosen tab is hidden,
+  as today.
+- **Nothing leads to nothing.** A special tab shows only when at least one published
+  Personas item (product or pack) is in that collection. When neither special has an
+  item, the row of tabs is not shown at all and the page is exactly as before this
+  amendment. `?coleccion=` with an unknown value, or with a collection whose tab is
+  not shown, behaves as "Todos".
+- **Without JavaScript, and shareable.** The tabs are plain links that load the page
+  with the choice in the address and end with `#colecciones`, so the visitor stays at
+  the tabs instead of jumping to the top. Reloading, or sending the link on WhatsApp
+  or Instagram, shows the same view. The page's title, description, canonical address
+  (`/`), Open Graph tags and the sitemap are those of the home page for every tab:
+  the tabs add no pages to the sitemap.
+- **Everything is in "Todos".** An item in a collection is also in "Todos". An item
+  in both collections appears in both tabs. An item in none appears only in "Todos".
+  Unpublished items appear nowhere.
+- **The header does not change.** The links stay "Productos · Packs · Catálogos
+  empresas · Cómo pedir · Colegios y grupos" under the rules of criteria 35 and 69;
+  they point to the sections of "Todos" (a visitor on a special tab who uses one
+  returns to the page as it is without `coleccion`).
+- **Empresas.** `/empresas` has no tabs and ignores `?coleccion=`; an Empresas item
+  never appears on the home page, whatever its `collections` (criterion 68).
+- **Admin.** The product form gets a **"Colecciones"** field with two checkboxes,
+  "Especial Navidad" and "Especial escolar", none checked for a new item, with the
+  hint **"Todos los productos salen siempre en «Todos»."** Saving writes the
+  `collections` of spec 001. A change shows on the public page without a deploy. The
+  product list gets no new badge or filter in this amendment.
+- **Photos.** The school collection will show photos of children and school crests;
+  the image-privacy rule (the "Privacy" constraint above, criteria 25 and 26, and
+  `CLAUDE.md`) still holds: no photo with a minor's face or a school crest is
+  published until the client confirms permission.
+- **Out:** collections the admin creates, renames or deletes (the two are fixed in
+  code, like `kind` and `audience`), a page or address per collection, a collection
+  filter in the admin product list, a badge for collections in the list, tabs on
+  `/empresas` or on a product page, a third special (Father's Day, World Cup 2026,
+  St. Patrick's), and changing the card, prices, photos or WhatsApp buttons.
 
 ## Constraints
 
@@ -775,6 +831,51 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     can be reached and chosen with a visible focus, the chosen one has
     `aria-current="page"`, and at 360 px the filters wrap with no horizontal scroll.
 
+**Collection tabs** (added 2026-11-05, issue #120, draft)
+
+82. Given published Personas items: a product and a pack in "Especial Navidad", a
+    product in "Especial escolar", and a product and a pack in no collection, when a
+    visitor opens the home page with no `coleccion`, then the row labelled
+    "Colecciones" shows the tabs "Todos", "Especial Navidad" and "Especial escolar" in
+    that order, between the hero and "Productos", "Todos" has `aria-current="page"`,
+    and "Productos" and "Packs" list all five items as they did before this
+    amendment.
+83. Given the same items, when the visitor opens `/?coleccion=navidad`, then
+    "Especial Navidad" has `aria-current="page"`, "Productos" lists only that
+    collection's product and "Packs" only its pack; and when they open
+    `/?coleccion=escolar`, then "Productos" lists only its product and the "Packs"
+    section is hidden because it has none.
+84. Given an unknown value (`/?coleccion=otra`), or `/?coleccion=escolar` when no
+    published Personas item is in "Especial escolar", when the home page opens, then
+    it shows "Todos"; and given no published Personas item in either collection, then
+    no row of tabs is shown and the page is the same as before this amendment.
+85. Given an item in both collections, an item in none, an unpublished item in a
+    collection, and an Empresas item in "Especial Navidad", when each view is opened,
+    then the first appears in both tabs and in "Todos", the second only in "Todos",
+    the third nowhere, and the fourth never on the home page; and `/empresas?coleccion=navidad`
+    lists every published Empresas item and has no tabs.
+86. Given the tabs, when JavaScript is turned off and a visitor chooses "Especial
+    Navidad", then the address is `/?coleccion=navidad#colecciones`, the view is that
+    collection with the tabs still in view, and loading the same address again, or in
+    another browser, shows the same view; and the page's title, description,
+    canonical address and the sitemap are those of the home page.
+87. Given the tabs at 360 px and at 1280 px, when the page is used with the keyboard
+    only, then each tab can be reached and chosen with a visible focus and is at least
+    44 by 44 px, the chosen one has `aria-current="page"`, the page has no horizontal
+    scroll (the tabs wrap or scroll inside their own row), all visible text is
+    Spanish, text contrast is at least 4.5:1, and axe reports no serious or critical
+    violation.
+88. Given the admin creating or editing a product or pack, when they open the form,
+    then it has a "Colecciones" field with the checkboxes "Especial Navidad" and
+    "Especial escolar", none checked for a new item, and the hint "Todos los
+    productos salen siempre en «Todos»."; when they save a published Personas item
+    with "Especial Navidad" checked, then it appears under that tab, and still under
+    "Todos", without a deploy; and when they uncheck it and save, then it is gone
+    from that tab and stays in "Todos".
+89. Given the header on the home page with a special tab chosen, when a visitor
+    reads and uses it, then its links are those of criteria 35 and 69 and "Productos"
+    and "Packs" point to `#productos` and `#packs` of the page without `coleccion`.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -822,6 +923,11 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 | 78 | "Catálogo" field, hint, moving an item between catalogs | End to end (Playwright) against local Supabase as a throwaway admin; a unit test for the form input parser (catalog required, only the two values) |
 | 79, 80 | Badge, counts, filter from the address, combined with `tipo` | Unit test for the pure function that counts, filters and groups the list; end to end (Playwright) for the address and the reload |
 | 81 | Catalog filters by keyboard, wrapping at 360 px | End to end (Playwright) at 360 and 1280 px with axe |
+| 82, 83, 84, 85 | Tabs, what each shows, unknown or empty collection, membership rules | Unit test for the pure function that picks the collection from the address and filters and groups the items (extending the grouping function of criteria 33 and 68); end to end (Playwright) at 360 and 1280 px against local Supabase with seeded fake items, with axe; the empty case unpublishes the seeded items in the test and restores them |
+| 86 | Works without JavaScript, shareable, home page metadata and sitemap | End to end (Playwright) with JavaScript disabled, reading the address, the tags and the sitemap of the running server |
+| 87 | Keyboard, 44 px, `aria-current`, no horizontal scroll, contrast, axe | End to end (Playwright) at 360 and 1280 px with axe |
+| 88 | "Colecciones" field, hint, saving, showing and removing without a deploy | End to end (Playwright) against local Supabase as a throwaway admin; a unit test for the form input parser (only the two values, none allowed) |
+| 89 | Header unchanged on a special tab | End to end (Playwright) reading the links' `href` at 360 and 1280 px |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
@@ -864,3 +970,9 @@ message to the business number. Then delete the test product.
    them; her father's catalog, if there is one, could be read for structure (not
    copied). The header label "Catálogos empresas" is hers; "Empresas" alone would be
    shorter if the header gets tight at 360 px.
+7. **Collection tabs (issue #120), open with the owner and Javiera:** the exact names
+   and capitalization ("Especial navidad" in her message, "Especial Navidad" in the
+   mockup); whether an item may be in both specials (this draft says yes, with a list
+   on the row and no join table); whether "Todos" should be renamed. Proposed, to
+   confirm: the label "Colecciones" for the row of tabs and the admin hint "Todos
+   los productos salen siempre en «Todos»."

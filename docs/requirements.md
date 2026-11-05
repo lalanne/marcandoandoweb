@@ -201,6 +201,16 @@ writes for a company. Still open: minimum orders, lead times and invoicing
 ("factura"), and whether her father's business has a catalog to look at for
 structure. Specs 000, 001 and 002 carry the change (issue #107).
 
+## Feedback from Javiera: collections on the home page (2026-11-05)
+
+Javiera sent this to the owner, who relayed it. Her words, verbatim:
+
+> "Necesito secciones en la pagina principal de marcando ando, la actual que dice "productos", es la seccion todos, tb deberia haber una seccion, "especial navidad""especial escolar""
+
+**Summary (English).** She needs sections on the home page. The current one, "Productos", is the "Todos" (all) section. There should also be an "especial navidad" section and an "especial escolar" section. The owner added on 2026-11-05 that the specials hold packs as well as products.
+
+Owner decisions on 2026-11-05: the sections are tabs (collections) above the Productos and Packs sections of the home page ("Todos", "Especial Navidad", "Especial escolar"); choosing one filters both sections; everything stays in "Todos". Still open with Javiera: the exact names and capitalization of the tabs, and whether an item may be in both specials (the spec proposes yes). Specs 000, 001 and 002 carry the change (issue #120).
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
