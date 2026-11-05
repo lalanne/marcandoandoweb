@@ -55,12 +55,12 @@ function PackBadge() {
   );
 }
 
-// Spec 002, criterion 79: a filled teal pill with dark text, after "Pack".
+// Spec 002, criterion 79: a filled brand-yellow pill with dark text, after "Pack".
 function EmpresasBadge() {
   return (
     <span
       data-testid="empresas-badge"
-      className="rounded-full border-2 border-brand-night bg-brand-teal px-3 py-0.5 text-sm font-semibold text-brand-night"
+      className="rounded-full border-2 border-brand-night bg-brand-yellow px-3 py-0.5 text-sm font-semibold text-brand-night"
     >
       Empresas
     </span>
