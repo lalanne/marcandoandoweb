@@ -2,10 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useState } from "react";
-import {
-  validateAltText,
-  validateImageFile,
-} from "@/lib/admin/image-upload";
+import { validateImageFile } from "@/lib/admin/image-upload";
 import { panelImageUrl } from "@/lib/catalog/images";
 import type { PhotoFormState } from "@/lib/admin/action-helpers";
 import {
@@ -26,7 +23,7 @@ export type PhotoActions = {
   remove: (formData: FormData) => Promise<void>;
 };
 
-type Problems = { file?: string; alt?: string };
+type Problems = { file?: string };
 
 const KINDS = (
   <>
@@ -36,7 +33,7 @@ const KINDS = (
 );
 
 /**
- * Adds a photo. The type, the size and the alt text are checked here first, in
+ * Adds a photo. The type and the size are checked here first, in
  * Spanish, so a refused photo never leaves the phone; the Server Action and the
  * bucket check them again.
  */
@@ -59,14 +56,12 @@ export function UploadPhotoForm({
       file:
         (file instanceof File ? validateImageFile(file) : "Elige una foto para subir.") ??
         undefined,
-      alt: validateAltText(String(formData.get("alt_text") ?? "")) ?? undefined,
     };
     setProblems(found);
-    if (found.file || found.alt) return;
+    if (found.file) return;
     action(formData);
   }
 
-  const alt = problems.alt;
   const fileProblem = problems.file;
 
   return (
@@ -106,20 +101,13 @@ export function UploadPhotoForm({
           id="new-photo-alt"
           name="alt_text"
           autoComplete="off"
-          aria-required="true"
-          aria-describedby={alt ? "new-photo-alt-error" : "new-photo-alt-hint"}
-          aria-invalid={alt ? true : undefined}
+          aria-describedby="new-photo-alt-hint"
           className={inputClass}
         />
         <p id="new-photo-alt-hint" className="text-sm">
-          Obligatorio. Describe lo que se ve, por ejemplo «Botella azul con el
-          nombre Sofía».
+          Opcional. Si lo dejas vacío, se usa «Foto de» y el nombre. Si lo escribes,
+          describe lo que se ve, por ejemplo «Botella azul con el nombre Sofía».
         </p>
-        {alt ? (
-          <p id="new-photo-alt-error" role="alert" className={errorClass}>
-            {alt}
-          </p>
-        ) : null}
       </div>
       <div className={fieldClass}>
         <label htmlFor="new-photo-kind" className="font-medium">
@@ -129,7 +117,7 @@ export function UploadPhotoForm({
           {KINDS}
         </select>
       </div>
-      {state.error && !fileProblem && !alt ? (
+      {state.error && !fileProblem ? (
         <p role="alert" className={errorClass}>
           {state.error}
         </p>
@@ -186,7 +174,6 @@ export function PhotoRow({ ownerId, actions, image, number, isFirst, isLast }: P
               value={alt}
               onChange={(e) => setAlt(e.target.value)}
               autoComplete="off"
-              aria-required="true"
               aria-describedby={state.error ? `${altId}-error` : undefined}
               aria-invalid={state.error ? true : undefined}
               className={inputClass}

@@ -3,7 +3,7 @@ import {
   IMAGE_TYPE_ERROR,
   buildDesignImagePath,
   buildProductImagePath,
-  validateAltText,
+  altTextOrDefault,
   validateImageFile,
 } from "./image-upload";
 import { PHOTO_CONTENT_TYPE, resizePhoto } from "./resize-image";
@@ -53,6 +53,16 @@ export function toAdminImages(
 const ownerColumn = (owner: ImageOwner) =>
   owner.kind === "product" ? "product_id" : "design_id";
 
+/** The name of a product or the title of a design, for the default alt text. */
+async function ownerName(client: SupabaseClient, owner: ImageOwner): Promise<string> {
+  const { data } =
+    owner.kind === "product"
+      ? await client.from("product").select("name").eq("id", owner.id).maybeSingle()
+      : await client.from("design").select("title").eq("id", owner.id).maybeSingle();
+  const row = data as { name?: string; title?: string } | null;
+  return row?.name ?? row?.title ?? "";
+}
+
 export async function addImage(
   client: SupabaseClient,
   input: {
@@ -62,8 +72,7 @@ export async function addImage(
     kind: ImageKind;
   },
 ): Promise<Result> {
-  const altText = input.altText.trim();
-  const problem = validateAltText(altText) ?? validateImageFile(input.file);
+  const problem = validateImageFile(input.file);
   if (problem) return { ok: false, error: problem };
 
   // Stored resized, as WebP (issue #98): the phone's original is 1.5 to 3 MB.
@@ -74,6 +83,7 @@ export async function addImage(
   const resized = await resizePhoto(bytes);
   if (!resized) return { ok: false, error: IMAGE_TYPE_ERROR };
 
+  const altText = altTextOrDefault(input.altText, await ownerName(client, input.owner));
   const column = ownerColumn(input.owner);
   const { data: last, error: lastError } = await client
     .from("image")
@@ -110,9 +120,20 @@ export async function updateImage(
   imageId: string,
   input: { altText: string; kind: ImageKind },
 ): Promise<Result> {
-  const altText = input.altText.trim();
-  const problem = validateAltText(altText);
-  if (problem) return { ok: false, error: problem };
+  let altText = input.altText.trim();
+  if (altText === "") {
+    const { data: image } = await client
+      .from("image")
+      .select("product_id, design_id")
+      .eq("id", imageId)
+      .maybeSingle();
+    const owner: ImageOwner | null = image?.product_id
+      ? { kind: "product", id: image.product_id }
+      : image?.design_id
+        ? { kind: "design", id: image.design_id }
+        : null;
+    altText = altTextOrDefault("", owner ? await ownerName(client, owner) : "");
+  }
   const { data, error } = await client
     .from("image")
     .update({ alt_text: altText, kind: input.kind })

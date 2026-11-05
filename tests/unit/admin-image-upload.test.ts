@@ -3,7 +3,7 @@ import {
   MAX_IMAGE_BYTES,
   buildDesignImagePath,
   buildProductImagePath,
-  validateAltText,
+  altTextOrDefault,
   validateImageFile,
 } from "@/lib/admin/image-upload";
 
@@ -56,10 +56,20 @@ describe("buildDesignImagePath", () => {
   });
 });
 
-describe("validateAltText", () => {
-  it("requires text", () => {
-    expect(validateAltText("Botella azul con estrellas")).toBeNull();
-    expect(validateAltText("")).toMatch(/texto alternativo/i);
-    expect(validateAltText("   ")).toMatch(/texto alternativo/i);
+describe("altTextOrDefault", () => {
+  it("[002-AC90] keeps the text the admin wrote, trimmed", () => {
+    expect(altTextOrDefault("  Botella azul con estrellas ", "Botella")).toBe(
+      "Botella azul con estrellas",
+    );
+  });
+
+  it("[002-AC90] [002-AC91] uses \"Foto de {name}\" when the text is empty or only spaces", () => {
+    expect(altTextOrDefault("", "Botella Sofía")).toBe("Foto de Botella Sofía");
+    expect(altTextOrDefault("   ", " Botella Sofía ")).toBe("Foto de Botella Sofía");
+  });
+
+  it("[002-AC90] never returns an empty text, even without a name", () => {
+    expect(altTextOrDefault("", "").trim()).not.toBe("");
+    expect(altTextOrDefault("", "   ").trim()).not.toBe("");
   });
 });

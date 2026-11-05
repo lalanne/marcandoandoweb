@@ -181,14 +181,18 @@ describe("product images as the admin", () => {
     expect((await getProduct(admin, id))!.images).toHaveLength(1);
   });
 
-  it("refuses a missing alt text, a wrong type and a file above 5 MiB, storing nothing", async () => {
+  it("[002-AC90] stores \"Foto de {name}\" when the alt text is empty, and the written text otherwise", async () => {
+    const id = await make({ name: "Botella Sofía" });
+    for (const altText of ["", "   "]) {
+      expect((await addProductImage(admin, { productId: id, file: file(), altText, kind: "photo" })).ok).toBe(true);
+    }
+    expect((await addProductImage(admin, { productId: id, file: file(), altText: "Botella azul", kind: "photo" })).ok).toBe(true);
+    const alts = (await getProduct(admin, id))!.images.map((i) => i.alt_text);
+    expect(alts).toEqual(["Foto de Botella Sofía", "Foto de Botella Sofía", "Botella azul"]);
+  });
+
+  it("[002-AC8] refuses a wrong type and a file above 5 MiB, storing nothing", async () => {
     const id = await make();
-    const noAlt = await addProductImage(admin, {
-      productId: id,
-      file: file(),
-      altText: "  ",
-      kind: "photo",
-    });
     const gif = await addProductImage(admin, {
       productId: id,
       file: file("image/gif"),
@@ -201,17 +205,15 @@ describe("product images as the admin", () => {
       altText: "Muy grande",
       kind: "photo",
     });
-    expect(noAlt.ok).toBe(false);
     expect(gif.ok).toBe(false);
     expect(big.ok).toBe(false);
-    if (!noAlt.ok) expect(noAlt.error).toMatch(/texto alternativo/i);
     if (!big.ok) expect(big.error).toMatch(/5 MB/);
     expect((await getProduct(admin, id))?.images).toEqual([]);
     const listed = await admin.storage.from("images").list(`product/${id}`);
     expect(listed.data ?? []).toEqual([]);
   });
 
-  it("edits alt text and kind, and refuses an empty alt text", async () => {
+  it("[002-AC91] edits alt text and kind, and an emptied alt text becomes \"Foto de {name}\"", async () => {
     const id = await make();
     await addProductImage(admin, { productId: id, file: file(), altText: "Antes", kind: "photo" });
     const [image] = (await getProduct(admin, id))!.images;
@@ -220,7 +222,8 @@ describe("product images as the admin", () => {
     const after = (await getProduct(admin, id))!.images[0];
     expect([after.alt_text, after.kind]).toEqual(["Después", "graphic"]);
 
-    expect((await updateProductImage(admin, image.id, { altText: " ", kind: "photo" })).ok).toBe(false);
+    expect((await updateProductImage(admin, image.id, { altText: " ", kind: "photo" })).ok).toBe(true);
+    expect((await getProduct(admin, id))!.images[0].alt_text).toBe("Foto de Producto de prueba");
   });
 
   it("moves an image up and down by swapping positions", async () => {

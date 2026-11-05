@@ -17,8 +17,6 @@ export const IMAGE_TYPE_ERROR =
   "Esa foto no se puede usar. Usa un archivo JPG, PNG, WebP o AVIF.";
 export const IMAGE_SIZE_ERROR = "La foto pesa más de 5 MB. Elige una más liviana.";
 export const IMAGE_MISSING_ERROR = "Elige una foto para subir.";
-export const ALT_TEXT_ERROR =
-  "Escribe el texto alternativo de la foto: describe lo que se ve, para quien no puede verla.";
 
 /** A Spanish message when the file cannot be used, or null when it can. */
 export function validateImageFile(file: { type: string; size: number }): string | null {
@@ -28,8 +26,16 @@ export function validateImageFile(file: { type: string; size: number }): string 
   return null;
 }
 
-export function validateAltText(altText: string): string | null {
-  return altText.trim() === "" ? ALT_TEXT_ERROR : null;
+/**
+ * The alt text is optional (spec 002, criteria 90 to 92). An empty one becomes
+ * "Foto de {name}", so the table's not-empty constraint holds and no public
+ * image is left without Spanish alt text.
+ */
+export function altTextOrDefault(altText: string, ownerName: string): string {
+  const written = altText.trim();
+  if (written !== "") return written;
+  const name = ownerName.trim();
+  return name === "" ? "Foto" : `Foto de ${name}`;
 }
 
 function buildImagePath(

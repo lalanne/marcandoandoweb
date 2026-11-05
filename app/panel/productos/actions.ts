@@ -8,7 +8,6 @@ import {
   type PhotoFormState,
 } from "@/lib/admin/action-helpers";
 import {
-  validateAltText,
   validateImageFile,
 } from "@/lib/admin/image-upload";
 import { addImage, deleteImage, moveImage, updateImage } from "@/lib/admin/images";
@@ -110,8 +109,6 @@ export async function uploadPhoto(
   const altText = text(formData, "alt_text");
   const file = formData.get("file");
 
-  const altProblem = validateAltText(altText);
-  if (altProblem) return { error: altProblem };
   if (!(file instanceof File)) return { error: "Elige una foto para subir." };
   const fileProblem = validateImageFile(file);
   if (fileProblem) return { error: fileProblem };

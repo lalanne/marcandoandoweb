@@ -65,7 +65,7 @@ export default async function EditProductPage({
         </h2>
         <p>
           La primera foto de la lista es la que se ve en la tarjeta del producto.
-          Cada foto lleva un texto alternativo en español.
+          Cada foto lleva un texto alternativo en español; si no lo escribes, se usa «Foto de» y el nombre.
         </p>
         {product.images.length === 0 ? (
           <p>Todavía no hay fotos.</p>
