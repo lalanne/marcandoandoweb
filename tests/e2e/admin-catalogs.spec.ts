@@ -171,6 +171,18 @@ test("[002-AC79] an Empresas item carries an Empresas badge after Pack, a Person
   });
   expect(contrast(colors.fg, colors.bg)).toBeGreaterThanOrEqual(4.5);
 
+  // Issue #118: the badge is brand yellow (#F0B242), not teal, purple or gray, so it
+  // stands apart from the status badges and the Pack badge in the same row.
+  expect(colors.bg).toBe("rgb(240, 178, 66)");
+  const others = await packRow
+    .getByTestId("badges")
+    .locator("> *:not([data-testid='empresas-badge'])")
+    .evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundColor));
+  expect(others.length).toBeGreaterThanOrEqual(3);
+  for (const other of others) expect(other).not.toBe(colors.bg);
+  const axe = await new AxeBuilder({ page }).include("main").analyze();
+  expect(axe.violations.filter((v) => v.impact === "serious" || v.impact === "critical")).toEqual([]);
+
   await expect(
     page.getByRole("listitem").filter({ hasText: companyProduct }).getByTestId("empresas-badge"),
   ).toHaveText("Empresas");
