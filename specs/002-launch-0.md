@@ -40,7 +40,8 @@ Spec 001 must be approved for the part launch 0 uses. Launch 0 implements only:
 - **Product**: name, slug, description, `price_from_clp`, `is_available`,
   `is_featured`, `is_published`, ~~category~~ type (`kind`, amended 2026-10-31).
 - **Design**: title, slug, description, `is_published`; the gallery's unit.
-- **Image**: alt text required, owner is a product or a design, position.
+- **Image**: alt text (optional in the admin since 2026-11-05: an empty one is stored as
+  "Foto de {name}", so it is never empty), owner is a product or a design, position.
 - **Row-level security** exactly as in spec 001 for those tables: the public reads
   published rows, only the admin writes.
 
@@ -464,8 +465,12 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
 7. Given a published product, when the admin changes its price, then the public page
    shows the new price; when they mark it unavailable, then it shows the notice and
    no WhatsApp button; when they unpublish or delete it, then it disappears.
-8. Given the admin, when they try to save an image without alt text or above the size
-   limit, then it is refused with a clear message.
+8. Given the admin, when they try to save an image above the size limit or of a type
+   that is not allowed, then it is refused with a clear message.
+   **2026-11-05 amendment (issue #117).** The alt text is no longer required: Javiera
+   only wants to add the photo. Criterion 8 used to also refuse an image without alt
+   text; that part is replaced by criteria 90 to 92. The size and type refusals are
+   unchanged.
 9. ~~Given the admin, when they create, edit and delete a design with photos, then
    the "Real work" section reflects it.~~ **Retired 2026-10-31 (issue #69):** the
    panel no longer manages designs (criterion 37).
@@ -876,6 +881,25 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     reads and uses it, then its links are those of criteria 35 and 69 and "Productos"
     and "Packs" point to `#productos` and `#packs` of the page without `coleccion`.
 
+**Optional alt text (amendment of 2026-11-05, issue #117; approved by the owner on
+2026-11-05).** The "Texto alternativo" field of a photo is optional, for products, packs
+and designs (they share the form). When it is left empty (or only spaces) the app stores
+the Spanish default "Foto de {name}", with the name of the product or pack, or the title
+of the design, at the moment of saving. The database constraint (alt text not empty) is
+unchanged, so every `<img>` keeps a non-empty Spanish `alt` (criterion 16). The stored
+default is not updated if the item is renamed later; the admin can type another text.
+
+90. Given the admin on a product, pack or design, when they upload a photo and leave
+    the alt text empty (or with only spaces), then the upload succeeds, the photo is
+    stored with the alt text "Foto de {name}", and the public page shows it with that
+    `alt`; when they write an alt text, then it is stored and shown as before.
+91. Given a saved photo, when the admin empties its alt text and saves, then it is saved
+    with "Foto de {name}" and no error is shown.
+92. Given the photo form, when the admin opens it, then the field "Texto alternativo de
+    la foto nueva" is not marked required (no `aria-required`), and its hint says it is
+    optional and what is used when it is empty ("Opcional. Si lo dejas vacío, se usa
+    «Foto de {nombre}».").
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -928,6 +952,7 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
 | 87 | Keyboard, 44 px, `aria-current`, no horizontal scroll, contrast, axe | End to end (Playwright) at 360 and 1280 px with axe |
 | 88 | "Colecciones" field, hint, saving, showing and removing without a deploy | End to end (Playwright) against local Supabase as a throwaway admin; a unit test for the form input parser (only the two values, none allowed) |
 | 89 | Header unchanged on a special tab | End to end (Playwright) reading the links' `href` at 360 and 1280 px |
+| 90, 91, 92 | Optional alt text, default "Foto de {name}", hint | Unit test for the pure default function; integration test (Vitest) that products and designs store the default on upload and on edit; end to end (Playwright) uploading without alt text and reading the public `alt` |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
