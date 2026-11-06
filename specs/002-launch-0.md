@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved, with a draft amendment (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, is a draft awaiting the owner's approval; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -410,8 +410,8 @@ that the specials hold packs as well as products, and chose on 2026-11-05 the de
   `/empresas` or on a product page, a third special (Father's Day, World Cup 2026,
   St. Patrick's), and changing the card, prices, photos or WhatsApp buttons.
 
-**2026-11-06 amendment - illustrated collection tabs (issue #126, draft, awaiting the
-owner's approval).** Javiera sent mockups of the tabs
+**2026-11-06 amendment - illustrated collection tabs (issue #126, approved by the
+owner on 2026-11-06).** Javiera sent mockups of the tabs
 (`assets/mockups/126/`, summary in `docs/requirements.md`): each tab a larger rounded
 pill with an illustration on the left and the label on the right. The owner added
 that no pill is dark, "Todos" included (in her mockup it is dark navy), and chose on
@@ -967,8 +967,8 @@ default is not updated if the item is renamed later; the admin can type another 
     optional and what is used when it is empty ("Opcional. Si lo dejas vacío, se usa
     «Foto de {nombre}».").
 
-**Illustrated collection tabs (amendment of 2026-11-06, issue #126; draft, awaiting
-the owner's approval).** Criteria 82 to 89 still hold; these add the look of the tabs.
+**Illustrated collection tabs (amendment of 2026-11-06, issue #126; approved by
+the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of the tabs.
 
 93. Given the collection tabs on the home page, when a visitor sees them at 360 px and
     at 1280 px, then each of "Todos", "Especial Navidad" and "Especial Escolar" is a
