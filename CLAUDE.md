@@ -387,6 +387,14 @@ check retries for up to 60 seconds while the new deployment goes live.
   means the sign-in guard is off). Fix forward, or use the Rollback below if the
   site is broken for visitors.
 
+**Function region.** The production Supabase project is in us-west-2 (Oregon, free
+tier, cannot be moved), so `vercel.json` runs the functions in `pdx1` (Portland),
+next to it, instead of Vercel's default `iad1` (#131, measured in #129). Every
+catalog read, photo (`/img/...`) and product-page check calls the database, so the
+function belongs next to it. The Vercel dashboard (Settings, Functions, Function
+Region) is also set to `pdx1` as a backup; `vercel.json` wins, so keep both the same.
+Check with `curl -sI <site>/api/health | grep x-vercel-id`: `gru1::pdx1::...`.
+
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work
 with both the previous and the new code: add first, remove in a later release
