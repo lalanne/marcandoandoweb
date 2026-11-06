@@ -134,10 +134,18 @@ export function PacksSection({
 }
 
 const tabClass =
-  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border-2 border-brand-night px-5 py-2 text-base font-semibold";
+  "inline-flex min-h-11 min-w-11 items-center gap-1.5 rounded-full border-brand-night py-1.5 pl-2 pr-4 text-base font-semibold leading-tight text-brand-night sm:gap-2 sm:pl-3 sm:pr-5 sm:text-lg";
+
+// Illustration of each tab (spec 002, 2026-11-06 amendment): decorative, 44 px tall
+// on phones and 56 px from 640 px up, the same height in every tab.
+const TAB_IMAGE: Record<string, { src: string; width: number; height: number }> = {
+  todos: { src: "/img/tab-todos.webp", width: 151, height: 112 },
+  navidad: { src: "/img/tab-navidad.webp", width: 150, height: 112 },
+  escolar: { src: "/img/tab-escolar.webp", width: 152, height: 112 },
+};
 
 /**
- * The tabs "Todos", "Especial Navidad" and "Especial escolar" above the Productos
+ * The tabs "Todos", "Especial Navidad" and "Especial Escolar" above the Productos
  * and Packs sections (spec 002, criteria 82 to 87). Plain links that load the home
  * page with the choice in the address, so they work without JavaScript and can be
  * shared. Not shown when no published Personas item is in a collection.
@@ -145,16 +153,28 @@ const tabClass =
 export async function CollectionTabs({ searchParams }: { searchParams: SearchParams }) {
   const { available, collection } = await loadCollectionView(searchParams);
   if (available.length === 0) return null;
-  const tab = (href: string, label: string, chosen: boolean) => (
+  const tab = (href: string, label: string, chosen: boolean, image: keyof typeof TAB_IMAGE) => (
     <li key={href}>
       <a
         href={href}
         aria-current={chosen ? "page" : undefined}
         className={`${tabClass} ${
-          chosen ? "bg-brand-night text-brand-cream" : "bg-white text-brand-night hover:bg-brand-yellow/40"
+          chosen
+            ? "border-[3px] bg-brand-yellow-soft shadow-[3px_3px_0_var(--brand-night)]"
+            : "border-2 bg-white hover:bg-brand-yellow/40"
         }`}
       >
-        {label}
+        <Image
+          src={TAB_IMAGE[image].src}
+          alt=""
+          width={TAB_IMAGE[image].width}
+          height={TAB_IMAGE[image].height}
+          priority
+          unoptimized
+          className="h-11 w-auto shrink-0 sm:h-14"
+        />
+        {/* On phones a two-word label wraps inside its pill so two pills fit a row. */}
+        <span className="max-sm:w-min">{label}</span>
       </a>
     </li>
   );
@@ -162,9 +182,9 @@ export async function CollectionTabs({ searchParams }: { searchParams: SearchPar
     <div className="bg-brand-cream px-4 pt-8">
       <nav aria-label="Colecciones" id="colecciones" className="mx-auto max-w-5xl">
         <ul className="flex flex-wrap gap-3">
-          {tab("/", "Todos", collection === null)}
+          {tab("/", "Todos", collection === null, "todos")}
           {available.map((c) =>
-            tab(`/?coleccion=${c}#colecciones`, COLLECTION_LABEL[c], collection === c),
+            tab(`/?coleccion=${c}#colecciones`, COLLECTION_LABEL[c], collection === c, c),
           )}
         </ul>
       </nav>

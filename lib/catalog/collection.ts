@@ -11,7 +11,7 @@ export type Collection = (typeof COLLECTIONS)[number];
 /** Spanish label of each collection: the tab and the admin checkbox. */
 export const COLLECTION_LABEL: Record<Collection, string> = {
   navidad: "Especial Navidad",
-  escolar: "Especial escolar",
+  escolar: "Especial Escolar",
 };
 
 export function isCollection(value: unknown): value is Collection {

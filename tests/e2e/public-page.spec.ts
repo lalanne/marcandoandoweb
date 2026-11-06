@@ -241,10 +241,11 @@ test("[002-AC15] the footer shows no email and no placeholder", async ({ page })
   expect(text).not.toMatch(/correo|e-mail|email|por confirmar|pendiente/);
 });
 
+// The collection tab illustrations are decorative (alt="", spec 002 criterion 95) and eager.
 test("[002-AC16] every image has Spanish alt text", async ({ page }) => {
   await open(page);
   const alts = await page
-    .locator("img")
+    .locator("img:not(nav#colecciones img)")
     .evaluateAll((imgs) => imgs.map((i) => i.getAttribute("alt")));
   expect(alts.length).toBeGreaterThan(0);
   for (const alt of alts) {
@@ -257,7 +258,7 @@ test("[002-AC16] the hero image loads eagerly and the others lazily", async ({
 }) => {
   await open(page);
   const loading = await page
-    .locator("img")
+    .locator("img:not(nav#colecciones img)")
     .evaluateAll((imgs) => imgs.map((i) => i.getAttribute("loading")));
   expect(loading[0]).not.toBe("lazy");
   for (const value of loading.slice(1)) expect(value).toBe("lazy");
