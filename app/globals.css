@@ -10,6 +10,8 @@
   /* A darker purple for white text: #9565c4 with white is only 4.25:1, this
      one is 6.1:1 (spec 002, criterion 38, the Pack badge). */
   --brand-purple-deep: #7a4bae;
+  /* Brand yellow lightened: the chosen collection tab (spec 002, criterion 94). */
+  --brand-yellow-soft: #fbebc8;
 
   --background: var(--brand-cream);
   --foreground: var(--brand-night);
@@ -25,6 +27,7 @@
   --color-brand-night: var(--brand-night);
   --color-brand-cream: var(--brand-cream);
   --color-brand-purple-deep: var(--brand-purple-deep);
+  --color-brand-yellow-soft: var(--brand-yellow-soft);
   --font-sans: var(--font-fredoka);
 }
 

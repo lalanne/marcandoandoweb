@@ -51,7 +51,7 @@ describe("collections list", () => {
     expect(COLLECTIONS).toEqual(["navidad", "escolar"]);
     expect(COLLECTION_LABEL).toEqual({
       navidad: "Especial Navidad",
-      escolar: "Especial escolar",
+      escolar: "Especial Escolar",
     });
   });
 

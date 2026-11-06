@@ -70,7 +70,7 @@ test("[002-AC84] with no Personas item in either collection there is no row of t
   }
 });
 
-test("[002-AC84] with no item in Especial escolar, its tab is not shown and ?coleccion=escolar shows Todos", async ({
+test("[002-AC84] with no item in Especial Escolar, its tab is not shown and ?coleccion=escolar shows Todos", async ({
   page,
 }) => {
   const restore = await hide(["escolar"]);
@@ -78,7 +78,7 @@ test("[002-AC84] with no item in Especial escolar, its tab is not shown and ?col
     await page.goto("/?coleccion=escolar");
     const tabs = page.getByRole("navigation", { name: "Colecciones" });
     await expect(tabs).toBeVisible({ timeout: 20_000 });
-    await expect(tabs.getByRole("link", { name: "Especial escolar" })).toHaveCount(0);
+    await expect(tabs.getByRole("link", { name: "Especial Escolar" })).toHaveCount(0);
     await expect(tabs.getByRole("link", { name: "Todos" })).toHaveAttribute("aria-current", "page");
     await expect(
       productos(page).getByRole("heading", { level: 3, name: "Botella de ejemplo", exact: true }),
