@@ -211,6 +211,22 @@ Javiera sent this to the owner, who relayed it. Her words, verbatim:
 
 Owner decisions on 2026-11-05: the sections are tabs (collections) above the Productos and Packs sections of the home page ("Todos", "Especial Navidad", "Especial escolar"); choosing one filters both sections; everything stays in "Todos". Still open with Javiera: the exact names and capitalization of the tabs, and whether an item may be in both specials (the spec proposes yes). Specs 000, 001 and 002 carry the change (issue #120).
 
+## Feedback from Javiera: illustrated collection tabs (2026-11-06)
+
+Javiera sent mockup images, not text, which the owner relayed. They are in
+`assets/mockups/126/` (reference only, not site images): `tabs-today.jpg` (the tabs as
+they are, marked in red), `tabs-mockup.jpg` (the three tabs she wants),
+`tab-navidad.jpg` and `tab-todos.jpg` (two of them on their own).
+
+**Summary (English).** Each tab becomes a larger rounded pill with an illustration on
+the left and the label on the right: "Todos" with a t-shirt, a bottle and a mug (a
+yellow star, a pink heart, yellow sparks); "Especial Navidad" with Santa, a Christmas
+tree and a present; "Especial Escolar" with a backpack, books and a pencil. The owner
+added on 2026-11-06 that all three pills have a white background, "Todos" included
+(in her mockup it is dark). Spec 002 carries the change (issue #126). Still open: how
+the chosen tab stands out now that none is dark (the spec proposes a pink outline and
+a shadow), and "Especial Escolar" (her mockup) or "Especial escolar" (the site today).
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
