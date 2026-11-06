@@ -433,7 +433,8 @@ no-JavaScript behaviour, the hidden empty tab and criteria 82 to 89 do not chang
 
   They come from Javiera's mockups: each is cut out of `assets/mockups/126/` and saved
   as a transparent WebP in `public/img/` at twice its display size, at most 30 KB
-  each **(interpretation)**. If a crop does not look clean, it is redrawn as an SVG in
+  each **(interpretation)**. Ready cut-outs, 112 px tall and without the pill outline,
+  are in `assets/mockups/126/illustrations/`. If a crop does not look clean, it is redrawn as an SVG in
   the same style and brand colours instead; no other artwork is invented. They are
   decorative: `alt=""` and no accessible name of their own, because the label already
   names the tab. The illustration has the same size in every tab, about 40 px tall at
