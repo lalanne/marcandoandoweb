@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -362,9 +362,11 @@ that the specials hold packs as well as products, and chose on 2026-11-05 the de
 - **The tabs.** On the home page, between the hero and the "Productos" section, a row
   of three links under the label "Colecciones" (`<nav aria-label="Colecciones">`,
   anchor `#colecciones`): **Todos**, **Especial Navidad**, **Especial escolar**, in
-  that order. Chosen tab: a dark filled pill, with `aria-current="page"`; the others,
-  white pills with a dark outline. Each is at least 44 px tall, in the site's rounded
-  style.
+  that order. ~~Chosen tab: a dark filled pill, with `aria-current="page"`; the others,
+  white pills with a dark outline.~~ Each is at least 44 px tall, in the site's rounded
+  style. *(The look of the tabs is replaced by the 2026-11-06 amendment for issue #126
+  below: illustrated pills, the chosen one marked with a soft yellow fill, a thicker
+  outline and a shadow.)*
 - **What each tab shows.** "Todos" (`/`) is the page as it is today: every published
   Personas product under "Productos" and every published Personas pack under "Packs".
   A special tab (`/?coleccion=navidad`, `/?coleccion=escolar`) shows only the
@@ -407,6 +409,58 @@ that the specials hold packs as well as products, and chose on 2026-11-05 the de
   filter in the admin product list, a badge for collections in the list, tabs on
   `/empresas` or on a product page, a third special (Father's Day, World Cup 2026,
   St. Patrick's), and changing the card, prices, photos or WhatsApp buttons.
+
+**2026-11-06 amendment - illustrated collection tabs (issue #126, approved by the
+owner on 2026-11-06).** Javiera sent mockups of the tabs
+(`assets/mockups/126/`, summary in `docs/requirements.md`): each tab a larger rounded
+pill with an illustration on the left and the label on the right. The owner added
+that no pill is dark, "Todos" included (in her mockup it is dark navy), and chose on
+2026-11-06 the soft yellow fill for the chosen tab. This replaces only the look of the
+tabs in the #120 amendment above; what each tab shows, the addresses, the
+no-JavaScript behaviour, the hidden empty tab and criteria 82 to 89 do not change.
+
+- **The pills.** Each tab is a rounded pill (fully rounded ends) with a 2 px
+  night-blue outline (`--brand-night`, `#141824`), like the site's other outlined
+  controls. The tabs that are not chosen have a white background (`#FFFFFF`). Inside,
+  left to right: the illustration, then the label in the site's typeface, night blue,
+  semibold. No tab has a dark filled background, whether chosen or not.
+- **The illustrations.**
+
+  | Tab | Illustration |
+  |-----|--------------|
+  | Todos | A white t-shirt, a bottle and a mug, with a yellow star, a pink heart on the mug and yellow spark strokes |
+  | Especial Navidad | A smiling Santa, a Christmas tree with a star and a red present with a yellow ribbon |
+  | Especial Escolar | A blue backpack with a star, red and blue books and a yellow pencil |
+
+  They come from Javiera's mockups: each is cut out of `assets/mockups/126/` and saved
+  as a transparent WebP in `public/img/` at twice its display size, at most 30 KB
+  each **(interpretation)**. Ready cut-outs, 112 px tall and without the pill outline,
+  are in `assets/mockups/126/illustrations/`. If a crop does not look clean, it is redrawn as an SVG in
+  the same style and brand colours instead; no other artwork is invented. They are
+  decorative: `alt=""` and no accessible name of their own, because the label already
+  names the tab. The illustration has the same size in every tab, about 44 px tall at
+  360 px and 56 px at 1280 px **(owner confirmed the sizes, with 44 px on phones, on
+  2026-11-06)**, and is loaded eagerly (the tabs
+  sit right under the hero), with its width and height set so nothing shifts as it
+  loads.
+- **The chosen tab** **(owner chose the soft yellow fill on 2026-11-06)**. It keeps
+  `aria-current="page"` and stands out by more than colour: a soft yellow background
+  (brand yellow `#F0B242` lightened to about `#FBEBC8` **(interpretation)**, defined
+  as a CSS variable), a 3 px night-blue outline instead of 2 px, and the site's
+  offset shadow (`3px 3px 0` night blue, as on "Cotizar por WhatsApp"). The others
+  have a white background, the 2 px outline and no shadow. The keyboard focus ring
+  (3 px purple, as everywhere on the site) stays visible on top of either look.
+- **Labels.** Same order and links; the third label changes from "Especial escolar"
+  to **"Especial Escolar"**, as in Javiera's mockup (owner decision, 2026-11-06), in
+  the tab, the `lib/catalog/collection.ts` labels and every place that shows the
+  collection name (criteria 82 to 89 read it that way from now on). At 360 px the
+  pills wrap onto a second line instead of scrolling sideways, a two-word label may
+  wrap inside its pill, and the row has no horizontal scroll.
+- **Out:** illustrations anywhere else (header, sections, cards), animation, a new
+  collection, and any change to what the tabs show or where they link.
+
+Before this amendment the tabs were text-only pills and the chosen one was dark
+filled with white text.
 
 ## Constraints
 
@@ -913,6 +967,30 @@ default is not updated if the item is renamed later; the admin can type another 
     optional and what is used when it is empty ("Opcional. Si lo dejas vacío, se usa
     «Foto de {nombre}».").
 
+**Illustrated collection tabs (amendment of 2026-11-06, issue #126; approved by
+the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of the tabs.
+
+93. Given the collection tabs on the home page, when a visitor sees them at 360 px and
+    at 1280 px, then each of "Todos", "Especial Navidad" and "Especial Escolar" is a
+    pill with a night-blue outline, with its own illustration (the table in the
+    2026-11-06 amendment) to the left of its label, the three illustrations the same
+    height, a white background when not chosen, and no tab, chosen or not, with a dark
+    background.
+94. Given any tab chosen ("Todos" at `/`, "Especial Navidad" at `/?coleccion=navidad`,
+    "Especial Escolar" at `/?coleccion=escolar`), when the visitor reads the row, then
+    only that tab has `aria-current="page"`, the soft yellow background, the 3 px
+    outline and the offset shadow, and the other tabs have a white background, the
+    2 px outline and no shadow.
+95. Given the tabs, when they are read by a screen reader or the accessibility tree,
+    then each illustration has `alt=""`, the accessible name of each tab is exactly its
+    label, and every illustration is a file under `/img/` of at most 30 KB with its
+    width and height set.
+96. Given the tabs at 360 px and at 1280 px, when the page is used with the keyboard
+    only, then each tab is at least 44 by 44 px with a visible focus, the page has no
+    horizontal scroll, label text contrast is at least 4.5:1 and the outlines at least
+    3:1 against the background, the tabs at 1280 px fit on one line, and axe reports
+    no serious or critical violation.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -966,6 +1044,9 @@ default is not updated if the item is renamed later; the admin can type another 
 | 88 | "Colecciones" field, hint, saving, showing and removing without a deploy | End to end (Playwright) against local Supabase as a throwaway admin; a unit test for the form input parser (only the two values, none allowed) |
 | 89 | Header unchanged on a special tab | End to end (Playwright) reading the links' `href` at 360 and 1280 px |
 | 90, 91, 92 | Optional alt text, default "Foto de {name}", hint | Unit test for the pure default function; integration test (Vitest) that products and designs store the default on upload and on edit; end to end (Playwright) uploading without alt text and reading the public `alt` |
+| 93, 94 | Illustrated pills, chosen tab by soft yellow fill, thicker outline and shadow | End to end (Playwright) at 360 and 1280 px against local Supabase with the seeded collections, reading each tab's image, computed background, border width and shadow for each of the three addresses; screenshots attached to the PR |
+| 95 | Decorative illustrations, accessible names, file size and dimensions | End to end (Playwright) reading `alt`, the accessible name and the `width`/`height` attributes; a unit test that checks the size of the files in `public/img/` |
+| 96 | Keyboard, 44 px, no horizontal scroll, contrast, one line at 1280 px, axe | End to end (Playwright) at 360 and 1280 px with axe |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
