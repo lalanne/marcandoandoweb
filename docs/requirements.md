@@ -223,9 +223,10 @@ the left and the label on the right: "Todos" with a t-shirt, a bottle and a mug 
 yellow star, a pink heart, yellow sparks); "Especial Navidad" with Santa, a Christmas
 tree and a present; "Especial Escolar" with a backpack, books and a pencil. The owner
 added on 2026-11-06 that all three pills have a white background, "Todos" included
-(in her mockup it is dark). Spec 002 carries the change (issue #126). Still open: how
-the chosen tab stands out now that none is dark (the spec proposes a pink outline and
-a shadow), and "Especial Escolar" (her mockup) or "Especial escolar" (the site today).
+(in her mockup it is dark). Spec 002 carries the change (issue #126). Decided by the owner on
+2026-11-06: the chosen tab is marked with a soft yellow fill, a thicker outline and a
+shadow; the label is "Especial Escolar" (her mockup); illustrations about 44 px tall
+at 360 px and 56 px at 1280 px.
 
 ## Original text (Spanish, verbatim)
 
