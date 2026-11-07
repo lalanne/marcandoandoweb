@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved, with one amendment in draft: the 2026-11-06 amendment for issue #136 (the catalog served from a cache, refreshed when the admin saves; criteria 97 to 102) awaits the owner's approval. Approved amendments: (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -461,6 +461,57 @@ no-JavaScript behaviour, the hidden empty tab and criteria 82 to 89 do not chang
 
 Before this amendment the tabs were text-only pills and the chosen one was dark
 filled with white text.
+
+**2026-11-06 amendment - the catalog is served from a cache, refreshed when the
+admin saves (issue #136; DRAFT, awaiting the owner's approval).** Javiera reported
+that the site is slow to load (not the photo browsing fixed in #98). Measured in #129
+and #134: after a few quiet minutes, every visit waits on Supabase, whose first
+answer after a quiet period takes about 0.5 s (30 to 90 ms right after), so the
+products appear about 2.7 s after a cold visit starts, against about 1.2 s warm.
+Product pages also wait 0.6 to 1 s on the database check in `proxy.ts` before
+anything shows, not even the header. Moving the functions next to the database
+(#131) did not help. The catalog changes only when the admin saves, so it is built
+once and served from Vercel's cache, and rebuilt when she saves.
+
+- **What is cached.** The public catalog pages: the home page with its sections
+  (Productos, Packs and the published designs) and its collection views (`/?coleccion=...`),
+  `/empresas`, and every published product's page (`/productos/<slug>`). A visitor
+  gets them from the cache without a database read. Before this amendment every
+  visit read the catalog from the database (inside `<Suspense>`, after the page's
+  shell).
+- **Refreshed on every admin save.** Any panel action that changes what the public
+  sees (creating, editing, publishing, unpublishing, marking unavailable or deleting
+  a product or pack; changing its collections or audience; adding, editing, moving or
+  deleting a photo) refreshes the cached pages it affects before the admin's next
+  page load. Every criterion of this spec that says "without a deploy" still holds,
+  word for word: the change shows on the next load. Only the first load after a
+  save waits on the database, once.
+- **Changes made outside the panel** (the Supabase dashboard, a script such as
+  `scripts/optimize-photos.mjs`, a migration) show within 1 hour, with no deploy; a
+  production deploy shows them at once. No visitor waits for that hourly refresh:
+  the cached page is served while the new one is built.
+- **Product pages keep their real 404** (criterion 60): an unknown or unpublished
+  slug answers 404 with none of its data, and a product unpublished in the panel is
+  a 404 on its next load. The check in `proxy.ts` that read the database before
+  every product page is removed; the proxy guards only `/panel` again.
+- **Unchanged:** every address (the collection tabs keep `/?coleccion=navidad` and
+  `/?coleccion=escolar`, with the views, canonical address, sitemap and
+  no-JavaScript behavior of criteria 82 to 89), what each page shows, and the header
+  link "Admin" / "Mi panel" (criteria 27 to 31), which is still read per visit and
+  makes no database call for a visitor without a session.
+- **The build reads the catalog.** The production build fills the cache from the
+  production database. A build that cannot read the database fails, so production
+  keeps the previous deployment and never serves an empty catalog.
+- **Goal (measured, not a criterion):** on the #129 phone profile, a cold visit to
+  the home page shows the products in about the warm time (about 1.2 s, against
+  2.7 s today), and a product page answers its first byte about as fast as the home
+  page. Measured on production after each step and posted on #129.
+- **Out:** the photo cache. `/img/...` keeps its 5-minute public cache and the
+  unpublish window of criteria 25 and 26, decided by the owner on 2026-11-01. A
+  longer photo cache needs a way to purge a photo from Vercel's CDN the moment it is
+  unpublished (photos of children may be withdrawn), which has to be tried first. It
+  will be its own amendment after that spike. Also out: keeping Supabase awake with
+  scheduled pings, and moving the Supabase project.
 
 ## Constraints
 
@@ -991,6 +1042,35 @@ the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of 
     3:1 against the background, the tabs at 1280 px fit on one line, and axe reports
     no serious or critical violation.
 
+**Catalog served from a cache (amendment of 2026-11-06, issue #136; DRAFT, awaiting
+the owner's approval).** Every other criterion still holds, including each one that
+says "without a deploy".
+
+97. Given the production server with published items, when `/`,
+    `/?coleccion=navidad`, `/empresas` or a published product's page has been loaded
+    once and a product's name is then changed directly in the database (not through
+    the panel), when the same page is loaded again, then it still shows the old name;
+    and on production, the second request for each of those pages is answered from
+    Vercel's cache (`x-vercel-cache` is `HIT`, `STALE` or `PRERENDER`).
+98. Given those pages cached, when the admin, in the panel, renames a product, edits
+    its price, publishes or unpublishes it, marks it unavailable, changes its
+    collections or audience, deletes it, or adds, edits, moves or deletes one of its
+    photos, then the next load of each affected page (the home page and its
+    collection views, `/empresas`, the product's page) shows the change.
+99. Given a change made directly in the database, when the cached page is older than
+    1 hour, then the next loads show the change (the first may still show the old
+    page while the new one is built); and given a production deploy, then the change
+    shows as soon as it is live.
+100. Given a published product whose page has been loaded, when the admin unpublishes
+     it in the panel, then its page answers 404 with none of its data on the next
+     load; and given an unknown slug, then it answers 404 (criterion 60 unchanged).
+101. Given any request to a public page, when it is answered, then no database read
+     runs before the response starts: the proxy's matcher covers only `/panel` and
+     `/panel/*`, and a product page has no `Server-Timing` entry from the proxy.
+102. Given a production build whose Supabase URL or key is wrong or unreachable,
+     when the build runs, then it fails, instead of producing pages with an empty
+     catalog.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -1047,6 +1127,12 @@ the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of 
 | 93, 94 | Illustrated pills, chosen tab by soft yellow fill, thicker outline and shadow | End to end (Playwright) at 360 and 1280 px against local Supabase with the seeded collections, reading each tab's image, computed background, border width and shadow for each of the three addresses; screenshots attached to the PR |
 | 95 | Decorative illustrations, accessible names, file size and dimensions | End to end (Playwright) reading `alt`, the accessible name and the `width`/`height` attributes; a unit test that checks the size of the files in `public/img/` |
 | 96 | Keyboard, 44 px, no horizontal scroll, contrast, one line at 1280 px, axe | End to end (Playwright) at 360 and 1280 px with axe |
+| 97 | Pages served from the cache, not re-read from the database | End to end (Playwright) on the production server (`CI=1`) against local Supabase: a direct database change does not show; smoke test (spec 004) reads `x-vercel-cache` on production |
+| 98 | Every panel action that changes the public view refreshes it at once | End to end (Playwright) as a throwaway admin, one step per action, on the production server |
+| 99 | Changes outside the panel show within 1 hour | Unit test of the cache lifetime setting (at most 1 hour); not waited out in end to end |
+| 100 | Unpublish gives a 404 at once; unknown slug 404 | End to end (Playwright) on the production server |
+| 101 | No database read before the response; proxy guards only `/panel` | Unit test of the proxy matcher; end to end reading the product page's `Server-Timing` |
+| 102 | A build that cannot read the database fails | A CI step builds with an unreachable Supabase URL and expects the build to fail |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
@@ -1096,3 +1182,7 @@ message to the business number. Then delete the test product.
    on the row and no join table); whether "Todos" should be renamed. Proposed, to
    confirm: the label "Colecciones" for the row of tabs and the admin hint "Todos
    los productos salen siempre en «Todos»."
+8. **Catalog cache (issue #136), draft:** is 1 hour the right bound for changes
+   made outside the panel (shorter means more database reads by Vercel, never by
+   visitors)? And is it acceptable that the first load right after an admin save,
+   usually the admin's own, waits on the database once?
