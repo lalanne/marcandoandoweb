@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { healthResponse } from "@/lib/health";
+import { SERVER_TIMING_FORMAT } from "@/lib/server-timing";
 import { localSupabase } from "./helpers";
 
 // Spec 004, criterion 15: the health route reads the products with the public
@@ -56,5 +57,28 @@ describe("[004-AC15] health check", () => {
 
   it("[004-AC15] answers 503 error when the URL is not a URL", async () => {
     await expectError(await healthResponse({ url: "not a url", anonKey }));
+  });
+});
+
+// Issue #134: the database read time and the cold flag, on success only.
+describe("health check Server-Timing", () => {
+  it("a 200 carries the database time and the cold flag, nothing else", async () => {
+    const response = await healthResponse({ url, anonKey });
+    expect(response.status).toBe(200);
+    const header = response.headers.get("server-timing") ?? "";
+    expect(header).toMatch(/^db;dur=\d+(\.\d)?, cold;desc="[01]"$/);
+    expect(header).toMatch(SERVER_TIMING_FORMAT);
+  });
+
+  it("a 503 carries no Server-Timing", async () => {
+    for (const settings of [
+      { url: "http://127.0.0.1:1", anonKey },
+      { url, anonKey: "not-a-valid-key" },
+      { url: undefined, anonKey },
+    ]) {
+      const response = await healthResponse(settings);
+      expect(response.status).toBe(503);
+      expect(response.headers.get("server-timing")).toBeNull();
+    }
   });
 });

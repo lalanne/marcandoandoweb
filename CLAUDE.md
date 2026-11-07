@@ -395,6 +395,13 @@ function belongs next to it. The Vercel dashboard (Settings, Functions, Function
 Region) is also set to `pdx1` as a backup; `vercel.json` wins, so keep both the same.
 Check with `curl -sI <site>/api/health | grep x-vercel-id`: `gru1::pdx1::...`.
 
+**Server-Timing (#134).** `/img/...`, `/api/health` and the product-page check in
+`proxy.ts` answer a `Server-Timing` header on success: the Supabase time
+(`storage;dur=` or `db;dur=`, ms) and `cold;desc="1"` when the function instance had
+just started. Read it with `curl -sI <url> | grep -i server-timing` or in the
+browser's Network tab. Durations and the cold flag only (`lib/server-timing.ts`); a
+404 or 503 carries none, so it reveals nothing.
+
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work
 with both the previous and the new code: add first, remove in a later release
