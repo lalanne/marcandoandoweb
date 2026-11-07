@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { coldStart, serverTiming, timed } from "@/lib/server-timing";
 import { imagePathFromSegments } from "./images";
 
 /**
@@ -12,10 +13,13 @@ export async function serveImage(
   segments: string[],
   cacheControl: string,
 ): Promise<Response> {
+  const cold = coldStart();
   const path = imagePathFromSegments(segments);
   if (!path) return new Response("Not found", { status: 404 });
 
-  const { data, error } = await client.storage.from("images").download(path);
+  const [{ data, error }, ms] = await timed(async () =>
+    client.storage.from("images").download(path),
+  );
   if (error || !data) return new Response("Not found", { status: 404 });
 
   return new Response(await data.arrayBuffer(), {
@@ -23,6 +27,8 @@ export async function serveImage(
       "Content-Type": data.type || "application/octet-stream",
       "Cache-Control": cacheControl,
       "X-Content-Type-Options": "nosniff",
+      // Issue #134: on success only, so a refusal reveals nothing more.
+      "Server-Timing": serverTiming({ storage: ms }, cold),
     },
   });
 }

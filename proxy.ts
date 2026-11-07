@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminUser } from "./lib/auth/admin";
 import { isPublishedSlug } from "./lib/catalog/queries";
+import { coldStart, serverTiming, timed } from "./lib/server-timing";
 import { createPublicClient } from "./lib/supabase/public";
 
 // A product page for a slug that is not published (or does not exist) must answer
@@ -17,13 +18,21 @@ async function productPageGuard(request: NextRequest): Promise<NextResponse> {
   } catch {
     // A malformed address is not a product.
   }
+  const cold = coldStart();
   let exists = true;
+  let ms: number | null = null;
   try {
-    exists = await isPublishedSlug(createPublicClient(), slug);
+    [exists, ms] = await timed(() => isPublishedSlug(createPublicClient(), slug));
   } catch {
     // The database could not be read: let the page report it.
   }
-  if (exists) return NextResponse.next();
+  if (exists) {
+    const response = NextResponse.next();
+    // Issue #134: the check's database time, only when it answered and the page
+    // is let through, so a 404 reveals nothing more.
+    if (ms !== null) response.headers.set("Server-Timing", serverTiming({ db: ms }, cold));
+    return response;
+  }
   const url = request.nextUrl.clone();
   url.pathname = "/producto-no-encontrado";
   url.search = "";
