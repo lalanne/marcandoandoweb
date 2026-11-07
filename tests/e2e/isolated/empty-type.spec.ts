@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
-import { createTestAdmin, supabaseEnv } from "../supabase";
+import { createTestAdmin, refreshCatalog, supabaseEnv } from "../supabase";
 
 // Spec 002, criterion 34: a type with no published product has no section and
 // no header link. This hides every published product of one type for a moment,
@@ -11,10 +11,14 @@ import { createTestAdmin, supabaseEnv } from "../supabase";
 
 let admin: SupabaseClient;
 let removeAdmin: () => Promise<void>;
+// The public pages are cached (spec 002, criteria 97 and 98): after each direct
+// change the cache is refreshed the way the admin does, with a save in the panel.
+let refresh: () => Promise<void>;
 
 test.beforeAll(async () => {
   const created = await createTestAdmin("empty-type");
   removeAdmin = created.remove;
+  refresh = () => refreshCatalog(created);
   const { url, anonKey } = supabaseEnv();
   admin = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -37,12 +41,14 @@ async function hideKind(kind: "producto" | "pack"): Promise<() => Promise<void>>
   if (error) throw new Error(error.message);
   const ids = (data ?? []).map((r) => r.id as string);
   expect(ids.length).toBeGreaterThan(0);
+  await refresh();
   return async () => {
     const { error: restore } = await admin
       .from("product")
       .update({ is_published: true })
       .in("id", ids);
     if (restore) throw new Error(restore.message);
+    await refresh();
   };
 }
 

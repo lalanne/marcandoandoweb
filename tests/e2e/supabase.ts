@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { chromium, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
 function localStatus(): Record<string, string> {
@@ -59,6 +60,41 @@ export async function createTestAdmin(label: string): Promise<{
       await service.auth.admin.deleteUser(id);
     },
   };
+}
+
+// The public pages are served from a cache that only a save in the panel refreshes
+// (spec 002, criteria 97 and 98), so a test that changes the database directly
+// calls this before it reads a public page. It does what the admin does: signs in
+// to the panel and saves a seeded draft ("Estuche de ejemplo (borrador)") without
+// changing anything, which refreshes the cache for every visitor. Nothing else
+// reads or writes that product, and a draft is on no public page.
+export async function refreshCatalog(admin: {
+  email: string;
+  password: string;
+}): Promise<void> {
+  // Its own browser, so it works from any hook; the address is the one of
+  // playwright.config.ts unless E2E_BASE_URL says otherwise.
+  const browser = await chromium.launch();
+  const context = await browser.newContext({
+    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto("/entrar");
+    await page.getByLabel("Correo").fill(admin.email);
+    await page.getByLabel("Contraseña").fill(admin.password);
+    await page.getByRole("button", { name: "Entrar" }).click();
+    await expect(page).toHaveURL(/\/panel$/);
+    await page.goto("/panel/productos");
+    await page.getByRole("link", { name: "Estuche de ejemplo (borrador)", exact: true }).click();
+    await page.getByRole("button", { name: "Guardar cambios" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Producto guardado." })).toBeVisible({
+      timeout: 20_000,
+    });
+  } finally {
+    await context.close();
+    await browser.close();
+  }
 }
 
 // Puts a tiny file at the path of the seeded demo photo (the seed has the row but

@@ -19,6 +19,7 @@ import {
   type ProductField,
 } from "@/lib/admin/product-input";
 import { createProduct, deleteProduct, updateProduct } from "@/lib/admin/products";
+import { refreshCatalog } from "@/lib/catalog/cache";
 
 // Server Actions behind /panel/productos. Each one checks the admin again and
 // then acts with the admin's own session, so row-level security and the storage
@@ -82,6 +83,7 @@ export async function saveProduct(
         values: raw,
       };
     }
+    refreshCatalog();
     redirect(`${editPath(id)}?aviso=guardado`);
   }
 
@@ -89,6 +91,7 @@ export async function saveProduct(
   if (!result.ok) {
     return { errors: { [result.field ?? "form"]: result.error }, values: raw };
   }
+  refreshCatalog();
   redirect(`${editPath(result.id)}?aviso=creado`);
 }
 
@@ -97,6 +100,7 @@ export async function deleteProductAction(formData: FormData): Promise<void> {
   const id = text(formData, "id");
   const result = await deleteProduct(supabase, id);
   if (!result.ok) redirect(`${editPath(id)}?aviso=no-eliminado`);
+  refreshCatalog();
   redirect("/panel/productos?aviso=eliminado");
 }
 
@@ -120,6 +124,7 @@ export async function uploadPhoto(
     kind: kindOf(formData),
   });
   if (!result.ok) return { error: result.error };
+  refreshCatalog();
   redirect(`${editPath(productId)}?aviso=foto-subida`);
 }
 
@@ -133,6 +138,7 @@ export async function savePhoto(
     kind: kindOf(formData),
   });
   if (!result.ok) return { error: result.error };
+  refreshCatalog();
   redirect(`${editPath(text(formData, "owner_id"))}?aviso=foto-guardada`);
 }
 
@@ -140,12 +146,14 @@ export async function movePhoto(formData: FormData): Promise<void> {
   const supabase = await adminClient();
   const direction = text(formData, "direction") === "up" ? "up" : "down";
   await moveImage(supabase, text(formData, "image_id"), direction);
+  refreshCatalog();
   redirect(editPath(text(formData, "owner_id")));
 }
 
 export async function deletePhoto(formData: FormData): Promise<void> {
   const supabase = await adminClient();
   const result = await deleteImage(supabase, text(formData, "image_id"));
+  if (result.ok) refreshCatalog();
   redirect(
     `${editPath(text(formData, "owner_id"))}?aviso=${
       result.ok ? "foto-eliminada" : "foto-no-eliminada"
