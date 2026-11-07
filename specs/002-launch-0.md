@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved, with one amendment in draft: the 2026-11-06 amendment for issue #136 (the catalog served from a cache, refreshed when the admin saves; criteria 97 to 102) awaits the owner's approval. Approved amendments: (the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -463,7 +463,7 @@ Before this amendment the tabs were text-only pills and the chosen one was dark
 filled with white text.
 
 **2026-11-06 amendment - the catalog is served from a cache, refreshed when the
-admin saves (issue #136; DRAFT, awaiting the owner's approval).** Javiera reported
+admin saves (issue #136, approved by the owner on 2026-11-06).** Javiera reported
 that the site is slow to load (not the photo browsing fixed in #98). Measured in #129
 and #134: after a few quiet minutes, every visit waits on Supabase, whose first
 answer after a quiet period takes about 0.5 s (30 to 90 ms right after), so the
@@ -1042,8 +1042,8 @@ the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of 
     3:1 against the background, the tabs at 1280 px fit on one line, and axe reports
     no serious or critical violation.
 
-**Catalog served from a cache (amendment of 2026-11-06, issue #136; DRAFT, awaiting
-the owner's approval).** Every other criterion still holds, including each one that
+**Catalog served from a cache (amendment of 2026-11-06, issue #136; approved by
+the owner on 2026-11-06).** Every other criterion still holds, including each one that
 says "without a deploy".
 
 97. Given the production server with published items, when `/`,
@@ -1182,7 +1182,7 @@ message to the business number. Then delete the test product.
    on the row and no join table); whether "Todos" should be renamed. Proposed, to
    confirm: the label "Colecciones" for the row of tabs and the admin hint "Todos
    los productos salen siempre en «Todos»."
-8. **Catalog cache (issue #136), draft:** is 1 hour the right bound for changes
+8. **Catalog cache (issue #136), approved by the owner on 2026-11-06; to revisit after measuring:** is 1 hour the right bound for changes
    made outside the panel (shorter means more database reads by Vercel, never by
    visitors)? And is it acceptable that the first load right after an admin save,
    usually the admin's own, waits on the database once?
