@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/header-link";
 import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
-import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
+import { loadCatalog, loadCollectionView } from "@/lib/catalog/load";
 import { KIND_SECTION } from "./CatalogSections";
 import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
@@ -25,16 +25,15 @@ const linkClass =
 async function CatalogLinks({
   base: pageBase,
   current,
-  searchParams,
+  collection,
 }: {
   base: string;
   current?: "empresas";
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
   const { products, empresas } = await loadCatalog();
-  const onCollection = searchParams
-    ? (await loadCollectionView(searchParams)).collection !== null
-    : false;
+  const onCollection =
+    collection !== undefined && (await loadCollectionView(collection)).collection !== null;
   const base = onCollection ? "/" : pageBase;
   const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
   return (
@@ -98,11 +97,11 @@ async function SessionLink() {
 export function SiteHeader({
   base = "",
   current,
-  searchParams,
+  collection,
 }: {
   base?: string;
   current?: "empresas";
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
   return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
@@ -119,7 +118,7 @@ export function SiteHeader({
         <nav aria-label="Secciones">
           <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
             <Suspense fallback={null}>
-              <CatalogLinks base={base} current={current} searchParams={searchParams} />
+              <CatalogLinks base={base} current={current} collection={collection} />
             </Suspense>
             <li>
               <a className={linkClass} href={`${base}#como-pedir`}>

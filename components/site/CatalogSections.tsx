@@ -5,7 +5,7 @@ import { COMPANY_PRICE_NOTE, priceLabel, WHOLESALE_NOTE } from "@/lib/catalog/fo
 import { imageUrl } from "@/lib/catalog/images";
 import type { ProductKind } from "@/lib/catalog/kind";
 import { COLLECTION_LABEL, listForCollection } from "@/lib/catalog/collection";
-import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
+import { loadCatalog, loadCollectionView } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
@@ -62,20 +62,21 @@ async function KindSection({
   kind,
   audience,
   className,
-  searchParams,
+  collection: requested,
 }: {
   kind: ProductKind;
   audience: Audience;
   className: string;
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
-  // Only the home page has collections; /empresas ignores `?coleccion=`.
+  // Only the home page has collections (`null` is "Todos"); /empresas passes none
+  // and ignores `?coleccion=`.
   let products: CatalogProduct[];
-  if (audience === "empresas" || !searchParams) {
+  if (audience === "empresas" || requested === undefined) {
     const catalog = await loadCatalog();
     products = (audience === "empresas" ? catalog.empresas : catalog.products)[kind];
   } else {
-    const { catalog, collection } = await loadCollectionView(searchParams);
+    const { catalog, collection } = await loadCollectionView(requested);
     products = listForCollection(catalog.products, collection)[kind];
   }
   if (products.length === 0) return null;
@@ -101,34 +102,34 @@ async function KindSection({
 
 export function ProductsSection({
   audience = "personas",
-  searchParams,
+  collection,
 }: {
   audience?: Audience;
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
   return (
     <KindSection
       kind="producto"
       audience={audience}
       className="bg-brand-cream"
-      searchParams={searchParams}
+      collection={collection}
     />
   );
 }
 
 export function PacksSection({
   audience = "personas",
-  searchParams,
+  collection,
 }: {
   audience?: Audience;
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
   return (
     <KindSection
       kind="pack"
       audience={audience}
       className="bg-brand-yellow/20"
-      searchParams={searchParams}
+      collection={collection}
     />
   );
 }
@@ -150,8 +151,8 @@ const TAB_IMAGE: Record<string, { src: string; width: number; height: number }> 
  * page with the choice in the address, so they work without JavaScript and can be
  * shared. Not shown when no published Personas item is in a collection.
  */
-export async function CollectionTabs({ searchParams }: { searchParams: SearchParams }) {
-  const { available, collection } = await loadCollectionView(searchParams);
+export async function CollectionTabs({ collection: requested }: { collection: string | null }) {
+  const { available, collection } = await loadCollectionView(requested);
   if (available.length === 0) return null;
   const tab = (href: string, label: string, chosen: boolean, image: keyof typeof TAB_IMAGE) => (
     <li key={href}>
@@ -243,11 +244,5 @@ export async function RealWorkSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-export function SectionSkeleton() {
-  return (
-    <div aria-hidden="true" className="min-h-64 bg-brand-cream" />
   );
 }

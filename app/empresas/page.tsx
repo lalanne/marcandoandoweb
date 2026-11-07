@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { EmpresasSections, SectionSkeleton } from "@/components/site/CatalogSections";
+import { EmpresasSections } from "@/components/site/CatalogSections";
 import { FloatingWhatsapp } from "@/components/site/FloatingWhatsapp";
 import { buttonClass } from "@/components/site/Hero";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -10,9 +9,8 @@ import { generalWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { siteUrl } from "@/lib/site";
 
 // The company catalog (spec 002, "Catálogo empresa", criteria 71 to 77). Like
-// the home page: the heading, intro and button are prerendered and the items are
-// read at request time inside Suspense, so changes in the panel show without a
-// deploy.
+// the home page, the whole page is prerendered with the items read from the cache
+// (spec 002, criteria 97 to 99), and a save in the panel refreshes it.
 export const metadata: Metadata = empresasMetadata(siteUrl);
 
 export default function EmpresasPage() {
@@ -37,9 +35,7 @@ export default function EmpresasPage() {
             </a>
           </div>
         </section>
-        <Suspense fallback={<SectionSkeleton />}>
-          <EmpresasSections />
-        </Suspense>
+        <EmpresasSections />
       </main>
       <SiteFooter />
       <FloatingWhatsapp audience="empresas" />

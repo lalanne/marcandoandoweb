@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
-import { ADMIN, supabaseEnv } from "./supabase";
+import { ADMIN, refreshCatalog, supabaseEnv } from "./supabase";
 
 // Spec 002, "Image privacy" (criteria 25 and 26). Fake products and tiny
 // generated PNGs, created through the admin session and removed afterwards.
@@ -51,11 +51,14 @@ test.beforeAll(async () => {
     });
     if (img.error) throw new Error(img.error.message);
   }
+  // The public page is cached (spec 002, criteria 97 and 98): refresh it as the admin does.
+  await refreshCatalog(ADMIN);
 });
 
 test.afterAll(async () => {
   await admin.storage.from("images").remove([published.path, draft.path]);
   for (const id of productIds) await admin.from("product").delete().eq("id", id);
+  await refreshCatalog(ADMIN);
 });
 
 async function signIn(page: Page) {

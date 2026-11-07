@@ -172,8 +172,40 @@ Before the first Playwright run, install the browser once: `npx playwright insta
 
 The public page needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 (copy `.env.example` to the gitignored `.env.local`; local values come from
-`npx supabase status`). The page reads the database at request time inside
-`<Suspense>`, so database changes show without a redeploy.
+`npx supabase status`). **The build needs the database too** (and `npm run build`
+fails without it, on purpose: spec 002, criterion 102). See "The catalog cache".
+
+### The catalog cache (issue #138, spec 002 criteria 97 to 102)
+
+The home page (`/` and the collection views), `/empresas` and the header links are
+built once, with the catalog read inside them, and served from Vercel's cache:
+a visitor's request never reads the database. `lib/catalog/load.ts` reads it in a
+`"use cache"` function tagged `catalog` (`lib/catalog/cache.ts`: `CATALOG_TAG`,
+`CATALOG_CACHE_LIFE`, `refreshCatalog()`). The header's session link
+(`SessionLink`) stays per request.
+
+- **Refresh on save.** Every Server Action in `app/panel/productos/actions.ts` that
+  changes what the public sees calls `refreshCatalog()` (`updateTag("catalog")`)
+  after the write and before the redirect; a new action that does so must too (a test,
+  `tests/e2e/catalog-cache.spec.ts`, goes through each one). The next load waits once
+  for the database and shows the change.
+- **Outside the panel** (Supabase dashboard, `scripts/optimize-photos.mjs`, a
+  migration) the change shows within 1 hour (`revalidate`), served stale while it
+  rebuilds; a deploy shows it at once (the cache key includes the build).
+- **Collection tabs.** A cached scope cannot read `searchParams`, so `/?coleccion=navidad`
+  and `/?coleccion=escolar` are rewritten (`next.config.ts`, `has` query) to the
+  prerendered pages `app/colecciones/navidad` and `.../escolar`. Visitors never see
+  those addresses; any other value of `coleccion` matches no rule and gets `/`
+  ("Todos"). The address, canonical, sitemap and no-JavaScript behavior are unchanged.
+- **Tests that change the database directly** (a `service`/admin client insert or
+  update, not the panel) must call `refreshCatalog(browser, baseURL, admin)` from
+  `tests/e2e/supabase.ts` before reading a public page: it saves a seeded draft in the
+  panel, which is what refreshes the cache. A test that needs *no* other test to
+  refresh while it runs goes in `tests/e2e/isolated/`.
+- **The build fails when the database is unreachable.** `npm run build` needs
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` pointing at a
+  reachable database (local Supabase for CI and for you; production for Vercel).
+- Product pages and the `proxy.ts` check are issue #139.
 
 ### Local Supabase
 
@@ -313,7 +345,7 @@ because they become required checks (spec 003). Run each locally before opening 
 
 | Job | What it checks | Locally |
 |-----|----------------|---------|
-| `static` | Lint, typecheck, production build | `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout) |
+| `static` | Lint, typecheck, production build against local Supabase, and a build with an unreachable database that must fail (criterion 102) | `npx supabase start`, export the `NEXT_PUBLIC_SUPABASE_*` values of `npx supabase status -o env`, then `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout). The failing build: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:1 npm run build` must exit non-zero |
 | `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
 | `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
 | `integration` | Start local Supabase, reset from migrations and seed, run `tests/integration/` | `npx supabase start && npx supabase db reset && npm run test:integration` |
@@ -357,6 +389,12 @@ below). The production URL, the commit and the smoke result are written to the r
 summary. `land-pr` confirms a deploy by reading that summary (`gh run list
 --workflow deploy.yml`) and checking the run is green; a waiting run is not a
 failure, tell the owner it needs their acceptance.
+
+**The production build reads the catalog** from the production database (the
+`NEXT_PUBLIC_SUPABASE_*` values `vercel pull` brings in) to fill the cache. If it
+cannot, `vercel build` fails, the job stops before `vercel deploy` and production
+keeps serving the previous deployment (spec 002, criterion 102); the migrations of
+that run have already been applied, which is why each must work with the old code.
 
 **Smoke test (spec 004, criteria 12 to 18).** After the Vercel step, `deploy.yml`
 installs Chromium and runs `npm run test:smoke` (`tests/smoke/`,

@@ -27,10 +27,40 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # The build reads the catalog from the database to fill the cache (spec 002,
+      # 2026-11-06 amendment, criterion 102), so it needs one: local Supabase, as in
+      # the e2e job.
+      - name: Fake Google provider values (spec 005, never real credentials)
+        run: cp supabase/.env.example supabase/.env
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,realtime,logflare,vector,edge-runtime,mailpit,postgres-meta,supavisor
+      - name: Read the local URL and public anon key
+        # Public demo keys of the local stack; they are not secrets.
+        run: |
+          eval "$(npx supabase status -o env | sed -n 's/^\(API_URL\|ANON_KEY\)=/export LOCAL_\1=/p')"
+          echo "NEXT_PUBLIC_SUPABASE_URL=${LOCAL_API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${LOCAL_ANON_KEY}" >> "$GITHUB_ENV"
+      # Criterion 102: a build that cannot read the database fails, so production
+      # keeps the previous deployment instead of serving an empty catalog. An address
+      # nothing listens on must stop the build at the catalog read.
+      - name: A build that cannot read the database fails (spec 002, criterion 102)
+        run: |
+          if NEXT_PUBLIC_SUPABASE_ANON_KEY=unreachable NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:1 npm run build > "$RUNNER_TEMP/unreachable-build.log" 2>&1; then
+            echo "::error::The build succeeded with an unreachable database; it must fail (spec 002, criterion 102)"
+            exit 1
+          fi
+          grep -q "Error occurred prerendering page" "$RUNNER_TEMP/unreachable-build.log" || {
+            cat "$RUNNER_TEMP/unreachable-build.log"
+            echo "::error::The build failed, but not at the catalog read"
+            exit 1
+          }
       # Build before typecheck: Next generates the global LayoutProps type
       # (.next/types) during the build, and a clean checkout does not have it.
       - run: npm run build
       - run: npm run typecheck
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup
 
   unit:
     runs-on: ubuntu-latest
