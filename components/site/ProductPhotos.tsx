@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
+import type { Audience } from "@/lib/catalog/audience";
 import { imageUrl } from "@/lib/catalog/images";
 import {
   nextPhoto,
@@ -19,11 +20,30 @@ import type { CatalogImage } from "@/lib/catalog/types";
 // resized to about 1000 px WebP on upload, so they are served as they are.
 // The box is brand teal until its photo arrives, so there is never an empty gap.
 
-const photoClass =
-  "aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30 object-cover";
-
-const roundButton =
-  "flex h-11 w-11 items-center justify-center rounded-full border-2 border-brand-night bg-white text-brand-night shadow-[2px_2px_0_var(--brand-night)]";
+// Company pages: the corporate look, with a light gray box while the photo loads
+// (spec 002, 2026-11-12 amendment).
+const STYLES = {
+  personas: {
+    photo: "aspect-[4/3] w-full rounded-2xl border-2 border-brand-night bg-brand-teal/30 object-cover",
+    round:
+      "flex h-11 w-11 items-center justify-center rounded-full border-2 border-brand-night bg-white text-brand-night shadow-[2px_2px_0_var(--brand-night)]",
+    counter:
+      "absolute right-2 top-2 rounded-full border-2 border-brand-night bg-white px-2 text-sm font-semibold text-brand-night",
+    dot: "h-3 w-3 rounded-full border-2 border-brand-night",
+    dotOn: "bg-brand-night",
+    dotOff: "bg-white",
+  },
+  empresas: {
+    photo: "aspect-[4/3] w-full rounded-lg border border-corp-line bg-corp-gray object-cover",
+    round:
+      "flex h-11 w-11 items-center justify-center rounded-md border border-corp-line bg-white text-corp-navy",
+    counter:
+      "absolute right-2 top-2 rounded-md border border-corp-line bg-white px-2 text-sm font-semibold text-corp-navy",
+    dot: "h-3 w-3 rounded-full border border-corp-navy",
+    dotOn: "bg-corp-navy",
+    dotOff: "bg-white",
+  },
+} as const;
 
 function Arrow({ direction }: { direction: "left" | "right" }) {
   return (
@@ -43,7 +63,15 @@ function Arrow({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-function Photo({ image, onLoad }: { image: CatalogImage; onLoad?: () => void }) {
+function Photo({
+  image,
+  onLoad,
+  className,
+}: {
+  image: CatalogImage;
+  onLoad?: () => void;
+  className: string;
+}) {
   return (
     <Image
       src={imageUrl(image.storagePath)}
@@ -53,12 +81,21 @@ function Photo({ image, onLoad }: { image: CatalogImage; onLoad?: () => void }) 
       loading="lazy"
       unoptimized
       onLoad={onLoad}
-      className={photoClass}
+      className={className}
     />
   );
 }
 
-export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: string }) {
+export function ProductPhotos({
+  images,
+  name,
+  audience = "personas",
+}: {
+  images: CatalogImage[];
+  name: string;
+  audience?: Audience;
+}) {
+  const style = STYLES[audience];
   const [index, setIndex] = useState(0);
   const [loadedPath, setLoadedPath] = useState<string | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -75,10 +112,13 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
 
   if (count === 0) {
     return (
-      <div aria-hidden="true" className={`${photoClass} bg-brand-teal/30`} />
+      <div
+        aria-hidden="true"
+        className={audience === "empresas" ? style.photo : `${style.photo} bg-brand-teal/30`}
+      />
     );
   }
-  if (count === 1) return <Photo image={images[0]} />;
+  if (count === 1) return <Photo image={images[0]} className={style.photo} />;
 
   const shown = Math.min(index, count - 1);
   const current = images[shown];
@@ -106,11 +146,12 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
         <Photo
           key={current.storagePath}
           image={current}
+          className={style.photo}
           onLoad={() => setLoadedPath(current.storagePath)}
         />
         <span
           data-testid="photo-counter"
-          className="absolute right-2 top-2 rounded-full border-2 border-brand-night bg-white px-2 text-sm font-semibold text-brand-night"
+          className={style.counter}
         >
           {index + 1} / {count}
         </span>
@@ -118,7 +159,7 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
           type="button"
           aria-label="Foto anterior"
           onClick={() => setIndex((i) => previousPhoto(i, count))}
-          className={`${roundButton} absolute left-2 top-1/2 -translate-y-1/2`}
+          className={`${style.round} absolute left-2 top-1/2 -translate-y-1/2`}
         >
           <Arrow direction="left" />
         </button>
@@ -126,7 +167,7 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
           type="button"
           aria-label="Foto siguiente"
           onClick={() => setIndex((i) => nextPhoto(i, count))}
-          className={`${roundButton} absolute right-2 top-1/2 -translate-y-1/2`}
+          className={`${style.round} absolute right-2 top-1/2 -translate-y-1/2`}
         >
           <Arrow direction="right" />
         </button>
@@ -143,9 +184,7 @@ export function ProductPhotos({ images, name }: { images: CatalogImage[]; name: 
           >
             <span
               aria-hidden="true"
-              className={`h-3 w-3 rounded-full border-2 border-brand-night ${
-                i === index ? "bg-brand-night" : "bg-white"
-              }`}
+              className={`${style.dot} ${i === index ? style.dotOn : style.dotOff}`}
             />
           </button>
         ))}

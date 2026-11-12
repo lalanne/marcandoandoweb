@@ -7,6 +7,7 @@ import type { ProductKind } from "@/lib/catalog/kind";
 import { COLLECTION_LABEL, listForCollection } from "@/lib/catalog/collection";
 import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
 import type { CatalogImage, CatalogProduct } from "@/lib/catalog/types";
+import { corpButtonClass, corpCardClass } from "../company/styles";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
 
@@ -25,21 +26,32 @@ function Photo({ image }: { image: CatalogImage }) {
 }
 
 function ProductCard({ product }: { product: CatalogProduct }) {
+  const company = product.audience === "empresas";
   return (
-    <article className="flex flex-col gap-3 rounded-3xl border-2 border-brand-night bg-white p-3">
-      <ProductPhotos images={product.images} name={product.name} />
+    <article
+      className={
+        company
+          ? `flex flex-col gap-3 p-3 ${corpCardClass} ${product.kind === "pack" ? "border-t-[3px] border-t-corp-gold" : ""}`
+          : "flex flex-col gap-3 rounded-3xl border-2 border-brand-night bg-white p-3"
+      }
+    >
+      <ProductPhotos images={product.images} name={product.name} audience={product.audience} />
       <h3 className="text-lg font-semibold">{product.name}</h3>
       {priceLabel(product.priceFromClp, product.audience) !== null && (
         <p className="font-medium">{priceLabel(product.priceFromClp, product.audience)}</p>
       )}
       {!product.isAvailable && (
-        <p className="mt-auto rounded-full bg-brand-night/10 px-4 py-2 text-center font-medium">
+        <p
+          className={`mt-auto px-4 py-2 text-center font-medium ${
+            company ? "rounded-md bg-corp-gray text-corp-body" : "rounded-full bg-brand-night/10"
+          }`}
+        >
           no disponible por ahora
         </p>
       )}
       <a
         href={productPath(product.slug)}
-        className={`${buttonClass} ${product.isAvailable ? "mt-auto " : ""}text-center text-base`}
+        className={`${company ? corpButtonClass : buttonClass} ${product.isAvailable ? "mt-auto " : ""}text-center text-base`}
       >
         Ver
         <span className="sr-only"> {product.name}</span>
@@ -86,7 +98,7 @@ async function KindSection({
         <h2 id={`${id}-title`} className="text-3xl font-bold">
           {title}
         </h2>
-        <p className="mt-2 text-brand-night">
+        <p className={`mt-2 ${audience === "empresas" ? "text-corp-muted" : "text-brand-night"}`}>
           {audience === "empresas" ? COMPANY_PRICE_NOTE : WHOLESALE_NOTE}
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -110,7 +122,7 @@ export function ProductsSection({
     <KindSection
       kind="producto"
       audience={audience}
-      className="bg-brand-cream"
+      className={audience === "empresas" ? "bg-white" : "bg-brand-cream"}
       searchParams={searchParams}
     />
   );
@@ -127,7 +139,7 @@ export function PacksSection({
     <KindSection
       kind="pack"
       audience={audience}
-      className="bg-brand-yellow/20"
+      className={audience === "empresas" ? "bg-corp-gray" : "bg-brand-yellow/20"}
       searchParams={searchParams}
     />
   );
@@ -189,28 +201,6 @@ export async function CollectionTabs({ searchParams }: { searchParams: SearchPar
         </ul>
       </nav>
     </div>
-  );
-}
-
-/**
- * Both company sections, or the "preparing" line when there is no published
- * Empresas item, so a link already sent never leads to a blank page
- * (spec 002, criterion 72).
- */
-export async function EmpresasSections() {
-  const { producto, pack } = (await loadCatalog()).empresas;
-  if (producto.length === 0 && pack.length === 0) {
-    return (
-      <p className="mx-auto max-w-5xl px-4 py-12 text-lg">
-        Estamos preparando el catálogo para empresas. Escríbenos y te contamos.
-      </p>
-    );
-  }
-  return (
-    <>
-      <ProductsSection audience="empresas" />
-      <PacksSection audience="empresas" />
-    </>
   );
 }
 

@@ -24,4 +24,4 @@ export const WHOLESALE_NOTE =
   "Precios por unidad. Al por mayor es otro precio: cotiza por WhatsApp.";
 
 /** Shown once under each heading of /empresas instead of prices (spec 002, criterion 73). */
-export const COMPANY_PRICE_NOTE = "Precios según cantidad: cotiza por WhatsApp.";
+export const COMPANY_PRICE_NOTE = "Precios según cantidad: cotice por WhatsApp.";
