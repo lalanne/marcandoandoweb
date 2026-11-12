@@ -228,6 +228,24 @@ added on 2026-11-06 that all three pills have a white background, "Todos" includ
 shadow; the label is "Especial Escolar" (her mockup); illustrations about 44 px tall
 at 360 px and 56 px at 1280 px.
 
+## Feedback from Javiera: a corporate look for companies (2026-11-12)
+
+Javiera sent this to the owner, who relayed it. Her words, verbatim:
+
+> "quiero que la web de empresas tenga otro look que la web de individuos, que tenga un look mas corporativo"
+
+**Summary (English).** She wants the company site to look different from the site for
+individuals, with a more corporate look. She also has a new company logo, "Marcando
+Ando · Soluciones corporativas" (a navy wordmark and a gold "M" mark), saved as
+`assets/logo-empresas.png`.
+
+Owner decisions on 2026-11-12 (issue #141): the corporate look covers everything a
+company sees on the site (`/empresas` and the page of every Empresas item, with their
+header and footer); the look is option A of the design options, "Clásico" (white and
+light gray, navy and gold, Montserrat headings); the company pages address the visitor
+as "usted"; in the people's site, the "Catálogo empresa" link keeps its style and gains
+a navy briefcase icon and outline (option 3). Spec 002 carries the change.
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
