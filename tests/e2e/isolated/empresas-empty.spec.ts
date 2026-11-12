@@ -53,7 +53,9 @@ test("[002-AC70] with no published Empresas item, no page has the Catálogo empr
 }) => {
   const restore = await hideEmpresas();
   try {
-    for (const path of ["/", "/productos/demo-botella-ejemplo", "/empresas"]) {
+    // /empresas has its own company header (criterion 105, tested in
+    // company-look-empty.spec.ts); the people's pages are these two.
+    for (const path of ["/", "/productos/demo-botella-ejemplo"]) {
       await page.goto(path);
       await expect(nav(page).getByRole("link", { name: "Cómo pedir" })).toBeVisible();
       // The catalog links stream in; wait for the Personas ones.
@@ -79,18 +81,23 @@ test("[002-AC72] with no published Empresas item, /empresas answers 200 with the
   try {
     const response = await page.goto("/empresas");
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("heading", { level: 1, name: "Catálogo empresa" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Productos personalizados con el logo de su empresa",
+      }),
+    ).toBeVisible();
     await expect(
       page.getByText(
-        "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.",
+        "Poleras, polerones, tazones, botellas y regalos corporativos. Cotice por volumen por WhatsApp.",
         { exact: true },
       ),
     ).toBeVisible();
     await expect(
-      page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" }),
+      page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" }).first(),
     ).toBeVisible();
     await expect(
-      page.getByText("Estamos preparando el catálogo para empresas. Escríbenos y te contamos."),
+      page.getByText("Estamos preparando el catálogo para empresas. Escríbanos y le contamos."),
     ).toBeVisible({ timeout: 20_000 });
     await expect(page.locator("#productos")).toHaveCount(0);
     await expect(page.locator("#packs")).toHaveCount(0);

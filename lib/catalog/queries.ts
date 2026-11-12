@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseColors, parseSizes } from "./details";
-import { isAudience } from "./audience";
+import { isAudience, type Audience } from "./audience";
 import { parseCollections } from "./collection";
 import { groupByAudience } from "./group";
 import { isProductKind } from "./kind";
@@ -76,6 +76,26 @@ export async function isPublishedSlug(
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data !== null;
+}
+
+/**
+ * The catalog of the published product with this slug, or null when there is none.
+ * The proxy uses it to send the page of an Empresas item to the company route,
+ * which is the only one that loads the company fonts (spec 002, criterion 104).
+ */
+export async function getPublishedAudience(
+  client: SupabaseClient,
+  slug: string,
+): Promise<Audience | null> {
+  const { data, error } = await client
+    .from("product")
+    .select("audience")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (data === null) return null;
+  return data.audience === "empresas" ? "empresas" : "personas";
 }
 
 /** The slugs of every published product, for the sitemap (spec 002, criterion 61). */

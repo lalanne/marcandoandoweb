@@ -7,7 +7,11 @@ export function FloatingWhatsapp({ audience = "personas" }: { audience?: Audienc
     <a
       href={generalWhatsappUrl(audience)}
       aria-label="WhatsApp"
-      className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-night bg-brand-teal text-brand-night shadow-[3px_3px_0_var(--brand-night)] hover:bg-brand-yellow"
+      className={
+        audience === "empresas"
+          ? "fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-white bg-corp-navy text-white hover:bg-corp-navy-deep"
+          : "fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full border-2 border-brand-night bg-brand-teal text-brand-night shadow-[3px_3px_0_var(--brand-night)] hover:bg-brand-yellow"
+      }
     >
       <svg
         aria-hidden="true"

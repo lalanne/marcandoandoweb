@@ -172,7 +172,7 @@ describe("price label by audience", () => {
   });
 
   it("[002-AC73] has the company note, and it is not the wholesale note", () => {
-    expect(COMPANY_PRICE_NOTE).toBe("Precios según cantidad: cotiza por WhatsApp.");
+    expect(COMPANY_PRICE_NOTE).toBe("Precios según cantidad: cotice por WhatsApp.");
     expect(COMPANY_PRICE_NOTE).not.toBe(WHOLESALE_NOTE);
   });
 });

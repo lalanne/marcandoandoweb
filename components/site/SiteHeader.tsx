@@ -9,26 +9,32 @@ import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
 import { KIND_SECTION } from "./CatalogSections";
+import { corpAccountLinkClass } from "../company/styles";
 import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
 
-const linkClass =
-  "rounded-full px-2 py-1 text-sm font-medium hover:bg-brand-yellow/40 sm:px-3";
+const linkBase = "rounded-full px-2 text-sm font-medium hover:bg-brand-yellow/40 sm:px-3";
+const linkClass = `${linkBase} py-1`;
+
+// The link to the company catalog: same place, size, typeface and pill shape,
+// plus a 2 px navy outline, navy text and a briefcase before the text.
+// No vertical padding: the 2 px border and the 20 px line make a 24 px box, as tall
+// as the other links' line, so the header does not grow when the links stream in.
+const companyLinkClass = `${linkBase} flex items-center gap-1.5 border-2 border-corp-navy text-corp-navy`;
 
 // "Productos" and "Packs" only show when their section exists, so no link points
 // at a hidden section (spec 002, criteria 34 and 35). There is no link to the
 // "Trabajos reales" section (owner decision, 2026-10-31).
 // "Catálogo empresa" goes after "Packs" and only shows when an Empresas item is
-// published (spec 002, criteria 69 and 70); on /empresas it is the current page.
+// published (spec 002, criteria 69 and 70). It has a navy outline and a briefcase
+// icon (criterion 110). The company pages have their own header.
 // On the home page with a special collection chosen, "Productos" and "Packs" lead to
 // the sections of the page without `coleccion` (spec 002, criterion 89).
 async function CatalogLinks({
   base: pageBase,
-  current,
   searchParams,
 }: {
   base: string;
-  current?: "empresas";
   searchParams?: SearchParams;
 }) {
   const { products, empresas } = await loadCatalog();
@@ -48,11 +54,23 @@ async function CatalogLinks({
       ))}
       {hasEmpresas ? (
         <li>
-          <a
-            className={linkClass}
-            href={EMPRESAS_PATH}
-            aria-current={current === "empresas" ? "page" : undefined}
-          >
+          <a className={companyLinkClass} href={EMPRESAS_PATH}>
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" />
+              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+              <path d="M2 13h20" />
+            </svg>
             Catálogo empresa
           </a>
         </li>
@@ -66,9 +84,9 @@ async function CatalogLinks({
 const accountLinkClass =
   "inline-block w-24 rounded-full border-2 border-brand-night bg-brand-yellow px-3 py-1 text-center text-sm font-semibold hover:bg-brand-yellow/70";
 
-function AccountLink({ link }: { link: HeaderLink }) {
+function AccountLink({ link, corp = false }: { link: HeaderLink; corp?: boolean }) {
   return (
-    <a className={accountLinkClass} href={link.href}>
+    <a className={corp ? corpAccountLinkClass : accountLinkClass} href={link.href}>
       {link.label}
     </a>
   );
@@ -77,7 +95,7 @@ function AccountLink({ link }: { link: HeaderLink }) {
 // Reads the session at request time (getUser asks the auth server, so a forged
 // token does not count). Any failure shows "Entrar". Only this part is dynamic;
 // the rest of the header stays prerendered.
-async function SessionLink() {
+export async function SessionLink({ corp = false }: { corp?: boolean }) {
   // Outside the try: it opts the component into request time, and a catch must
   // not swallow that signal.
   const supabase = await createClient();
@@ -90,18 +108,16 @@ async function SessionLink() {
   } catch {
     // Unreadable session: keep the visitor link.
   }
-  return <AccountLink link={link} />;
+  return <AccountLink link={link} corp={corp} />;
 }
 
 // `base` is "" on the home page (the links are anchors on the page) and "/" on
 // other pages (the links go to the home page's sections).
 export function SiteHeader({
   base = "",
-  current,
   searchParams,
 }: {
   base?: string;
-  current?: "empresas";
   searchParams?: SearchParams;
 }) {
   return (
@@ -119,7 +135,7 @@ export function SiteHeader({
         <nav aria-label="Secciones">
           <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
             <Suspense fallback={null}>
-              <CatalogLinks base={base} current={current} searchParams={searchParams} />
+              <CatalogLinks base={base} searchParams={searchParams} />
             </Suspense>
             <li>
               <a className={linkClass} href={`${base}#como-pedir`}>

@@ -15,8 +15,8 @@ const COMPANY_GENERAL =
   "Hola, Marcando Ando. Escribo por mi empresa y quiero cotizar. Te cuento qué necesitamos:";
 const PERSONAS_GENERAL = "Hola, Marcando Ando. Quiero cotizar. Te cuento mi idea:";
 const INTRO =
-  "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.";
-const NOTE = "Precios según cantidad: cotiza por WhatsApp.";
+  "Poleras, polerones, tazones, botellas y regalos corporativos. Cotice por volumen por WhatsApp.";
+const NOTE = "Precios según cantidad: cotice por WhatsApp.";
 const WHOLESALE = "Precios por unidad. Al por mayor es otro precio: cotiza por WhatsApp.";
 
 const SEED_PRODUCT = { slug: "demo-empresa-polera", name: "Polera corporativa de ejemplo" };
@@ -111,7 +111,7 @@ test("[002-AC68] the home page lists only Personas items", async ({ page }) => {
   await expect(page.locator(`a[href="/productos/${SEED_PRODUCT.slug}"]`)).toHaveCount(0);
 });
 
-test("[002-AC69] with an Empresas item published, the header links are the five, in order, on the home page, a product page and /empresas", async ({
+test("[002-AC69] with an Empresas item published, the people's header links are the five, in order, on the home page and a Personas product page", async ({
   page,
 }) => {
   const expected = (base: string) => [
@@ -124,8 +124,6 @@ test("[002-AC69] with an Empresas item published, the header links are the five,
   for (const [path, base] of [
     ["/", ""],
     ["/productos/demo-botella-ejemplo", "/"],
-    [`/productos/${SEED_PRODUCT.slug}`, "/"],
-    ["/empresas", "/"],
   ] as const) {
     await page.goto(path);
     await expect(nav(page).getByRole("link", { name: "Catálogo empresa" })).toBeVisible({
@@ -136,25 +134,32 @@ test("[002-AC69] with an Empresas item published, the header links are the five,
   }
 });
 
-test("[002-AC69] on /empresas the link is the current page, and only there", async ({ page }) => {
-  await page.goto("/empresas");
-  const link = nav(page).getByRole("link", { name: "Catálogo empresa" });
-  await expect(link).toHaveAttribute("aria-current", "page", { timeout: PAGE_TIMEOUT });
-  await expect(nav(page).locator('[aria-current="page"]')).toHaveCount(1);
-  await page.goto("/");
-  await expect(nav(page).getByRole("link", { name: "Catálogo empresa" })).not.toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+test("[002-AC69] on the people's pages the link is not the current page (the company pages have their own header, criterion 105)", async ({
+  page,
+}) => {
+  for (const path of ["/", "/productos/demo-botella-ejemplo"]) {
+    await page.goto(path);
+    const link = nav(page).getByRole("link", { name: "Catálogo empresa" });
+    await expect(link).toBeVisible({ timeout: PAGE_TIMEOUT });
+    await expect(link).not.toHaveAttribute("aria-current", "page");
+    await expect(nav(page).locator('[aria-current="page"]')).toHaveCount(0);
+  }
 });
 
-test("[002-AC71] /empresas shows the heading, intro, button, then Productos and Packs of Empresas only, highlighted first", async ({
+test("[002-AC71] /empresas shows the heading, intro, button, then Productos and Packs of Empresas only, highlighted first (amended: criterion 106 gives the full order)", async ({
   page,
 }) => {
   await openEmpresas(page);
-  await expect(page.getByRole("heading", { level: 1, name: "Catálogo empresa" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Productos personalizados con el logo de su empresa",
+    }),
+  ).toBeVisible();
   await expect(page.getByText(INTRO, { exact: true })).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" }).first(),
+  ).toBeVisible();
 
   // Document order: heading, intro, button, Productos, Packs.
   const order = await page.evaluate(() => {
@@ -286,9 +291,11 @@ test("[002-AC74] an unavailable Empresas item says so and has no order button", 
 
 test("[002-AC75] /empresas and an Empresas page use the company general message", async ({ page }) => {
   await openEmpresas(page);
-  const button = page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" });
+  // The hero's button and the band's (criterion 106) carry the same message.
+  const buttons = await page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" }).all();
+  expect(buttons.length).toBeGreaterThanOrEqual(2);
   const floating = page.getByRole("link", { name: "WhatsApp", exact: true });
-  for (const link of [button, floating]) {
+  for (const link of [...buttons, floating]) {
     const href = await link.getAttribute("href");
     expect(href?.startsWith(`${WA}?text=`)).toBe(true);
     expect(messageOf(href)).toBe(COMPANY_GENERAL);
@@ -364,7 +371,7 @@ test("[002-AC77] /empresas fits the screen, is usable with the keyboard, has 44 
     expect(box!.height, `link ${i}`).toBeGreaterThanOrEqual(44);
     expect(box!.width, `link ${i}`).toBeGreaterThanOrEqual(44);
   }
-  const button = page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" });
+  const button = page.getByRole("main").getByRole("link", { name: "Cotizar por WhatsApp" }).first();
   await button.focus();
   await expect(button).toBeFocused();
   expect(await button.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe("none");
