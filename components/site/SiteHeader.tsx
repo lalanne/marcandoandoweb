@@ -89,7 +89,7 @@ function CompanyLogoLink() {
         aria-hidden="true"
         className="logo-divider h-11 w-px shrink-0 bg-brand-night/35 md:h-14"
       />
-      <a href={EMPRESAS_PATH} className="shrink-0 rounded-md">
+      <a href={EMPRESAS_PATH} className="flex min-h-11 shrink-0 items-center rounded-md">
         <Image
           src="/img/logo-empresas.webp"
           alt="Marcando Ando, soluciones corporativas"

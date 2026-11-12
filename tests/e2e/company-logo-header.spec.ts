@@ -129,10 +129,10 @@ for (const path of ["/", "/productos/demo-botella-ejemplo"]) {
 
     await noHorizontalScroll(page);
     // Every link keeps its 44 px target where criterion 18 requires it: the logo
-    // links are as tall as their logos or taller.
+    // link has a 44 px box around its smaller logo.
     const logoLink = page.getByRole("banner").getByRole("link", { name: COMPANY_ALT });
     const box = (await logoLink.boundingBox())!;
-    expect(box.height).toBeGreaterThanOrEqual(wide(page) ? 40 : 32);
+    expect(box.height).toBeGreaterThanOrEqual(44);
     const { violations } = await new AxeBuilder({ page }).analyze();
     expect(
       violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id),
