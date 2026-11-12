@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved, with one amendment in draft: the 2026-11-12 amendment for issue #141 (a corporate look for the company pages, criteria 103 to 111) is waiting for the owner's approval. (The 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -514,8 +514,8 @@ once and served from Vercel's cache, and rebuilt when she saves.
   will be its own amendment after that spike. Also out: keeping Supabase awake with
   scheduled pings, and moving the Supabase project.
 
-**2026-11-12 amendment - a corporate look for the company pages (issue #141, draft:
-waiting for the owner's approval).** Javiera: "quiero que la web de empresas tenga
+**2026-11-12 amendment - a corporate look for the company pages (issue #141, approved
+by the owner on 2026-11-12).** Javiera: "quiero que la web de empresas tenga
 otro look que la web de individuos, que tenga un look mas corporativo" (her words in
 `docs/requirements.md`). Until now the company catalog used the people's look
 (cream, Fredoka, dark outlines, offset shadows, four bright colors) and addressed the
@@ -1211,8 +1211,8 @@ says "without a deploy".
      when the build runs, then it fails, instead of producing pages with an empty
      catalog.
 
-**Corporate look for the company pages (amendment of 2026-11-12, issue #141; draft,
-waiting for the owner's approval).** "Company pages" are `/empresas` and the page of
+**Corporate look for the company pages (amendment of 2026-11-12, issue #141; approved
+by the owner on 2026-11-12).** "Company pages" are `/empresas` and the page of
 every Empresas item; "people's pages" are every other public page. Criterion 77
 (no horizontal scroll, keyboard, 44 px, Spanish, axe) still holds for the company
 pages in their new look.
@@ -1396,7 +1396,7 @@ message to the business number. Then delete the test product.
    made outside the panel (shorter means more database reads by Vercel, never by
    visitors)? And is it acceptable that the first load right after an admin save,
    usually the admin's own, waits on the database once?
-9. **Corporate look (issue #141), draft; open with Javiera:** the hero heading
+9. **Corporate look (issue #141), approved by the owner on 2026-11-12; still open with Javiera:** the hero heading
    "Productos personalizados con el logo de su empresa", the intro line and the three
    "Cómo cotizar" steps are proposed copy (in particular, is it true that the design is
    reviewed with the customer before production?); a photo for the hero, if she wants
