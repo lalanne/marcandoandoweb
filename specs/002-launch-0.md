@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved, with one amendment in draft: the 2026-11-12 amendment for issue #141 (a corporate look for the company pages, criteria 103 to 111) is waiting for the owner's approval. (The 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -339,7 +339,8 @@ people (B2C); she also wants to sell to companies (B2B). The owner decided on
   hero, the "Cómo pedir" or the "Colegios y grupos" blocks.
 
 Before this amendment there was one catalog and the header had four section links
-(criterion 35).
+(criterion 35). The look, header, footer, heading and "tú" copy of the company pages
+described here are replaced by the 2026-11-12 amendment (issue #141) further down.
 
 **2026-11-05 amendment - the "Empresas" badge is brand yellow (issue #118, approved by the owner on 2026-11-05).**
 Javiera said the "Empresas" badge was sometimes too like the other badges. It was a
@@ -513,6 +514,135 @@ once and served from Vercel's cache, and rebuilt when she saves.
   will be its own amendment after that spike. Also out: keeping Supabase awake with
   scheduled pings, and moving the Supabase project.
 
+**2026-11-12 amendment - a corporate look for the company pages (issue #141, draft:
+waiting for the owner's approval).** Javiera: "quiero que la web de empresas tenga
+otro look que la web de individuos, que tenga un look mas corporativo" (her words in
+`docs/requirements.md`). Until now the company catalog used the people's look
+(cream, Fredoka, dark outlines, offset shadows, four bright colors) and addressed the
+visitor as "tú". The owner decided on 2026-11-12: everything a company sees gets a
+corporate look, option A ("Clásico") of the design options; the company pages say
+"usted"; there is a new company logo; and the people's header marks the link to the
+company catalog with a briefcase icon (option 3). The people's site does not change
+otherwise.
+
+- **The company pages.** `/empresas` and the page `/productos/<slug>` of every
+  Empresas item (available or not), each as a whole: header, content, footer and the
+  floating WhatsApp button. Every other page (the home page and its collection views,
+  Personas product pages, `/entrar`, `/panel`, the 404 page) keeps today's look.
+- **The logo.** "Marcando Ando · Soluciones corporativas": a navy wordmark with a
+  gold "M" mark, from `assets/logo-empresas.png` (2172×724, white background). The
+  site serves it as `public/img/logo-empresas.webp`, at twice its display size and
+  at most 40 KB **(interpretation)**, with `width` and `height` set and loaded
+  eagerly. It is about 44 px tall at 360 px and 64 px at 1280 px **(interpretation)**,
+  its alt text is "Marcando Ando, soluciones corporativas", and it links to
+  `/empresas`. Its white background sits on the white header, so no transparent
+  version is needed for this look. The people's logo does not appear on the company
+  pages. The browser-tab icon and the social-sharing image stay as they are
+  **(interpretation)**.
+- **Colors**, as CSS variables on `:root` with a `--corp-` prefix, next to the
+  people's `--brand-` ones:
+
+  | Variable | Value | Used for | Contrast |
+  |----------|-------|----------|----------|
+  | `--corp-navy` | `#0B1B3F` | Text, headings, buttons, outlines, the call-to-action band | 16.9:1 on white |
+  | `--corp-navy-deep` | `#07122B` | Footer background | |
+  | `--corp-gold` | `#B8862B` | Decoration only: short rules, step numbers (24 px or larger, bold), the top edge of pack cards, the button on the navy band (navy text on it: 5.2:1) | 3.2:1 on white, so never small text |
+  | `--corp-gold-text` | `#8A6417` | Gold text at any size (the eyebrow line, text links) | 5.4:1 on white, 5.0:1 on the light gray |
+  | `--corp-gold-light` | `#E2C07A` | Links in the footer | 10.7:1 on the footer |
+  | `--corp-gray` | `#F5F6F9` | Background of alternate sections and of a photo box while it loads | |
+  | `--corp-line` | `#E4E7EE` | 1 px outlines of cards and the header's bottom line | |
+  | `--corp-body` | `#3B4559` | Body text | 8.9:1 on the light gray |
+  | `--corp-muted` | `#5A6478` | Secondary text (notes, "Web para personas") | 5.5:1 on the light gray |
+
+  The page background is white (`#FFFFFF`). No pink, yellow, teal or purple on the
+  company pages.
+- **Type.** Montserrat (600 to 800) for headings, the header links and buttons;
+  Inter (400 to 600) for body text; both from Google Fonts through `next/font`, and
+  downloaded only on the company pages **(interpretation)**. Fredoka is not used on
+  them.
+- **Shapes.** Buttons have 6 px corners and cards 8 px; cards and the header have 1 px
+  `--corp-line` outlines. No 2 px dark outlines, no offset shadows and no fully
+  rounded pills (those are the people's style). The keyboard focus ring stays visible
+  (3 px, in `--corp-navy` on light backgrounds and white on navy).
+- **The header of the company pages.** White, with a 1 px bottom line. Left: the
+  company logo. Then the links, in this order: **Productos** (`/empresas#productos`),
+  **Packs** (`/empresas#packs`), **Cómo cotizar** (`/empresas#cotizar`), **Web para
+  personas** (`/`, in `--corp-muted`), a navy **"Cotizar por WhatsApp"** button with
+  the general company message, and the sign-in link ("Admin" / "Mi panel",
+  criteria 27 to 31, in the corporate style). "Productos" and "Packs" show only when
+  `/empresas` has that section. At 360 px the links wrap onto more lines; there is no
+  horizontal scroll. This replaces, on the company pages, the five links of the
+  2026-11-04 amendment; the people's pages keep those five.
+- **The page `/empresas`**, in this order:
+  1. **Hero**, on light gray: the eyebrow line "Catálogo empresa" (small capitals,
+     `--corp-gold-text`); the heading **"Productos personalizados con el logo de su
+     empresa"** (proposed copy, to confirm with Javiera); a short gold rule; the intro
+     line **"Poleras, polerones, tazones, botellas y regalos corporativos. Cotice por
+     volumen por WhatsApp."** (proposed copy; it names only products the business
+     already makes); the buttons "Cotizar por WhatsApp" (navy, general company
+     message) and "Ver productos" (navy outline, to `#productos`, only when that
+     section exists). The design options show a photo next to the text; per the
+     real-data rule there is no photo and no placeholder until Javiera sends one, and
+     the text then takes the full width.
+  2. **Categories:** one line, "Poleras · Polerones · Tazones · Botellas · Regalos
+     corporativos", plain text with gold dots, not links **(interpretation)**.
+  3. **Productos** (`#productos`) and **Packs** (`#packs`, light gray): each heading,
+     then once the note **"Precios según cantidad: cotice por WhatsApp."**, then the
+     cards. A card shows what it shows today (photos, name, badges, "Ver", criterion 71
+     and the #101 amendment), in the corporate style: white, 1 px outline, 8 px
+     corners, the name in Montserrat; a pack card has a 3 px gold top edge. A section
+     with no items is hidden, as before.
+  4. **Cómo cotizar** (`#cotizar`): three numbered steps (proposed copy, to confirm
+     with Javiera): **01 "Escríbanos"**, "Cuéntenos por WhatsApp qué productos
+     necesita y cuántas unidades."; **02 "Envíe su logo"**, "Revisamos el diseño con
+     usted antes de producir."; **03 "Reciba su cotización"**, "Le respondemos con el
+     precio según la cantidad." Lead times are not mentioned: they are not confirmed
+     (2026-11-04 amendment).
+  5. **Call-to-action band**, navy: "¿Necesita productos con el logo de su empresa?"
+     and a gold "Cotizar por WhatsApp" button (navy text, general company message).
+
+  With no published Empresas item, the page shows the hero, the line **"Estamos
+  preparando el catálogo para empresas. Escríbanos y le contamos."**, "Cómo cotizar"
+  and the band, and no "Ver productos" button.
+- **The page of an Empresas item.** Same content and order as today (photos, details,
+  back link "Volver a catálogo empresa", "Pedir por WhatsApp", "no disponible por
+  ahora"), in the corporate colors, type and shapes, with the company header and
+  footer. The photo box fills with `--corp-gray` while a photo loads, instead of
+  teal.
+- **The footer of the company pages.** On `--corp-navy-deep`: "Marcando Ando ·
+  Soluciones corporativas", the WhatsApp link (same number, general company message)
+  and the Instagram link, the same facts as today's footer. The people's tagline
+  "Marcamos tus ideas." is not shown.
+- **The floating WhatsApp button** on the company pages: a navy circle with a white
+  icon, a 1 px white outline and no offset shadow. Same place, size, label and
+  message as before (criterion 75).
+- **"Usted" on the company pages.** All visible text that addresses the visitor uses
+  "usted". Changed: the intro line and the empty-catalog line (above), the section
+  note ("cotiza" becomes "cotice"), and the page description and Open Graph
+  description of `/empresas`: "Poleras, polerones, tazones, botellas y regalos
+  corporativos con el logo de su empresa. Cotice por volumen por WhatsApp." The
+  WhatsApp messages are written in the customer's voice to the business, so they do
+  not change **(interpretation, open question 9)**. The people's pages keep "tú".
+- **The link from the people's site.** On the people's pages the header link
+  "Catálogo empresa" keeps its place, size, typeface and pill shape, and gains a 2 px
+  `--corp-navy` outline, navy text and a briefcase icon before the text (an inline
+  stroke SVG, 16 px, `aria-hidden="true"`). Its accessible name stays "Catálogo
+  empresa". The other header links do not change. No banner or strip is added
+  (option 4 was declined).
+- **How it is built** **(interpretation)**. A theme, not a second site: the company
+  pages set a theme on their root element, the `--corp-` variables drive the shared
+  components (cards, sections, product page), and the company header, footer and
+  hero are their own components. No new framework or UI library (ADR-0001). The
+  design options are on the owner's Claude Design canvas (option A is the reference;
+  option B, "Ejecutivo oscuro", and C, "Minimalista editorial", were not chosen).
+- **Out:** any other change to the people's look; a separate domain or subdomain;
+  a hero photo (until Javiera sends one); minimum orders, lead times, invoicing or
+  company clients; the WhatsApp messages; the admin panel's look; the browser-tab
+  icon and the social-sharing image.
+
+Before this amendment the company pages used the people's look, header, footer and
+"tú" copy; criteria 69, 71, 72 and 73 are amended to match (marked there).
+
 ## Constraints
 
 Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
@@ -547,6 +677,8 @@ Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
   admin cannot save an image without it), good contrast, keyboard access.
 - **Responsive.** Phone, tablet, computer.
 - **Brand.** Logo and palette from `CLAUDE.md`, colors as CSS variables on `:root`.
+  The company pages have their own logo, palette and type (2026-11-12 amendment,
+  issue #141).
 - **Local development.** Runs entirely on the developer machine with local Supabase
   in Docker, migrations from day one (spec 000).
 - **Ownership.** Accounts start under the owner's; handover to Javiera is part of v1.
@@ -893,7 +1025,9 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     order; "Catálogo empresa" goes to `/empresas`; on `/empresas` it has
     `aria-current="page"`; and the links fit without horizontal scroll at 360 px and
     1280 px. (Criterion 35 is extended: the links are those five when an Empresas item
-    is published, and its four otherwise.)
+    is published, and its four otherwise.) (Amended 2026-11-12, issue #141: this
+    holds for the people's pages; the company pages have their own header,
+    criterion 105.)
 70. Given no published Empresas item, when any public page loads, then the header has
     no "Catálogo empresa" link, and the other links follow criteria 34 and 35.
 71. Given published Empresas items of both kinds, when a visitor opens `/empresas`,
@@ -901,16 +1035,22 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     "Cotizar por WhatsApp" button, a "Productos" section with only the Empresas
     products and a "Packs" section with only the Empresas packs, highlighted items
     first in each; and a kind with no published Empresas item has no section.
+    (Amended 2026-11-12, issue #141: "Catálogo empresa" is now the eyebrow line above
+    the heading "Productos personalizados con el logo de su empresa", and the page
+    has more sections; the full order is criterion 106.)
 72. Given no published Empresas item, when a visitor opens `/empresas`, then the page
     answers 200 with the heading, the intro line, the button and the line "Estamos
     preparando el catálogo para empresas. Escríbenos y te contamos.", and no
-    "Productos" or "Packs" section.
+    "Productos" or "Packs" section. (Amended 2026-11-12, issue #141: the line now
+    reads "Estamos preparando el catálogo para empresas. Escríbanos y le contamos.",
+    criterion 107.)
 73. Given an Empresas item with price 7000, when its card on `/empresas` and its page
     at `/productos/<slug>` load, then neither shows "$7.000", "c/u" or any price, and
     the page's description and Open Graph tags contain no price; and each section on
     `/empresas` has, once, right under its heading, "Precios según cantidad: cotiza por
     WhatsApp." with a contrast of at least 4.5:1, and not the home page's wholesale
-    note.
+    note. (Amended 2026-11-12, issue #141: the note now reads "Precios según
+    cantidad: cotice por WhatsApp.", criterion 107.)
 74. Given an available Empresas item, when a visitor opens its page, then the back
     link reads "Volver a catálogo empresa" and goes to `/empresas#productos` (or
     `/empresas#packs` for a pack), and "Pedir por WhatsApp" opens
@@ -1071,6 +1211,68 @@ says "without a deploy".
      when the build runs, then it fails, instead of producing pages with an empty
      catalog.
 
+**Corporate look for the company pages (amendment of 2026-11-12, issue #141; draft,
+waiting for the owner's approval).** "Company pages" are `/empresas` and the page of
+every Empresas item; "people's pages" are every other public page. Criterion 77
+(no horizontal scroll, keyboard, 44 px, Spanish, axe) still holds for the company
+pages in their new look.
+
+103. Given a published Empresas item, when `/empresas` and its product page load at
+     360 px and at 1280 px, then the header shows the company logo
+     (`/img/logo-empresas.webp`, alt "Marcando Ando, soluciones corporativas",
+     linking to `/empresas`) and not the people's logo; headings, header links and
+     buttons are set in Montserrat and body text in Inter; the page background is
+     white; and no button or card has an offset shadow or a 2 px dark outline.
+104. Given the home page, a collection view (`/?coleccion=navidad`) and a Personas
+     product page, when they load, then they look as before this amendment (the
+     people's logo, Fredoka, the cream background, the people's header and footer),
+     and no Montserrat or Inter font file is requested.
+105. Given published Empresas products and packs, when a company page loads, then its
+     header links are exactly "Productos", "Packs", "Cómo cotizar", "Web para
+     personas", "Cotizar por WhatsApp" and the sign-in link ("Admin" or "Mi panel"),
+     in that order; they go to `/empresas#productos`, `/empresas#packs`,
+     `/empresas#cotizar`, `/` and `https://wa.me/56982661835` with the general company
+     message; "Productos" (or "Packs") is missing when `/empresas` has no such
+     section; and at 360 px the header has no horizontal scroll.
+106. Given published Empresas items of both kinds, when a visitor opens `/empresas`,
+     then they see, in order: the eyebrow "Catálogo empresa"; one `h1`, "Productos
+     personalizados con el logo de su empresa"; the intro line; the buttons
+     "Cotizar por WhatsApp" and "Ver productos" (to `#productos`); the categories line;
+     the "Productos" and "Packs" sections (criterion 71); "Cómo cotizar" (`#cotizar`)
+     with its three steps; the navy band with "¿Necesita productos con el logo de su
+     empresa?" and "Cotizar por WhatsApp"; and the footer. The hero has no image.
+107. Given the company pages, when their visible text is read, then the intro line is
+     "Poleras, polerones, tazones, botellas y regalos corporativos. Cotice por volumen
+     por WhatsApp.", each section's note is "Precios según cantidad: cotice por
+     WhatsApp.", the empty-catalog line is "Estamos preparando el catálogo para
+     empresas. Escríbanos y le contamos.", the `/empresas` description and
+     `og:description` are "Poleras, polerones, tazones, botellas y regalos
+     corporativos con el logo de su empresa. Cotice por volumen por WhatsApp.", and no
+     visible text contains the words "tú", "tu", "tus", "te", "cotiza", "escríbenos"
+     or "cuéntanos"; and the people's pages keep their texts (criterion 55 and the
+     home page's wholesale note unchanged).
+108. Given the company pages, when their styles are read, then the variables
+     `--corp-navy` `#0B1B3F`, `--corp-navy-deep` `#07122B`, `--corp-gold` `#B8862B`,
+     `--corp-gold-text` `#8A6417`, `--corp-gold-light` `#E2C07A`, `--corp-gray`
+     `#F5F6F9`, `--corp-line` `#E4E7EE`, `--corp-body` `#3B4559` and `--corp-muted`
+     `#5A6478` are defined on `:root`; no text smaller than 24 px is colored
+     `--corp-gold`; every text has a contrast of at least 4.5:1 (3:1 at 24 px or
+     larger) against its background; and no pink, yellow, teal or purple brand color
+     is used.
+109. Given a company page, when its footer and floating button are read, then the
+     footer is on `--corp-navy-deep` with "Marcando Ando · Soluciones corporativas",
+     the WhatsApp link (general company message) and the Instagram link, and without
+     "Marcamos tus ideas."; and the floating button is a navy circle with a white icon
+     and no offset shadow, with the label and message of criterion 75.
+110. Given at least one published Empresas item, when a people's page loads at 360 px
+     and at 1280 px, then its "Catálogo empresa" link has a 2 px `--corp-navy`
+     outline, navy text and a decorative briefcase icon (`aria-hidden="true"`)
+     before the text; its accessible name is exactly "Catálogo empresa"; the other
+     header links look as before; and the header has no horizontal scroll.
+111. Given `public/img/logo-empresas.webp`, when it is checked, then it is at most
+     40 KB, has at least twice the pixels it is shown at on a 1280 px screen, and the
+     `<img>` has `width` and `height` set and is not lazy loaded.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -1133,6 +1335,14 @@ says "without a deploy".
 | 100 | Unpublish gives a 404 at once; unknown slug 404 | End to end (Playwright) on the production server |
 | 101 | No database read before the response; proxy guards only `/panel` | Unit test of the proxy matcher; end to end reading the product page's `Server-Timing` |
 | 102 | A build that cannot read the database fails | A CI step builds with an unreachable Supabase URL and expects the build to fail |
+| 103, 104 | Company pages in the corporate look; people's pages unchanged, no corporate fonts loaded | End to end (Playwright) at 360 and 1280 px against local Supabase, reading the logo, computed font families, backgrounds, borders and shadows, and the font requests of each page; screenshots attached to the PR |
+| 105 | Company header links, order, targets, hidden empty sections | End to end (Playwright) at 360 and 1280 px, with and without Empresas packs |
+| 106 | Order of the `/empresas` sections, one `h1`, no hero image | End to end (Playwright) reading the landmarks and headings in document order |
+| 107 | "Usted" copy and the words list | Unit tests for the copy constants and the metadata builder; end to end reading the visible text of `/empresas` and an Empresas product page |
+| 108 | `--corp-` variables, gold not used for small text, contrast, no people's colors | End to end (Playwright) reading the computed styles, with axe for contrast |
+| 109 | Company footer and floating button | End to end (Playwright) reading the footer text, links, colors and the button's `href` |
+| 110 | Briefcase icon on the people's "Catálogo empresa" link | End to end (Playwright) at 360 and 1280 px with axe, reading the accessible name and `aria-hidden` |
+| 111 | Company logo file size, pixels, `width`/`height`, eager | Unit test of the file in `public/img/`; end to end reading the `<img>` attributes |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
@@ -1186,3 +1396,10 @@ message to the business number. Then delete the test product.
    made outside the panel (shorter means more database reads by Vercel, never by
    visitors)? And is it acceptable that the first load right after an admin save,
    usually the admin's own, waits on the database once?
+9. **Corporate look (issue #141), draft; open with Javiera:** the hero heading
+   "Productos personalizados con el logo de su empresa", the intro line and the three
+   "Cómo cotizar" steps are proposed copy (in particular, is it true that the design is
+   reviewed with the customer before production?); a photo for the hero, if she wants
+   one; whether the pre-filled WhatsApp messages, written as the customer ("Te cuento
+   qué necesitamos"), should change for companies (the draft keeps them); and the
+   logo sizes (about 44 px tall at 360 px, 64 px at 1280 px).

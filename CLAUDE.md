@@ -34,7 +34,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 
 ## Rules
 
-- **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"). Code, class names and file names are in English.
+- **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"), except the company pages (`/empresas` and the pages of Empresas items), which say "usted" (spec 002, issue #141). Code, class names and file names are in English.
 - **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
 - **Stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, Storage, RLS) and Vercel, the same web stack as `duplaweb`. See `docs/adr/0001-web-stack.md`. Do not add other frameworks, services or providers without asking: the point is one stack across all projects.
 - **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
@@ -56,6 +56,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
   - Cream `#FBF5E9`
 - **Style:** playful, rounded and hand-made. Use a chunky rounded typeface (for example Fredoka or Baloo from Google Fonts) and dark outlines like the logo's.
 - Define the colors as CSS variables on `:root`.
+- **Company pages** (`/empresas` and the pages of Empresas items) have their own corporate look instead: the logo `assets/logo-empresas.png` ("Marcando Ando · Soluciones corporativas"), navy `#0B1B3F` and gold `#B8862B` (`--corp-` variables), Montserrat and Inter, thin outlines and small corners. The brand rules above apply to the people's site. Details in spec 002 (2026-11-12 amendment, issue #141).
 
 ## Reference content (Instagram)
 
@@ -75,7 +76,7 @@ tests/unit/    Vitest tests
 tests/e2e/     Playwright tests
 specs/         specs (see specs/README.md)
 docs/          requirements and ADRs
-assets/        logo.png and Instagram screenshots (ig0-ig4.png, reference only)
+assets/        logo.png, logo-empresas.png and Instagram screenshots (ig0-ig4.png, reference only)
 public/img/    optimized images served by the site (create it when the first one is added)
 AGENTS.md, README.md, CLAUDE.md
 ```

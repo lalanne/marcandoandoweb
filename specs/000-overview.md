@@ -1,6 +1,6 @@
 # 000 — Product Overview & v1 Scope
 
-**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69, #85; first approved by the owner on 2026-10-23). The 2026-11-04 amendment for issue #107 (a catalog for companies) was approved by the owner on 2026-11-04.
+**Status:** approved (by the owner, 2026-10-31, with the amendments of that date: issues #63, #69, #85; first approved by the owner on 2026-10-23). The 2026-11-04 amendment for issue #107 (a catalog for companies) was approved by the owner on 2026-11-04. The 2026-11-12 amendment for issue #141 (a corporate look for the company pages) is a draft, waiting for the owner's approval.
 
 Source: [`docs/requirements.md`](../docs/requirements.md) (the client's text, cited
 below as "Req §N" using its section numbers: 1 objective, 2 visual identity,
@@ -77,6 +77,8 @@ Every other spec inherits these.
 
 - **Language:** all visible site text is Chilean Spanish, informal ("tú"). Code,
   identifiers and file names are English (project rule in `CLAUDE.md`).
+  Amended 2026-11-12 (issue #141, draft): the company pages (`/empresas` and the
+  pages of Empresas items) address the visitor as "usted" (spec 002).
 - **Currency:** Chilean pesos (CLP) only. Prices are shown with a dot as
   thousands separator (`$7.000`). CLP has no minor unit, so amounts are whole
   numbers. Prices are reference or "from" prices, not firm quotes (Req §3B).
@@ -86,6 +88,9 @@ Every other spec inherits these.
 - **Brand:** the official logo and the brand colors pink, teal, yellow, purple
   and navy; light or white backgrounds so products stand out; cheerful, modern,
   tidy (Req §2). Palette values and typography belong to the design system spec.
+  Amended 2026-11-12 (issue #141, draft): the company pages have a corporate look
+  of their own, with the company logo "Marcando Ando · Soluciones corporativas",
+  navy and gold, and Montserrat and Inter (spec 002).
 - **Real content:** real photos of real products (Req §2). Never invent prices,
   numbers, addresses or testimonials; a missing fact is a visible placeholder.
 - **Privacy:** many existing photos show children and school crests. Nothing with
