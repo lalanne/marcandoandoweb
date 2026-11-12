@@ -44,11 +44,11 @@ export function CompanyHeader() {
           <Image
             src="/img/logo-empresas.webp"
             alt="Marcando Ando, soluciones corporativas"
-            width={384}
-            height={128}
+            width={600}
+            height={125}
             priority
             unoptimized
-            className="h-11 w-auto md:h-16"
+            className="h-7 w-auto md:h-10"
           />
         </a>
         <nav aria-label="Secciones">

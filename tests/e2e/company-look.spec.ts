@@ -165,7 +165,12 @@ test("[002-AC104] the people's pages keep their logo, Fredoka, cream, header and
     await expect(
       header.getByRole("img", { name: "Marcando Ando, logo con una polera rosada con una M y un tazón morado" }),
     ).toBeVisible();
-    await expect(header.getByRole("img", { name: /soluciones corporativas/ })).toHaveCount(0);
+    // Since issue #148 (criterion 112) the company logo sits next to the people's logo,
+    // as a link to /empresas, while an Empresas item is published.
+    await expect(header.getByRole("link", { name: "Marcando Ando, soluciones corporativas" })).toHaveAttribute(
+      "href",
+      "/empresas",
+    );
     await expect(header.getByRole("link", { name: "Colegios y grupos" })).toBeVisible();
     await expect(page.getByRole("contentinfo")).toContainText("Marcamos tus ideas.");
 
@@ -586,7 +591,8 @@ for (const path of COMPANY_PAGES) {
     expect(attrs.loading).not.toBe("lazy");
     const box = (await logo.boundingBox())!;
     const wide = page.viewportSize()!.width >= 768;
-    expect(Math.round(box.height)).toBe(wide ? 64 : 44);
+    // Cropped file (issue #148, criterion 117): 40 px tall from 768 px, 28 px below.
+    expect(Math.round(box.height)).toBe(wide ? 40 : 28);
     expect(attrs.natural[0]).toBeGreaterThanOrEqual(Math.ceil(box.width) * 2 - 2);
     expect(attrs.natural[1]).toBeGreaterThanOrEqual(Math.ceil(box.height) * 2 - 2);
   });
