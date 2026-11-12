@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -648,6 +648,46 @@ otherwise.
 Before this amendment the company pages used the people's look, header, footer and
 "tú" copy; criteria 69, 71, 72 and 73 are amended to match (marked there).
 
+**2026-11-12 amendment - the company logo next to the people's logo (issue #148,
+approved by the owner on 2026-11-12).** The owner asked on 2026-11-12 for the corporate logo to sit beside the main
+Marcando Ando logo in the people's header, and to lead to `/empresas` when clicked.
+Javiera sent a version of the company logo with a transparent background the same
+day, so it can sit on the people's cream header. The owner chose variant A of the
+mockups (Claude Design canvas "Logo empresas en el header"): the two logos side by
+side with a thin line between them, and the menu link "Catálogo empresa" kept.
+
+- **The logo file.** `assets/logo-empresas.png` is replaced by Javiera's transparent
+  version (same design, 2172×724, transparent background). The site file
+  `public/img/logo-empresas.webp` is made from it, cropped to the drawn logo (the
+  original has a wide empty margin), with its transparency kept. One file serves both
+  headers.
+- **In the people's header** (the home page and its collection views, Personas
+  product pages): after the people's logo come a decorative vertical line (1 px,
+  `--brand-night` at 35% opacity, `aria-hidden`, about two thirds of the logo's
+  height) and the company logo, about 32 px tall below 768 px and 40 px tall from
+  768 px **(interpretation)**. The company logo is a link to `/empresas` with the alt
+  text "Marcando Ando, soluciones corporativas" and a visible focus ring. The people's
+  logo keeps its size and its link to `#inicio`. The menu does not change: the
+  "Catálogo empresa" link with its briefcase stays (criterion 110).
+- **When it shows.** Only when at least one Empresas item is published, the same rule
+  as the menu link (criterion 70) **(approved by the owner on 2026-11-12)**. When it appears after the catalog loads, the
+  header does not change height (criterion 67).
+- **Layout.** At 360 px both logos fit on one row, with the menu below as today. Where
+  the logos and the menu do not fit on one row, the menu wraps to a row below the
+  logos, as it does on phones today **(interpretation: at 1280 px the header's
+  1024 px content width is, by a rough estimate to be measured in the implementation, about 90 px too narrow for both logos and the five links
+  on one row, so the header gets a second row there; widening the header to 1152 px
+  was the alternative; the owner approved the second row on 2026-11-12)**. No horizontal scroll at any width.
+- **In the company header**, the cropped file shows the drawn logo at the same size as
+  before: about 28 px tall at 360 px and 40 px from 768 px, instead of 44 and 64 px
+  for the uncropped file **(interpretation)**. Nothing else on the company pages
+  changes.
+- **Out:** changing either logo's design; a logo or line in the footers; the admin
+  panel; the company pages' header otherwise.
+
+Criterion 111 is amended to match (marked there), and the logo bullet of the
+amendment above ("no transparent version is needed") is superseded by this one.
+
 ## Constraints
 
 Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
@@ -1276,7 +1316,32 @@ pages in their new look.
      header links look as before; and the header has no horizontal scroll.
 111. Given `public/img/logo-empresas.webp`, when it is checked, then it is at most
      40 KB, has at least twice the pixels it is shown at on a 1280 px screen, and the
-     `<img>` has `width` and `height` set and is not lazy loaded.
+     `<img>` has `width` and `height` set and is not lazy loaded. *(Amended 2026-11-12, issue #148: "shown at" means the larger of the
+     two headers it appears in, the people's and the company's; the file is cropped and
+     transparent, criterion 116.)*
+112. Given at least one published Empresas item, when the home page, a collection view
+     (`/?coleccion=navidad`) or a Personas product page loads at 360 px and at
+     1280 px, then the header shows, in order, the people's logo (link to `#inicio`),
+     a decorative line (`aria-hidden="true"`) and the company logo
+     `/img/logo-empresas.webp`, a link to `/empresas` whose accessible name is
+     "Marcando Ando, soluciones corporativas"; the company logo is next to the
+     people's logo on the same row, about 32 px tall at 360 px and 40 px tall at
+     1280 px; and the people's logo has the same size as before.
+113. Given the people's header, when the company logo link is clicked, then the
+     browser opens `/empresas`; and when it is reached with the keyboard, then it
+     shows a visible focus ring.
+114. Given no published Empresas item, when a people's page loads, then neither the
+     company logo nor the line is in the header, and the header looks as before.
+115. Given the people's header at 360 px and at 1280 px, when the catalog finishes
+     loading and the company logo appears, then the header's height does not change
+     (criterion 67), the page has no horizontal scroll, and every link is at least
+     44 px tall or wide where criterion 18 requires it; axe reports no violation.
+116. Given `public/img/logo-empresas.webp`, when it is checked, then it has a
+     transparent background (its corner pixels are fully transparent) and less than
+     10% of its height and width is empty margin around the drawn logo.
+117. Given a company page, when it loads at 360 px and at 1280 px, then its header
+     logo is about 28 px tall at 360 px and 40 px tall at 1280 px, and the company
+     header otherwise looks as in criterion 105.
 
 
 | # | Criterion | Layer |
@@ -1348,6 +1413,10 @@ pages in their new look.
 | 109 | Company footer and floating button | End to end (Playwright) reading the footer text, links, colors and the button's `href` |
 | 110 | Briefcase icon on the people's "Catálogo empresa" link | End to end (Playwright) at 360 and 1280 px with axe, reading the accessible name and `aria-hidden` |
 | 111 | Company logo file size, pixels, `width`/`height`, eager | Unit test of the file in `public/img/`; end to end reading the `<img>` attributes |
+| 112, 113, 114 | Company logo beside the people's logo, link, focus, hidden without Empresas items | End to end (Playwright) at 360 and 1280 px against local Supabase, with and without a published Empresas item (isolated test for the empty case) |
+| 115 | No height change when the logo streams in, no horizontal scroll, axe | End to end (Playwright) at 360 and 1280 px, measuring the header before and after the catalog loads, with axe |
+| 116 | Transparent, cropped logo file | Unit test reading `public/img/logo-empresas.webp` with sharp (corner alpha, trimmed margins) |
+| 117 | Company header logo size with the cropped file | End to end (Playwright) at 360 and 1280 px reading the `<img>` box |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
@@ -1408,3 +1477,8 @@ message to the business number. Then delete the test product.
    one; whether the pre-filled WhatsApp messages, written as the customer ("Te cuento
    qué necesitamos"), should change for companies (the draft keeps them); and the
    logo sizes (about 44 px tall at 360 px, 64 px at 1280 px).
+10. **Company logo in the people's header (issue #148), approved by the owner on 2026-11-12 with the draft's answers; to revisit after seeing it live:** should the logo show
+    even when no Empresas item is published (the draft hides it, like the menu link)?
+    At 1280 px the logos and the five links do not fit on one row in the 1024 px
+    header: accept a second row for the menu (the draft), or widen the header to
+    1152 px?
