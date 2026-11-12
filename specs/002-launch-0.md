@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, is a draft for the owner to approve; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -649,7 +649,7 @@ Before this amendment the company pages used the people's look, header, footer a
 "tú" copy; criteria 69, 71, 72 and 73 are amended to match (marked there).
 
 **2026-11-12 amendment - the company logo next to the people's logo (issue #148,
-draft).** The owner asked on 2026-11-12 for the corporate logo to sit beside the main
+approved by the owner on 2026-11-12).** The owner asked on 2026-11-12 for the corporate logo to sit beside the main
 Marcando Ando logo in the people's header, and to lead to `/empresas` when clicked.
 Javiera sent a version of the company logo with a transparent background the same
 day, so it can sit on the people's cream header. The owner chose variant A of the
@@ -670,15 +670,14 @@ side with a thin line between them, and the menu link "Catálogo empresa" kept.
   logo keeps its size and its link to `#inicio`. The menu does not change: the
   "Catálogo empresa" link with its briefcase stays (criterion 110).
 - **When it shows.** Only when at least one Empresas item is published, the same rule
-  as the menu link (criterion 70) **(interpretation; the owner has not answered
-  whether it should always show)**. When it appears after the catalog loads, the
+  as the menu link (criterion 70) **(approved by the owner on 2026-11-12)**. When it appears after the catalog loads, the
   header does not change height (criterion 67).
 - **Layout.** At 360 px both logos fit on one row, with the menu below as today. Where
   the logos and the menu do not fit on one row, the menu wraps to a row below the
   logos, as it does on phones today **(interpretation: at 1280 px the header's
   1024 px content width is, by a rough estimate to be measured in the implementation, about 90 px too narrow for both logos and the five links
   on one row, so the header gets a second row there; widening the header to 1152 px
-  is the alternative, and the owner decides)**. No horizontal scroll at any width.
+  was the alternative; the owner approved the second row on 2026-11-12)**. No horizontal scroll at any width.
 - **In the company header**, the cropped file shows the drawn logo at the same size as
   before: about 28 px tall at 360 px and 40 px from 768 px, instead of 44 and 64 px
   for the uncropped file **(interpretation)**. Nothing else on the company pages
@@ -1478,7 +1477,7 @@ message to the business number. Then delete the test product.
    one; whether the pre-filled WhatsApp messages, written as the customer ("Te cuento
    qué necesitamos"), should change for companies (the draft keeps them); and the
    logo sizes (about 44 px tall at 360 px, 64 px at 1280 px).
-10. **Company logo in the people's header (issue #148), draft:** should the logo show
+10. **Company logo in the people's header (issue #148), approved by the owner on 2026-11-12 with the draft's answers; to revisit after seeing it live:** should the logo show
     even when no Empresas item is published (the draft hides it, like the menu link)?
     At 1280 px the logos and the five links do not fit on one row in the 1024 px
     header: accept a second row for the menu (the draft), or widen the header to
