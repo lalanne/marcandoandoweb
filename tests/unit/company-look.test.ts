@@ -125,11 +125,49 @@ describe("company logo file", () => {
     expect(statSync(path).size).toBeLessThanOrEqual(40 * 1024);
   });
 
-  it("[002-AC111] is a WebP with at least twice the pixels of its largest display (192 by 64 px)", async () => {
+  it("[002-AC111] is a WebP with at least twice the pixels of its largest display (40 px tall in both headers)", async () => {
     const meta = await sharp(readFileSync(path)).metadata();
     expect(meta.format).toBe("webp");
-    expect(meta.width).toBeGreaterThanOrEqual(384);
-    expect(meta.height).toBeGreaterThanOrEqual(128);
+    // Amended by issue #148: the file is cropped, so it is shown 40 px tall at most.
+    expect(meta.height).toBeGreaterThanOrEqual(80);
+    expect(meta.width! / meta.height!).toBeGreaterThan(3);
+    expect(meta.width).toBeGreaterThanOrEqual(Math.round((meta.width! / meta.height!) * 40) * 2);
+  });
+
+  it("[002-AC116] is transparent in its corners", async () => {
+    const { data, info } = await sharp(readFileSync(path))
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const alphaAt = (x: number, y: number) => data[(y * info.width + x) * 4 + 3];
+    const w = info.width - 1;
+    const h = info.height - 1;
+    expect([alphaAt(0, 0), alphaAt(w, 0), alphaAt(0, h), alphaAt(w, h)]).toEqual([0, 0, 0, 0]);
+  });
+
+  it("[002-AC116] is cropped to the drawn logo: under 10% empty margin on every side", async () => {
+    const { data, info } = await sharp(readFileSync(path))
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    let x0 = info.width;
+    let y0 = info.height;
+    let x1 = 0;
+    let y1 = 0;
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < info.width; x++) {
+        if (data[(y * info.width + x) * 4 + 3] >= 51) {
+          x0 = Math.min(x0, x);
+          x1 = Math.max(x1, x);
+          y0 = Math.min(y0, y);
+          y1 = Math.max(y1, y);
+        }
+      }
+    }
+    expect(x0 / info.width).toBeLessThan(0.1);
+    expect((info.width - 1 - x1) / info.width).toBeLessThan(0.1);
+    expect(y0 / info.height).toBeLessThan(0.1);
+    expect((info.height - 1 - y1) / info.height).toBeLessThan(0.1);
   });
 });
 

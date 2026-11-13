@@ -40,15 +40,15 @@ export function CompanyHeader() {
   return (
     <header className="border-b border-corp-line bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
-        <a href={EMPRESAS_PATH} className="shrink-0 rounded-md">
+        <a href={EMPRESAS_PATH} className="flex min-h-11 shrink-0 items-center rounded-md">
           <Image
             src="/img/logo-empresas.webp"
             alt="Marcando Ando, soluciones corporativas"
-            width={384}
-            height={128}
+            width={600}
+            height={125}
             priority
             unoptimized
-            className="h-11 w-auto md:h-16"
+            className="h-7 w-auto md:h-10"
           />
         </a>
         <nav aria-label="Secciones">

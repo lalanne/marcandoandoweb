@@ -258,7 +258,8 @@ test("[002-AC16] the hero image loads eagerly and the others lazily", async ({
 }) => {
   await open(page);
   const loading = await page
-    .locator("img:not(nav#colecciones img)")
+    // The company logo next to the people's logo is eager too (criterion 111).
+    .locator("img:not(nav#colecciones img):not(header a[href='/empresas'] img)")
     .evaluateAll((imgs) => imgs.map((i) => i.getAttribute("loading")));
   expect(loading[0]).not.toBe("lazy");
   for (const value of loading.slice(1)) expect(value).toBe("lazy");

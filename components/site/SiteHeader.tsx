@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import {
   DEFAULT_HEADER_LINK,
   headerLinkFor,
@@ -79,6 +79,31 @@ async function CatalogLinks({
   );
 }
 
+// The company logo after the people's logo, with a thin line between them (spec 002,
+// criterion 112). Only when an Empresas item is published, the same rule as the
+// "Catálogo empresa" link (criteria 70 and 114).
+function CompanyLogoLink() {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="logo-divider h-11 w-px shrink-0 bg-brand-night/35 md:h-14"
+      />
+      <a href={EMPRESAS_PATH} className="flex min-h-11 shrink-0 items-center rounded-md">
+        <Image
+          src="/img/logo-empresas.webp"
+          alt="Marcando Ando, soluciones corporativas"
+          width={600}
+          height={125}
+          priority
+          unoptimized
+          className="h-8 w-auto md:h-10"
+        />
+      </a>
+    </>
+  );
+}
+
 // Same box for both labels (fixed width, same classes), so the header does not
 // shift when "Entrar" turns into "Mi panel".
 const accountLinkClass =
@@ -111,18 +136,25 @@ export async function SessionLink({ corp = false }: { corp?: boolean }) {
   return <AccountLink link={link} corp={corp} />;
 }
 
-// `base` is "" on the home page (the links are anchors on the page) and "/" on
-// other pages (the links go to the home page's sections).
-export function SiteHeader({
-  base = "",
-  searchParams,
+// The header's content. With an Empresas item published (`hasEmpresas`) the company
+// logo follows the people's logo and the menu always goes on a row of its own
+// (spec 002, criterion 112: the logos and the five links do not fit on one row), so
+// the header has the same height before and after the catalog streams in (criteria
+// 67 and 115). Without one, the menu keeps its place as before (criterion 114).
+function HeaderBar({
+  base,
+  hasEmpresas,
+  companyLogo,
+  catalogLinks,
 }: {
-  base?: string;
-  searchParams?: SearchParams;
+  base: string;
+  hasEmpresas: boolean;
+  companyLogo: ReactNode;
+  catalogLinks: ReactNode;
 }) {
   return (
-    <header className="border-b-2 border-brand-night bg-brand-cream">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
+    <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
+      <div className="flex shrink-0 items-center gap-3">
         <a href={`${base}#inicio`} className="shrink-0 rounded-xl">
           <Image
             src={logo}
@@ -132,29 +164,73 @@ export function SiteHeader({
             className="h-16 w-auto md:h-20"
           />
         </a>
-        <nav aria-label="Secciones">
-          <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
-            <Suspense fallback={null}>
-              <CatalogLinks base={base} searchParams={searchParams} />
-            </Suspense>
-            <li>
-              <a className={linkClass} href={`${base}#como-pedir`}>
-                Cómo pedir
-              </a>
-            </li>
-            <li>
-              <a className={linkClass} href={`${base}#colegios`}>
-                Colegios y grupos
-              </a>
-            </li>
-            <li className="ml-1">
-              <Suspense fallback={<AccountLink link={DEFAULT_HEADER_LINK} />}>
-                <SessionLink />
-              </Suspense>
-            </li>
-          </ul>
-        </nav>
+        {companyLogo}
       </div>
+      <nav aria-label="Secciones" className={hasEmpresas ? "basis-full" : undefined}>
+        <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
+          {catalogLinks}
+          <li>
+            <a className={linkClass} href={`${base}#como-pedir`}>
+              Cómo pedir
+            </a>
+          </li>
+          <li>
+            <a className={linkClass} href={`${base}#colegios`}>
+              Colegios y grupos
+            </a>
+          </li>
+          <li className="ml-1">
+            <Suspense fallback={<AccountLink link={DEFAULT_HEADER_LINK} />}>
+              <SessionLink />
+            </Suspense>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  );
+}
+
+async function LoadedHeaderBar({
+  base,
+  searchParams,
+}: {
+  base: string;
+  searchParams?: SearchParams;
+}) {
+  const { empresas } = await loadCatalog();
+  const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
+  return (
+    <HeaderBar
+      base={base}
+      hasEmpresas={hasEmpresas}
+      companyLogo={hasEmpresas ? <CompanyLogoLink /> : null}
+      catalogLinks={
+        <Suspense fallback={null}>
+          <CatalogLinks base={base} searchParams={searchParams} />
+        </Suspense>
+      }
+    />
+  );
+}
+
+// `base` is "" on the home page (the links are anchors on the page) and "/" on
+// other pages (the links go to the home page's sections). Until the catalog loads,
+// the header shows the people's logo and the fixed links, laid out as it will be
+// with Empresas items (the usual case), so it keeps its height.
+export function SiteHeader({
+  base = "",
+  searchParams,
+}: {
+  base?: string;
+  searchParams?: SearchParams;
+}) {
+  return (
+    <header className="border-b-2 border-brand-night bg-brand-cream">
+      <Suspense
+        fallback={<HeaderBar base={base} hasEmpresas companyLogo={null} catalogLinks={null} />}
+      >
+        <LoadedHeaderBar base={base} searchParams={searchParams} />
+      </Suspense>
     </header>
   );
 }
