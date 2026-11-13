@@ -10,17 +10,9 @@
 
 import { appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { isDocsFile } from "./docs-only.mjs";
 
-const NON_RUNTIME_PREFIXES = [
-  "docs/",
-  "specs/",
-  "assets/",
-  ".github/ISSUE_TEMPLATE/",
-];
-
-const isRuntime = (file) =>
-  !file.endsWith(".md") &&
-  !NON_RUNTIME_PREFIXES.some((prefix) => file.startsWith(prefix));
+const isRuntime = (file) => !isDocsFile(file);
 
 /**
  * @param {string[]} files paths changed since the last deployed commit

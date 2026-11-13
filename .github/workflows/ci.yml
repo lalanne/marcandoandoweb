@@ -17,7 +17,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Spec 003 (amendment of 2026-11-13, #146). Decides "docs only" with the same
+  # rule as the deploy check (scripts/docs-only.mjs). The heavy jobs skip with an
+  # `if:` on this output (a skipped job counts as passing for a required check;
+  # `paths-ignore` would leave them pending). An empty or failed diff means the
+  # full pipeline runs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.decide.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Decide whether only docs changed
+        id: decide
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            DIFF_CMD=(git diff --name-only "origin/${BASE_REF}...HEAD")
+          else
+            DIFF_CMD=(git diff --name-only "${BEFORE}" "${AFTER}")
+          fi
+          if CHANGED_FILES="$("${DIFF_CMD[@]}")"; then
+            export CHANGED_FILES
+            node scripts/docs-only.mjs
+          else
+            echo "Could not compute the diff: running the full pipeline."
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+          fi
+
   static:
+    needs: changes
+    # !cancelled() so that a failed `changes` job runs the job (full pipeline) instead of skipping it.
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +73,9 @@ jobs:
       - run: npm run typecheck
 
   unit:
+    needs: changes
+    # !cancelled() so that a failed `changes` job runs the job (full pipeline) instead of skipping it.
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +138,9 @@ jobs:
   # Spec 003. Local Supabase in Docker (the CLI is a devDependency). Only the
   # services the tests need are started, to keep the job fast.
   integration:
+    needs: changes
+    # !cancelled() so that a failed `changes` job runs the job (full pipeline) instead of skipping it.
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -116,6 +162,9 @@ jobs:
         run: npx supabase stop --no-backup
 
   migrations:
+    needs: changes
+    # !cancelled() so that a failed `changes` job runs the job (full pipeline) instead of skipping it.
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -145,6 +194,9 @@ jobs:
   # 360 and 1280 px (see playwright.config.ts), axe checks inside the tests.
   # The owner must add `e2e` to the required checks after this merges.
   e2e:
+    needs: changes
+    # !cancelled() so that a failed `changes` job runs the job (full pipeline) instead of skipping it.
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
