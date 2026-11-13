@@ -89,6 +89,46 @@ GitHub Actions, on every pull request to `main` and on every push to `main`.
 Later, not blocking at first: Lighthouse on the Vercel preview, dependency audit,
 Dependabot.
 
+### Docs-only changes skip the heavy jobs
+
+**2026-11-13 amendment (issue #146), draft, awaiting the owner's approval.** A
+docs-only PR such as #144 waited about 7 minutes for local Supabase, the production
+build and Playwright, and again after every update from `main`. Nothing those jobs
+check can change when only documentation changed.
+
+- **What counts as docs** is the deploy check's rule (spec 004), kept in one place
+  and used by both workflows: files under `docs/`, `specs/`, `assets/`,
+  `.github/ISSUE_TEMPLATE/`, and any `*.md` file. Everything else (code, tests,
+  config, workflows, scripts, migrations, `package.json`, `public/`) is not docs.
+- **A first job, `changes`,** lists the changed files and decides "docs only" with
+  that rule: on a pull request, the diff against the base branch
+  (`origin/main...HEAD`); on a push to `main`, the diff of the push
+  (`before...after`).
+- **Fail safe (interpretation):** an empty diff, or a diff that cannot be computed
+  (for example the `before` commit is missing), counts as *not* docs only, so the
+  full pipeline runs. The deploy check keeps its own behavior for an empty diff
+  (no deploy), as spec 004 says; only the per-file rule is shared.
+- **On a docs-only change** `static`, `unit`, `integration`, `migrations` and `e2e`
+  are skipped with an `if:` on the `changes` output. They report as *skipped*,
+  which GitHub counts as passing for a required check, so the PR can merge
+  without waiting. (`paths-ignore` is not used: a workflow that does not start
+  never reports, and required checks would stay pending.)
+- **Still run on a docs-only change**, because they are fast (no `npm ci`, no
+  database) or because docs are their input:
+  - `traceability`: it reads the specs, and a spec change can add, rename or
+    remove a criterion ID.
+  - `tests-with-changes` and `test-integrity`: they read the diff; on docs-only
+    changes they pass, but they keep reporting as before.
+  - `changes` itself.
+  `static` does not lint Markdown (ESLint covers only the code), so it is skipped.
+- **Any other change runs the full pipeline, unchanged.** No job does anything
+  different when it runs; the change is only whether it runs.
+- The required checks of `main` stay the same list; `changes` need not be
+  required, because if it fails the jobs that depend on it fail (not skip) and
+  block the PR.
+
+Criteria 19 to 25 below.
+
 Checks that need a database or a browser are added in the issue that introduces the
 first test of that kind, so the CI is never red for lack of tests or green for an
 empty suite. `static`, `unit`, `traceability` and `tests-with-changes` come first.
@@ -174,6 +214,27 @@ covered; revert check done (bugs); issue linked with `Closes #n`.
     `test-change-reviewed`, when CI runs, then it passes.
 18. Given a push to `main`, when CI runs, then `test-integrity` does nothing.
 
+19. Given a list of changed files that are all under `docs/`, `specs/`, `assets/`
+    or `.github/ISSUE_TEMPLATE/`, or end in `.md`, when the shared rule decides,
+    then the change is docs only.
+20. Given a list of changed files that includes any other file (code, a test,
+    `package.json`, a file under `.github/workflows/`, `scripts/`,
+    `supabase/migrations/` or `public/`), when the shared rule decides, then the
+    change is not docs only.
+21. Given an empty list of changed files, when CI decides, then the change is not
+    docs only (the full pipeline runs); and the deploy check still says no deploy
+    is needed for an empty list.
+22. Given a docs-only pull request, when CI runs, then `static`, `unit`,
+    `integration`, `migrations` and `e2e` are skipped, `traceability`,
+    `tests-with-changes` and `test-integrity` run, and the PR can merge once those
+    pass.
+23. Given a pull request that changes any non-docs file, when CI runs, then every
+    job runs, as before this amendment.
+24. Given a docs-only push to `main`, when CI runs, then the same jobs are skipped,
+    and the `Deploy` workflow still reports that no deploy is needed.
+25. Given the deploy check and the CI decision, when either classifies a file,
+    then both use the same function (one source of truth).
+
 ## Verification plan
 
 The CI is verified by trying to break it, on a throwaway branch, once per check:
@@ -186,6 +247,10 @@ The CI is verified by trying to break it, on a throwaway branch, once per check:
 | 12 | Template | Open a PR and read it |
 | 13, 14, 15, 16, 17 | Test integrity | Unit tests of the script's pure function (`tests/unit/test-integrity.test.ts`), plus a throwaway PR that weakens a test, closed without merging |
 | 18 | No-op on push | Read the job's `if` condition and the run on `main` |
+| 19, 20, 21, 25 | The docs-only rule | Unit tests of the shared function and of the CI decision (docs only, mixed, workflow, `package.json`, code, empty), plus a test that `deploy-needed.mjs` imports the shared rule; the existing `deploy-needed` tests stay green |
+| 22 | Docs-only PR | A real docs-only PR, linked from the implementation PR, showing the skipped jobs and the merge button enabled |
+| 23 | Full pipeline otherwise | The implementation PR itself (it changes a workflow and scripts) runs every job |
+| 24 | Docs-only push | The CI run on `main` after a docs-only merge, and its `Deploy` run summary |
 
 ## Rollout
 
