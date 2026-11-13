@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, is a draft for the owner to approve; the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12; the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -689,7 +689,7 @@ Criterion 111 is amended to match (marked there), and the logo bullet of the
 amendment above ("no transparent version is needed") is superseded by this one.
 
 **2026-11-12 amendment - the company logo as tall as the people's logo, stacked on
-phones, at a cache-safe address (issue #153, draft).** After the #148 change went live
+phones, at a cache-safe address (issue #153, approved by the owner on 2026-11-12).** After the #148 change went live
 the owner found the company logo too small next to the people's logo (32 and 40 px
 tall against 64 and 80 px) and saw the old logo (white box, uncropped) in their
 browser. The served file was correct; the browser had kept its cached copy because
@@ -1532,6 +1532,6 @@ message to the business number. Then delete the test product.
     At 1280 px the logos and the five links do not fit on one row in the 1024 px
     header: accept a second row for the menu (the draft), or widen the header to
     1152 px?
-11. **Company logo size (issue #153), draft:** below 768 px the company logo goes under
+11. **Company logo size (issue #153), approved by the owner on 2026-11-12; to revisit after seeing it live on a phone:** below 768 px the company logo goes under
     the people's logo, as wide as it (proposed), since it cannot be as tall as the
     people's logo beside it at 360 px. Confirm after seeing it live on a phone.
