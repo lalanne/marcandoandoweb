@@ -314,6 +314,7 @@ because they become required checks (spec 003). Run each locally before opening 
 
 | Job | What it checks | Locally |
 |-----|----------------|---------|
+| `changes` | Decides "docs only" from the diff with the deploy check's rule (`scripts/docs-only.mjs`; empty or failed diff means not docs only) and sets the output the heavy jobs read | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" node scripts/docs-only.mjs` |
 | `static` | Lint, typecheck, production build | `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout) |
 | `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
 | `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
@@ -323,6 +324,15 @@ because they become required checks (spec 003). Run each locally before opening 
 | `test-integrity` | A PR does not delete, rename, skip or weaken an existing test (deleted/renamed test file, removed or edited `expect(`/`assert`/`it(`/`test(`/`describe(` line, added `.skip`/`.only`/`.fixme`/`.todo`/`xit`/`xdescribe`/`xtest`), unless it has the label `test-change-reviewed` (the owner adds it). No-op on pushes to `main` | `git diff -U0 origin/main...HEAD \| LABELS='[]' node scripts/test-integrity.mjs` |
 
 | `e2e` | Production build started against local Supabase, Playwright at 360 and 1280 px with axe checks; traces uploaded on failure. **The owner must add `e2e` to the required checks of `main` after the PR that introduced it merges** | `npx supabase start && npx supabase db reset && npm run build && CI=1 npm run test:e2e` |
+
+**Docs-only changes (spec 003, #146).** When a PR or a push to `main` changes only
+docs (`docs/`, `specs/`, `assets/`, `.github/ISSUE_TEMPLATE/`, any `*.md`: the same rule
+as the deploy check), `static`, `unit`, `integration`, `migrations` and `e2e` are
+skipped by an `if:` on the `changes` job's output (skipped counts as passing for a
+required check, so the PR can merge in about a minute). `changes`, `traceability`
+(it reads the specs), `tests-with-changes` and `test-integrity` (cheap, they read the
+diff) still run. `static` is skipped because ESLint does not lint Markdown. Any other
+change, an empty diff or a diff that cannot be computed runs everything.
 
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.
