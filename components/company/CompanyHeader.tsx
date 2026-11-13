@@ -9,6 +9,7 @@ import { generalWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { KIND_SECTION } from "../site/CatalogSections";
 import { SessionLink } from "../site/SiteHeader";
 import { corpAccountLinkClass } from "./styles";
+import companyLogo from "@/public/img/logo-empresas.webp";
 
 const linkBase =
   "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-3 text-sm font-semibold font-heading hover:bg-corp-gray";
@@ -42,10 +43,8 @@ export function CompanyHeader() {
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
         <a href={EMPRESAS_PATH} className="flex min-h-11 shrink-0 items-center rounded-md">
           <Image
-            src="/img/logo-empresas.webp"
+            src={companyLogo}
             alt="Marcando Ando, soluciones corporativas"
-            width={600}
-            height={125}
             priority
             unoptimized
             className="h-7 w-auto md:h-10"

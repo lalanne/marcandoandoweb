@@ -67,7 +67,8 @@ for (const path of COMPANY_PAGES) {
     // The logo, and not the people's.
     const logo = page.getByRole("banner").getByRole("img", { name: "Marcando Ando, soluciones corporativas" });
     await expect(logo).toBeVisible();
-    await expect(logo).toHaveAttribute("src", "/img/logo-empresas.webp");
+    // Issue #153 (criterion 120): a content-hashed address, not /img/logo-empresas.webp.
+    await expect(logo).toHaveAttribute("src", /^\/_next\/static\/media\/logo-empresas\.[0-9a-z_-]{6,}\.webp$/);
     await expect(page.locator("header a:has(img)")).toHaveAttribute("href", "/empresas");
     await expect(page.locator('img[src*="/img/logo."], img[alt*="polera rosada"]')).toHaveCount(0);
 
