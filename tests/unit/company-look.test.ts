@@ -134,6 +134,13 @@ describe("company logo file", () => {
     expect(meta.width).toBeGreaterThanOrEqual(Math.round((meta.width! / meta.height!) * 40) * 2);
   });
 
+  it("[002-AC111] has at least 160 px of height, twice its largest display (80 px tall in the people's header)", async () => {
+    // Amended by issue #153.
+    const meta = await sharp(readFileSync(path)).metadata();
+    expect(meta.height).toBeGreaterThanOrEqual(160);
+    expect(meta.width).toBeGreaterThanOrEqual(Math.round((meta.width! / meta.height!) * 80) * 2);
+  });
+
   it("[002-AC116] is transparent in its corners", async () => {
     const { data, info } = await sharp(readFileSync(path))
       .ensureAlpha()

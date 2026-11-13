@@ -32,7 +32,7 @@ async function noHorizontalScroll(page: Page) {
 }
 
 for (const path of PEOPLE_PAGES) {
-  test(`[002-AC112] on ${path} the company logo sits after the people's logo and a line, on one row`, async ({
+  test(`[002-AC112] on ${path} the company logo sits after the people's logo and a line, in the right place`, async ({
     page,
   }) => {
     await openPeoplePage(page, path);
@@ -41,8 +41,6 @@ for (const path of PEOPLE_PAGES) {
     const companyLink = header.getByRole("link", { name: COMPANY_ALT });
     await expect(peopleLink).toHaveAttribute("href", /#inicio$/);
     await expect(companyLink).toHaveAttribute("href", "/empresas");
-    const companyImg = companyLink.getByRole("img", { name: COMPANY_ALT });
-    await expect(companyImg).toHaveAttribute("src", "/img/logo-empresas.webp");
 
     // In order: people's logo, a decorative line, company logo.
     const line = header.locator("[aria-hidden='true'].logo-divider");
@@ -67,20 +65,18 @@ for (const path of PEOPLE_PAGES) {
         text: el.textContent,
       };
     });
-    expect(lineStyle.width).toBe(1);
     expect(lineStyle.text).toBe("");
-    // --brand-night at 35% opacity (the browser reports the colour as rgba or oklab).
-    expect(lineStyle.color).toMatch(/0\.35\)$/);
+    if (wide(page)) {
+      // The line is only displayed from 768 px (criteria 118 and 119).
+      expect(lineStyle.width).toBe(1);
+      // --brand-night at 35% opacity (the browser reports the colour as rgba or oklab).
+      expect(lineStyle.color).toMatch(/0\.35\)$/);
+    }
 
-    // Sizes: the people's logo as before (64 and 80 px), the company logo 32 and 40 px.
+    // The people's logo keeps its size (64 and 80 px); the company logo's size is
+    // in criteria 118 and 119.
     const peopleBox = (await peopleLink.getByRole("img").boundingBox())!;
-    const companyBox = (await companyImg.boundingBox())!;
     expect(Math.round(peopleBox.height)).toBe(wide(page) ? 80 : 64);
-    expect(Math.round(companyBox.height)).toBe(wide(page) ? 40 : 32);
-    // Same row: the two logos are centred on the same line.
-    const centre = (b: { y: number; height: number }) => b.y + b.height / 2;
-    expect(Math.abs(centre(peopleBox) - centre(companyBox))).toBeLessThanOrEqual(2);
-    expect(companyBox.x).toBeGreaterThan(peopleBox.x + peopleBox.width);
     await noHorizontalScroll(page);
   });
 }
@@ -102,6 +98,73 @@ test("[002-AC113] the company logo link opens /empresas and shows a focus ring f
   await expect(page).toHaveURL(/\/empresas$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: PAGE_TIMEOUT });
 });
+
+// Criteria 118 to 120 (issue #153).
+
+const PEOPLE_LOGO_IMG = `header a[href$='#inicio'] img`;
+const COMPANY_LOGO_IMG = `header a[href='/empresas'] img`;
+
+for (const path of PEOPLE_PAGES) {
+  test(`[002-AC118] on ${path} from 768 px the company logo is as tall as the people's logo, on the same row after the line`, async ({
+    page,
+  }) => {
+    test.skip(!wide(page), "from 768 px only; the stacked layout is criterion 119");
+    await openPeoplePage(page, path);
+    const people = (await page.locator(PEOPLE_LOGO_IMG).boundingBox())!;
+    const company = (await page.locator(COMPANY_LOGO_IMG).boundingBox())!;
+    const line = (await page.locator("header .logo-divider").boundingBox())!;
+    expect(Math.round(people.height)).toBe(80);
+    expect(Math.abs(company.height - people.height)).toBeLessThanOrEqual(2);
+    const centre = (b: { y: number; height: number }) => b.y + b.height / 2;
+    expect(Math.abs(centre(company) - centre(people))).toBeLessThanOrEqual(2);
+    expect(line.x).toBeGreaterThanOrEqual(people.x + people.width);
+    expect(company.x).toBeGreaterThanOrEqual(line.x + line.width);
+    expect(line.height).toBeGreaterThan(40);
+    await noHorizontalScroll(page);
+  });
+
+  test(`[002-AC119] on ${path} below 768 px the company logo is on its own row under the people's logo, as wide as it, with no line`, async ({
+    page,
+  }) => {
+    test.skip(wide(page), "below 768 px only; the one-row layout is criterion 118");
+    await openPeoplePage(page, path);
+    const people = (await page.locator(PEOPLE_LOGO_IMG).boundingBox())!;
+    const company = (await page.locator(COMPANY_LOGO_IMG).boundingBox())!;
+    expect(company.y).toBeGreaterThanOrEqual(people.y + people.height - 1);
+    expect(Math.abs(company.x - people.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(company.width - people.width)).toBeLessThanOrEqual(2);
+    await expect(page.locator("header .logo-divider")).toBeHidden();
+    const display = await page
+      .locator("header .logo-divider")
+      .evaluate((el) => getComputedStyle(el).display);
+    expect(display).toBe("none");
+    const menu = (await page.getByRole("banner").getByRole("navigation").boundingBox())!;
+    const companyLink = (await page
+      .getByRole("banner")
+      .getByRole("link", { name: COMPANY_ALT })
+      .boundingBox())!;
+    expect(menu.y).toBeGreaterThanOrEqual(companyLink.y + companyLink.height - 1);
+    await noHorizontalScroll(page);
+  });
+}
+
+for (const path of ["/", "/empresas"]) {
+  test(`[002-AC120] on ${path} the company logo's src is a content-hashed /_next/static/media/ address that answers 200 with a WebP`, async ({
+    page,
+    request,
+  }) => {
+    if (path === "/") await openPeoplePage(page, path);
+    else await page.goto(path);
+    const logo = page.getByRole("banner").getByRole("img", { name: COMPANY_ALT });
+    await expect(logo).toBeVisible({ timeout: PAGE_TIMEOUT });
+    const src = (await logo.getAttribute("src"))!;
+    expect(src).not.toBe("/img/logo-empresas.webp");
+    expect(src).toMatch(/^\/_next\/static\/media\/logo-empresas\.[0-9a-z_-]{6,}\.webp$/);
+    const res = await request.get(src);
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/webp");
+  });
+}
 
 for (const path of ["/", "/productos/demo-botella-ejemplo"]) {
   test(`[002-AC115] on ${path} the header keeps its height when the company logo appears, has no horizontal scroll and passes axe`, async ({

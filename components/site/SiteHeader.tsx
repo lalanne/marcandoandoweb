@@ -12,6 +12,7 @@ import { KIND_SECTION } from "./CatalogSections";
 import { corpAccountLinkClass } from "../company/styles";
 import { createClient } from "@/lib/supabase/server";
 import logo from "@/public/img/logo.webp";
+import companyLogoFile from "@/public/img/logo-empresas.webp";
 
 const linkBase = "rounded-full px-2 text-sm font-medium hover:bg-brand-yellow/40 sm:px-3";
 const linkClass = `${linkBase} py-1`;
@@ -79,29 +80,39 @@ async function CatalogLinks({
   );
 }
 
-// The company logo after the people's logo, with a thin line between them (spec 002,
-// criterion 112). Only when an Empresas item is published, the same rule as the
-// "Catálogo empresa" link (criteria 70 and 114).
+// The company logo after the people's logo (spec 002, criteria 112, 118 and 119). Only
+// when an Empresas item is published, the same rule as the "Catálogo empresa" link
+// (criteria 70 and 114). From 768 px it is as tall as the people's logo (80 px), on
+// the same row after a thin line. Below 768 px it goes on its own row under the
+// people's logo, as wide as it (140 px, the width of the 64 px tall people's logo),
+// with no line. The file is imported statically, so its address carries a content
+// hash and a new file reaches browsers that cached an old one (criterion 120);
+// `unoptimized` keeps that address as the `src` instead of a /_next/image one.
 function CompanyLogoLink() {
   return (
-    <>
+    <div className="flex items-center gap-3">
       <span
         aria-hidden="true"
-        className="logo-divider h-11 w-px shrink-0 bg-brand-night/35 md:h-14"
+        className="logo-divider hidden h-14 w-px shrink-0 bg-brand-night/35 md:block"
       />
       <a href={EMPRESAS_PATH} className="flex min-h-11 shrink-0 items-center rounded-md">
         <Image
-          src="/img/logo-empresas.webp"
+          src={companyLogoFile}
           alt="Marcando Ando, soluciones corporativas"
-          width={600}
-          height={125}
           priority
           unoptimized
-          className="h-8 w-auto md:h-10"
+          className="h-auto w-[140px] md:h-20 md:w-auto"
         />
       </a>
-    </>
+    </div>
   );
+}
+
+// Holds the company logo's row below 768 px while the catalog loads, so the header
+// has the same height before and after it streams in (criterion 115). From 768 px the
+// logo shares the people's logo's row, so nothing is needed.
+function CompanyLogoSpace() {
+  return <div aria-hidden="true" className="h-11 md:hidden" />;
 }
 
 // Same box for both labels (fixed width, same classes), so the header does not
@@ -154,7 +165,7 @@ function HeaderBar({
 }) {
   return (
     <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 flex-col items-start md:flex-row md:items-center md:gap-3">
         <a href={`${base}#inicio`} className="shrink-0 rounded-xl">
           <Image
             src={logo}
@@ -227,7 +238,14 @@ export function SiteHeader({
   return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
       <Suspense
-        fallback={<HeaderBar base={base} hasEmpresas companyLogo={null} catalogLinks={null} />}
+        fallback={
+          <HeaderBar
+            base={base}
+            hasEmpresas
+            companyLogo={<CompanyLogoSpace />}
+            catalogLinks={null}
+          />
+        }
       >
         <LoadedHeaderBar base={base} searchParams={searchParams} />
       </Suspense>
