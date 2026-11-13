@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12; the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06; the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -688,6 +688,37 @@ side with a thin line between them, and the menu link "Catálogo empresa" kept.
 Criterion 111 is amended to match (marked there), and the logo bullet of the
 amendment above ("no transparent version is needed") is superseded by this one.
 
+**2026-11-12 amendment - the company logo as tall as the people's logo, stacked on
+phones, at a cache-safe address (issue #153, approved by the owner on 2026-11-12).** After the #148 change went live
+the owner found the company logo too small next to the people's logo (32 and 40 px
+tall against 64 and 80 px) and saw the old logo (white box, uncropped) in their
+browser. The served file was correct; the browser had kept its cached copy because
+the new file had the same address, `/img/logo-empresas.webp`. The owner chose on
+2026-11-12 (Claude Design canvas "Logo empresas en el header", artboard "Elegida
+(#153)"):
+
+- **From 768 px:** the company logo is as tall as the people's logo (80 px), on the
+  same row, with the decorative line between them (about 56 px tall). The menu stays
+  on the row below.
+- **Below 768 px:** a company logo as tall as the people's logo cannot fit beside it
+  (about 307 px wide at 64 px tall, next to a 140 px logo, in about 328 px). So the
+  company logo goes on its own row **under** the people's logo, left-aligned with it,
+  **as wide as the people's logo** (about 140 px wide, about 30 px tall), with no
+  line. The menu comes below it.
+- **The address of the logo changes with the file.** Both headers load the company
+  logo through a static import (as the people's logo already is), so it is served
+  from `/_next/static/media/` with a content hash in its name, and a new version of
+  the file reaches browsers that cached an old one. The file stays
+  `public/img/logo-empresas.webp` in the repo.
+- **The file** has at least 160 px of height (twice the 80 px display) and stays at
+  most 40 KB, transparent and cropped (criteria 111 and 116).
+- Unchanged: when it shows (criterion 114), no height change when it streams in
+  (criterion 115), the link and focus ring (criterion 113), the company header's
+  look and logo size (criterion 117), the people's logo and the menu.
+
+Criteria 111 and 112 are amended to match (marked there); the sizes and the
+one-row layout at 360 px in the #148 amendment above are superseded by this one.
+
 ## Constraints
 
 Inherited from spec 000 and `CLAUDE.md`, restated where they bite:
@@ -1318,7 +1349,8 @@ pages in their new look.
      40 KB, has at least twice the pixels it is shown at on a 1280 px screen, and the
      `<img>` has `width` and `height` set and is not lazy loaded. *(Amended 2026-11-12, issue #148: "shown at" means the larger of the
      two headers it appears in, the people's and the company's; the file is cropped and
-     transparent, criterion 116.)*
+     transparent, criterion 116.)* *(Amended 2026-11-12, issue #153: the largest display
+     is 80 px tall in the people's header, so the file has at least 160 px of height.)*
 112. Given at least one published Empresas item, when the home page, a collection view
      (`/?coleccion=navidad`) or a Personas product page loads at 360 px and at
      1280 px, then the header shows, in order, the people's logo (link to `#inicio`),
@@ -1327,6 +1359,8 @@ pages in their new look.
      "Marcando Ando, soluciones corporativas"; the company logo is next to the
      people's logo on the same row, about 32 px tall at 360 px and 40 px tall at
      1280 px; and the people's logo has the same size as before.
+     *(Amended 2026-11-12, issue #153: the sizes, the one-row layout at 360 px and the
+     address `/img/logo-empresas.webp` are replaced by criteria 118, 119 and 120.)*
 113. Given the people's header, when the company logo link is clicked, then the
      browser opens `/empresas`; and when it is reached with the keyboard, then it
      shows a visible focus ring.
@@ -1342,6 +1376,20 @@ pages in their new look.
 117. Given a company page, when it loads at 360 px and at 1280 px, then its header
      logo is about 28 px tall at 360 px and 40 px tall at 1280 px, and the company
      header otherwise looks as in criterion 105.
+118. Given at least one published Empresas item, when a people's page loads at
+     1280 px (and at any width from 768 px), then the company logo is on the same row
+     as the people's logo, after the decorative line, and its rendered height equals
+     the people's logo's height (80 px, within 2 px).
+119. Given at least one published Empresas item, when a people's page loads at 360 px
+     (and at any width below 768 px), then the company logo is on its own row directly
+     under the people's logo, its left edge aligned with it (within 2 px), its
+     rendered width equals the people's logo's width (within 2 px), the decorative
+     line is not displayed, the menu is below the company logo, and the page has no
+     horizontal scroll.
+120. Given the people's header and the company header, when the company logo's `<img>`
+     is read, then its `src` is not `/img/logo-empresas.webp` but an address under
+     `/_next/static/media/` whose file name carries a content hash, and that address
+     answers 200 with a WebP image.
 
 
 | # | Criterion | Layer |
@@ -1417,6 +1465,8 @@ pages in their new look.
 | 115 | No height change when the logo streams in, no horizontal scroll, axe | End to end (Playwright) at 360 and 1280 px, measuring the header before and after the catalog loads, with axe |
 | 116 | Transparent, cropped logo file | Unit test reading `public/img/logo-empresas.webp` with sharp (corner alpha, trimmed margins) |
 | 117 | Company header logo size with the cropped file | End to end (Playwright) at 360 and 1280 px reading the `<img>` box |
+| 118, 119 | Company logo as tall as the people's logo from 768 px; stacked and as wide below | End to end (Playwright) at 360 and 1280 px against local Supabase, reading both logos' boxes and the line's display |
+| 120 | Content-hashed logo address in both headers | End to end (Playwright) reading the `src` of the `<img>` in the people's and the company header and requesting it |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
@@ -1482,3 +1532,6 @@ message to the business number. Then delete the test product.
     At 1280 px the logos and the five links do not fit on one row in the 1024 px
     header: accept a second row for the menu (the draft), or widen the header to
     1152 px?
+11. **Company logo size (issue #153), approved by the owner on 2026-11-12; to revisit after seeing it live on a phone:** below 768 px the company logo goes under
+    the people's logo, as wide as it (proposed), since it cannot be as tall as the
+    people's logo beside it at 360 px. Confirm after seeing it live on a phone.
