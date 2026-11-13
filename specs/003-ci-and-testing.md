@@ -124,8 +124,10 @@ check can change when only documentation changed.
 - **Any other change runs the full pipeline, unchanged.** No job does anything
   different when it runs; the change is only whether it runs.
 - The required checks of `main` stay the same list; `changes` need not be
-  required, because if it fails the jobs that depend on it fail (not skip) and
-  block the PR.
+  required, because if it fails the jobs that depend on it run (full pipeline):
+  their `if:` is `!cancelled() && docs_only != 'true'`, so a failure never skips
+  a check. (Wording corrected on 2026-11-13, issue #158, to match the
+  implementation merged in #157; the first wording said they would fail.)
 
 Criteria 19 to 25 below.
 
