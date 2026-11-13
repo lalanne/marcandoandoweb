@@ -91,7 +91,7 @@ Dependabot.
 
 ### Docs-only changes skip the heavy jobs
 
-**2026-11-13 amendment (issue #146), draft, awaiting the owner's approval.** A
+**2026-11-13 amendment (issue #146, approved by the owner on 2026-11-13).** A
 docs-only PR such as #144 waited about 7 minutes for local Supabase, the production
 build and Playwright, and again after every update from `main`. Nothing those jobs
 check can change when only documentation changed.
