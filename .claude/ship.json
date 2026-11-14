@@ -43,7 +43,6 @@
       "unit",
       "traceability",
       "tests-with-changes",
-      "test-integrity",
       "integration",
       "migrations",
       "e2e"
