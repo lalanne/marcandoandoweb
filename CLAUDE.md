@@ -15,6 +15,7 @@ the marketplace's `main`. Use them on every change:
 - Once a spec is approved, delegate the implementation and PR to the
   `core-practices:coder` agent instead of implementing it in the main session.
 - The branch-guard hook blocks commits and pushes to `main`.
+- Ship settings (remotes, checks, labels, deploy) are in `.claude/ship.json`.
 
 Project-specific rules below override the plugin's defaults.
 

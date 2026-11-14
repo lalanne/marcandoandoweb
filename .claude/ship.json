@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "owner": "lalanne",
+  "repo": "lalanne/marcandoandoweb",
+  "pushRemote": "git@github-lalanne:lalanne/marcandoandoweb.git",
+  "defaultBranch": "main",
+  "setup": "source ~/.nvm/nvm.sh && nvm use",
+  "board": {
+    "owner": "lalanne",
+    "number": 3
+  },
+  "issueLabels": [
+    "bug",
+    "enhancement",
+    "documentation",
+    "content",
+    "accessibility",
+    "ci",
+    "performance",
+    "infrastructure",
+    "design",
+    "admin",
+    "security"
+  ],
+  "assignIssuesTo": "lalanne",
+  "branchTypes": [
+    "feat",
+    "fix",
+    "docs",
+    "chore",
+    "refactor",
+    "test"
+  ],
+  "specs": {
+    "dir": "specs",
+    "index": "specs/README.md",
+    "criterionIdPattern": "\\[(\\d{3})-AC(\\d+)\\]"
+  },
+  "ci": {
+    "workflow": "ci.yml",
+    "requiredChecks": [
+      "static",
+      "unit",
+      "traceability",
+      "tests-with-changes",
+      "test-integrity",
+      "integration",
+      "migrations",
+      "e2e"
+    ],
+    "testIntegrityCheck": "test-integrity",
+    "ownerOnlyLabels": [
+      "test-change-reviewed",
+      "no-test-needed"
+    ],
+    "knownFlakes": []
+  },
+  "localChecks": [
+    "npm run lint",
+    "npm run build",
+    "npm run typecheck",
+    "npm test",
+    "npm run test:integration",
+    "CI=1 npm run test:e2e"
+  ],
+  "deploy": {
+    "workflow": "deploy.yml",
+    "environment": "production",
+    "environmentId": 25297706427,
+    "approve": "gh api repos/{repo}/actions/runs/{run}/pending_deployments -F \"environment_ids[]={environmentId}\" -f state=approved -f comment=\"{comment}\"",
+    "successStep": "Smoke test the live site",
+    "liveUrl": "https://marcandoandoweb.vercel.app/"
+  },
+  "neverStage": [
+    "github_*.txt",
+    "supabase_*.txt",
+    "vercel_*.txt"
+  ],
+  "mockups": {
+    "tool": "claude-design",
+    "assetsDir": "public/img"
+  }
+}
