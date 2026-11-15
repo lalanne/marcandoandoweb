@@ -213,3 +213,158 @@ test("[002-AC98] every panel action that changes the public view shows on the ne
   await expect(page).toHaveURL(/\/panel\/productos\?aviso=eliminado$/, { timeout: PAGE_TIMEOUT });
   await expect(await card(page, EMPRESAS, renamed)).toHaveCount(0);
 });
+
+// The product's page: its status and, when it is there, its heading. Waits for the
+// page's own content, so "not there" is not "not loaded yet".
+async function productPage(page: Page, slug: string) {
+  const response = await page.goto(`/productos/${slug}`);
+  if (response?.status() === 200) {
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: PAGE_TIMEOUT });
+  }
+  return response?.status();
+}
+
+test("[002-AC98] every panel action that changes the public view shows on the next load of the product's page, including one published after the build", async ({
+  page,
+}, testInfo) => {
+  const name = `Pagina ${testInfo.project.name} cache e2e ${run}`;
+  const renamed = `Pagina renombrada ${testInfo.project.name} cache e2e ${run}`;
+  const slug = `e2e-cache98-page-${testInfo.project.name}-${run}`;
+  const h1 = (text: string) => page.getByRole("heading", { level: 1, name: text, exact: true });
+  await signIn(page);
+
+  // Not there yet: a 404, which the cache may keep for this slug until the save.
+  expect(await productPage(page, slug)).toBe(404);
+
+  // Published after the build: its page exists on the next load, with no deploy.
+  await page.goto("/panel/productos/nuevo");
+  await page.getByLabel("Nombre", { exact: true }).fill(name);
+  await page.getByLabel("Dirección web (slug)").fill(slug);
+  await page.getByLabel("Precio (CLP)").fill("7.000");
+  await page.getByLabel("Publicado", { exact: true }).check();
+  await save(page, "Guardar producto");
+  const edit = new URL(page.url()).pathname;
+  expect(await productPage(page, slug)).toBe(200);
+  await expect(h1(name)).toBeVisible();
+
+  // Rename.
+  await page.goto(edit);
+  await page.getByLabel("Nombre", { exact: true }).fill(renamed);
+  await save(page);
+  expect(await productPage(page, slug)).toBe(200);
+  await expect(h1(renamed)).toBeVisible();
+  await expect(page.getByText(name, { exact: true })).toHaveCount(0);
+
+  // Price.
+  await page.goto(edit);
+  await page.getByLabel("Precio (CLP)").fill("9.900");
+  await save(page);
+  await productPage(page, slug);
+  await expect(page.getByRole("main")).toContainText("$9.900");
+
+  // Unavailable, and available again.
+  await page.goto(edit);
+  await page.getByLabel("Disponible", { exact: true }).uncheck();
+  await save(page);
+  await productPage(page, slug);
+  await expect(page.getByRole("main").getByText("no disponible por ahora")).toBeVisible();
+  await page.goto(edit);
+  await page.getByLabel("Disponible", { exact: true }).check();
+  await save(page);
+  await productPage(page, slug);
+  await expect(page.getByRole("main").getByText("no disponible por ahora")).toHaveCount(0);
+
+  // A photo: add, change its text, remove.
+  await page.goto(edit);
+  await page.getByLabel("Archivo de imagen").setInputFiles({
+    name: "foto.png",
+    mimeType: "image/png",
+    buffer: PNG,
+  });
+  await page.getByLabel("Texto alternativo de la foto nueva").fill(`Foto pagina ${run}`);
+  await page.getByRole("button", { name: "Subir foto", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Foto subida." })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await productPage(page, slug);
+  await expect(page.getByRole("main").getByRole("img", { name: `Foto pagina ${run}` }).first()).toBeVisible();
+  await page.goto(edit);
+  await page.getByLabel("Texto alternativo de la foto 1").fill(`Foto pagina corregida ${run}`);
+  await page.getByRole("button", { name: "Guardar foto 1" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Foto guardada." })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await productPage(page, slug);
+  await expect(
+    page.getByRole("main").getByRole("img", { name: `Foto pagina corregida ${run}` }).first(),
+  ).toBeVisible();
+  await page.goto(edit);
+  await page.getByRole("button", { name: "Eliminar la foto 1" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Foto eliminada." })).toBeVisible({
+    timeout: PAGE_TIMEOUT,
+  });
+  await productPage(page, slug);
+  await expect(page.getByRole("img", { name: `Foto pagina corregida ${run}` })).toHaveCount(0);
+
+  // Audience: Empresas puts the page in the company look, at the same address.
+  await page.goto(edit);
+  await page.getByRole("group", { name: "Catálogo" }).getByRole("radio", { name: "Empresas" }).check();
+  await save(page);
+  expect(await productPage(page, slug)).toBe(200);
+  await expect(
+    page.getByRole("banner").getByRole("link", { name: "Marcando Ando, soluciones corporativas" }),
+  ).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Colegios y grupos" })).toHaveCount(0);
+  await page.goto(edit);
+  await page.getByRole("group", { name: "Catálogo" }).getByRole("radio", { name: "Personas" }).check();
+  await save(page);
+  expect(await productPage(page, slug)).toBe(200);
+  await expect(page.getByRole("banner").getByRole("link", { name: "Colegios y grupos" })).toBeVisible();
+
+  // Unpublish and publish.
+  await page.goto(edit);
+  await page.getByLabel("Publicado", { exact: true }).uncheck();
+  await save(page);
+  expect(await productPage(page, slug)).toBe(404);
+  await page.goto(edit);
+  await page.getByLabel("Publicado", { exact: true }).check();
+  await save(page);
+  expect(await productPage(page, slug)).toBe(200);
+
+  // Delete.
+  await page.goto(edit);
+  await page.getByText("Eliminar producto", { exact: true }).click();
+  await page.getByRole("button", { name: "Sí, eliminar este producto" }).click();
+  await expect(page).toHaveURL(/\/panel\/productos\?aviso=eliminado$/, { timeout: PAGE_TIMEOUT });
+  expect(await productPage(page, slug)).toBe(404);
+});
+
+test("[002-AC100] a product unpublished in the panel is a 404 with none of its data on its next load, and an unknown slug is a 404", async ({
+  page,
+}, testInfo) => {
+  const name = `Despublicada ${testInfo.project.name} cache e2e ${run}`;
+  const slug = `e2e-cache100-${testInfo.project.name}-${run}`;
+  await signIn(page);
+  await page.goto("/panel/productos/nuevo");
+  await page.getByLabel("Nombre", { exact: true }).fill(name);
+  await page.getByLabel("Dirección web (slug)").fill(slug);
+  await page.getByLabel("Publicado", { exact: true }).check();
+  await save(page, "Guardar producto");
+  const edit = new URL(page.url()).pathname;
+
+  // Loaded once, so its page is in the cache.
+  expect(await productPage(page, slug)).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+
+  await page.goto(edit);
+  await page.getByLabel("Publicado", { exact: true }).uncheck();
+  await save(page);
+  const gone = await page.request.get(`/productos/${slug}`);
+  expect(gone.status()).toBe(404);
+  expect(await gone.text()).not.toContain(name);
+  await page.goto(`/productos/${slug}`);
+  await expect(page.getByText(name)).toHaveCount(0);
+
+  const unknown = await page.request.get(`/productos/no-existe-${testInfo.project.name}-${run}`);
+  expect(unknown.status()).toBe(404);
+});

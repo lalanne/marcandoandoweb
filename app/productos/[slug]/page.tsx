@@ -5,16 +5,21 @@ import { ProductDetail } from "@/components/site/ProductDetail";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { productMetadata } from "@/lib/catalog/details";
-import { loadProduct } from "@/lib/catalog/load";
+import { loadProduct, loadPublishedSlugs } from "@/lib/catalog/load";
 import { siteUrl } from "@/lib/site";
 
-// The page of one product (spec 002, criteria 57 to 66). Read at request time, so
-// a change in the panel shows without a deploy; an unpublished or unknown slug
-// is a 404 (criterion 60).
+// The page of one product (spec 002, criteria 57 to 66, 97 to 101), served from the
+// cache (tag `catalog`, refreshed by every panel action). The published products'
+// pages are built with the deploy; any other slug is rendered on its first visit and
+// cached too, so a product published later has its page with no deploy. `params` is
+// awaited outside any Suspense, so the product is known before the response starts
+// and an unpublished or unknown slug answers a real 404 (criterion 60).
 
-// The product is read before the page body is sent; the proxy has already
-// answered 404 for an unpublished or unknown slug (criterion 60).
 export const instant = false;
+
+export async function generateStaticParams() {
+  return (await loadPublishedSlugs()).map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -29,6 +34,15 @@ export default async function ProductPage({ params }: PageProps<"/productos/[slu
   const { slug } = await params;
   const product = await loadProduct(slug);
   if (!product) notFound();
+  if (product.audience === "empresas") {
+    // Its own module, loaded only here: next/font declares a font for every route
+    // that imports it, and the people's page must not ask for the company fonts
+    // (criterion 104).
+    const { default: CompanyProductPage } = await import(
+      "@/components/company/CompanyProductPage"
+    );
+    return <CompanyProductPage product={product} />;
+  }
   return (
     <>
       <SiteHeader base="/" />

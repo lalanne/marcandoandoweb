@@ -52,13 +52,6 @@ export function productPageView(product: CatalogProduct) {
 /** The page of the company catalog (spec 002, "Catálogo empresa"). */
 export const EMPRESAS_PATH = "/empresas";
 
-/**
- * The internal route that renders the page of an Empresas item. The proxy rewrites
- * `/productos/<slug>` to it, so the address the visitor sees does not change; asked
- * for directly it answers 404 (spec 002, criterion 104).
- */
-export const COMPANY_PRODUCT_ROUTE = "/empresa-producto";
-
 export function productPath(slug: string): string {
   return `/productos/${encodeURIComponent(slug)}`;
 }

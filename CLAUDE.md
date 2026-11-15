@@ -207,7 +207,12 @@ a visitor's request never reads the database. `lib/catalog/load.ts` reads it in 
 - **The build fails when the database is unreachable.** `npm run build` needs
   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` pointing at a
   reachable database (local Supabase for CI and for you; production for Vercel).
-- Product pages and the `proxy.ts` check are issue #139.
+- **Product pages (issue #139, criteria 97 to 101).** `/productos/<slug>` is served from
+  the same cache: `loadProduct` is a `"use cache"` read tagged `catalog` (an unknown or
+  unpublished slug is cached as null), `generateStaticParams` builds the published
+  products' pages with the deploy, and any other slug is rendered on its first visit.
+  `params` is awaited outside any Suspense, so `notFound()` answers a real 404 (criterion
+  60). `proxy.ts` no longer reads the database: it guards only `/panel` and `/panel/*`.
 
 ### Local Supabase
 
@@ -440,17 +445,17 @@ check retries for up to 60 seconds while the new deployment goes live.
 **Function region.** The production Supabase project is in us-west-2 (Oregon, free
 tier, cannot be moved), so `vercel.json` runs the functions in `pdx1` (Portland),
 next to it, instead of Vercel's default `iad1` (#131, measured in #129). Every
-catalog read, photo (`/img/...`) and product-page check calls the database, so the
+catalog rebuild, photo (`/img/...`) and `/api/health` call the database, so the
 function belongs next to it. The Vercel dashboard (Settings, Functions, Function
 Region) is also set to `pdx1` as a backup; `vercel.json` wins, so keep both the same.
 Check with `curl -sI <site>/api/health | grep x-vercel-id`: `gru1::pdx1::...`.
 
-**Server-Timing (#134).** `/img/...`, `/api/health` and the product-page check in
-`proxy.ts` answer a `Server-Timing` header on success: the Supabase time
+**Server-Timing (#134).** `/img/...` and `/api/health` answer a `Server-Timing` header on success: the Supabase time
 (`storage;dur=` or `db;dur=`, ms) and `cold;desc="1"` when the function instance had
 just started. Read it with `curl -sI <url> | grep -i server-timing` or in the
 browser's Network tab. Durations and the cold flag only (`lib/server-timing.ts`); a
-404 or 503 carries none, so it reveals nothing.
+404 or 503 carries none, so it reveals nothing. Product pages carry none: nothing
+reads the database before they start (criterion 101).
 
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work
