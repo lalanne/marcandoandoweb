@@ -306,6 +306,10 @@ test("[002-AC18] every link and button is reachable with the keyboard, with a vi
   page,
 }) => {
   await open(page);
+  // Streamed parts (the session link) first sit in a hidden `S:` container next
+  // to their fallback and then swap in: count only once nothing is pending, or
+  // the hidden copy is counted and then disappears (#164).
+  await expect(page.locator('[id^="S:"]')).toHaveCount(0);
   const count = await page.locator("a[href], button").count();
   const reached = new Set<number>();
   for (let i = 0; i < count + 2; i++) {
