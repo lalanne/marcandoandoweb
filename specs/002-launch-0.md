@@ -635,11 +635,13 @@ otherwise.
   hero are their own components. No new framework or UI library (ADR-0001). The
   design options are on the owner's Claude Design canvas (option A is the reference;
   option B, "Ejecutivo oscuro", and C, "Minimalista editorial", were not chosen).
-  *Implementation note (issue #145):* `next/font` declares a font for every route
-  that imports it, so the page of an Empresas item is its own internal route
-  (`/empresa-producto/<slug>`) to which the proxy rewrites `/productos/<slug>`
-  (the address does not change); asked for directly, that route answers 404. This
-  keeps Montserrat and Inter off the people's product pages (criterion 104).
+  *Implementation note (issue #145, changed by issue #139):* `next/font` declares a
+  font for every route that imports it, and the page of an Empresas item now shares
+  the route `/productos/<slug>` with the people's items (the proxy no longer
+  rewrites it, criterion 101). So Montserrat and Inter are self-hosted in
+  `public/fonts` (the latin variable files from Google Fonts, OFL) and their
+  stylesheet is linked only by the company shell, which only company pages render.
+  This keeps them off the people's pages (criterion 104). Owner decision, 2026-11-15.
 - **Out:** any other change to the people's look; a separate domain or subdomain;
   a hero photo (until Javiera sends one); minimum orders, lead times, invoicing or
   company clients; the WhatsApp messages; the admin panel's look; the browser-tab

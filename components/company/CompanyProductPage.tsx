@@ -7,9 +7,8 @@ import { CompanyShell } from "./CompanyShell";
 
 /**
  * The page of an Empresas item (spec 002, criteria 57 to 66 and 103 to 109). The
- * product page imports this module only through `import()`, when the product is an
- * Empresas item, so the company fonts (declared by CompanyShell) are not part of a
- * people's product page (criterion 104).
+ * product page at /productos/<slug> renders it for an Empresas item; the company
+ * fonts are linked by CompanyShell, so a people's item never loads them.
  */
 export default function CompanyProductPage({ product }: { product: CatalogProduct }) {
   return (

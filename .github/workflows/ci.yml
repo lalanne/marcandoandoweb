@@ -89,7 +89,10 @@ jobs:
             echo "::error::The build succeeded with an unreachable database; it must fail (spec 002, criterion 102)"
             exit 1
           fi
-          grep -q "Error occurred prerendering page" "$RUNNER_TEMP/unreachable-build.log" || {
+          # Two places read the catalog: a prerendered page ("Error occurred prerendering
+          # page") and the list of product pages to build (generateStaticParams, "Failed
+          # to collect page data for /productos/[slug]", caused by "fetch failed").
+          grep -qE "Error occurred prerendering page|Failed to collect page data for /productos/\[slug\]" "$RUNNER_TEMP/unreachable-build.log" || {
             cat "$RUNNER_TEMP/unreachable-build.log"
             echo "::error::The build failed, but not at the catalog read"
             exit 1

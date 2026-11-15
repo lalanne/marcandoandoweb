@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import CompanyProductPage from "@/components/company/CompanyProductPage";
 import { FloatingWhatsapp } from "@/components/site/FloatingWhatsapp";
 import { ProductDetail } from "@/components/site/ProductDetail";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -35,12 +36,6 @@ export default async function ProductPage({ params }: PageProps<"/productos/[slu
   const product = await loadProduct(slug);
   if (!product) notFound();
   if (product.audience === "empresas") {
-    // Its own module, loaded only here: next/font declares a font for every route
-    // that imports it, and the people's page must not ask for the company fonts
-    // (criterion 104).
-    const { default: CompanyProductPage } = await import(
-      "@/components/company/CompanyProductPage"
-    );
     return <CompanyProductPage product={product} />;
   }
   return (
