@@ -88,12 +88,12 @@ test("a published photo carries the storage time; a refused one carries none", a
   }
 });
 
-test("a published product page carries the check's database time; a 404 carries none", async ({
+test("[002-AC101] a product page, published or not, carries no Server-Timing: nothing reads the database before it starts", async ({
   request,
 }) => {
   const ok = await request.get(`/productos/${published.slug}`);
   expect(ok.status()).toBe(200);
-  expect(ok.headers()["server-timing"]).toMatch(timing("db"));
+  expect(ok.headers()["server-timing"]).toBeUndefined();
 
   for (const slug of [draft.slug, `no-existe-${run}`]) {
     const missing = await request.get(`/productos/${slug}`);

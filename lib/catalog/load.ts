@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { connection } from "next/server";
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { CATALOG_CACHE_LIFE, CATALOG_TAG } from "./cache";
@@ -23,11 +22,27 @@ async function readCatalog() {
 }
 export const loadCatalog = cache(readCatalog);
 
-/** One published product for its page, read at request time; null when unknown. */
-export const loadProduct = cache(async (slug: string) => {
-  await connection();
+/**
+ * One published product for its page, from the cache (criteria 97, 98 and 100):
+ * the page of each slug is built once and a save in the panel refreshes it. An
+ * unknown or unpublished slug is cached as null, so its 404 costs no database read
+ * either; publishing it expires the tag. A read that fails throws and is not cached.
+ */
+async function readProduct(slug: string) {
+  "use cache";
+  cacheTag(CATALOG_TAG);
+  cacheLife(CATALOG_CACHE_LIFE);
   return getProductBySlug(createPublicClient(), slug);
-});
+}
+export const loadProduct = cache(readProduct);
+
+/** The slugs of the published products, so their pages are built with the deploy. */
+export async function loadPublishedSlugs(): Promise<string[]> {
+  const catalog = await loadCatalog();
+  return [catalog.products, catalog.empresas].flatMap((byKind) =>
+    Object.values(byKind).flatMap((items) => items.map((item) => item.slug)),
+  );
+}
 
 /**
  * The catalog and the collection of the home page view (spec 002, criteria 82 to

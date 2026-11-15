@@ -107,3 +107,36 @@ test("[002-AC97] a name changed directly in the database does not show on /, /?c
     await expect(page.getByRole("heading", { level: 3, name: old, exact: true }), path).toHaveCount(0);
   }
 });
+
+test("[002-AC97] a name changed directly in the database does not show on a published product's page that was already loaded", async ({
+  page,
+}, testInfo) => {
+  const tag = `${testInfo.project.name} cache97 page e2e ${run}`;
+  const slug = `e2e-cache97-page-${testInfo.project.name}-${run}`;
+  const id = await insert({
+    slug,
+    name: `Antes ${tag}`,
+    kind: "producto",
+    audience: "personas",
+    is_published: true,
+    is_available: true,
+  });
+  await refreshCatalog(ADMIN);
+
+  const h1 = (name: string) => page.getByRole("heading", { level: 1, name, exact: true });
+  await page.goto(`/productos/${slug}`);
+  await expect(h1(`Antes ${tag}`)).toBeVisible({ timeout: PAGE_TIMEOUT });
+
+  const { error } = await admin.from("product").update({ name: `Despues ${tag}` }).eq("id", id);
+  if (error) throw new Error(error.message);
+
+  // The database says the new name; the cached page still says the old one.
+  await page.goto(`/productos/${slug}`);
+  await expect(h1(`Antes ${tag}`)).toBeVisible({ timeout: PAGE_TIMEOUT });
+  await expect(h1(`Despues ${tag}`)).toHaveCount(0);
+
+  // A save in the panel (criterion 98) is what brings it in.
+  await refreshCatalog(ADMIN);
+  await page.goto(`/productos/${slug}`);
+  await expect(h1(`Despues ${tag}`)).toBeVisible({ timeout: PAGE_TIMEOUT });
+});

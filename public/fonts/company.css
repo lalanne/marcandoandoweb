@@ -1,0 +1,37 @@
+/* Montserrat and Inter for the company pages only (spec 002, criteria 103 and 104).
+   Variable fonts from Google Fonts (SIL Open Font License 1.1), latin subset, copied
+   here so no request goes to another site. Linked only by CompanyShell. */
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 600 800;
+  font-display: swap;
+  src: url("/fonts/montserrat-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Montserrat Fallback";
+  src: local(Arial);
+  ascent-override: 85.79%;
+  descent-override: 22.25%;
+  line-gap-override: 0%;
+  size-adjust: 112.83%;
+}
+@font-face {
+  font-family: "Inter Fallback";
+  src: local(Arial);
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+  size-adjust: 107.12%;
+}
+.corp-theme {
+  --font-montserrat: "Montserrat", "Montserrat Fallback";
+  --font-inter: "Inter", "Inter Fallback";
+}
