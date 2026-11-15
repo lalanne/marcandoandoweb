@@ -1,7 +1,7 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
-import { createTestAdmin, supabaseEnv } from "./supabase";
+import { createTestAdmin, refreshCatalog, supabaseEnv } from "./supabase";
 
 // Spec 002, "Catálogo empresa" (criteria 68 to 77, issue #107). Reads the
 // seeded fake company items (supabase/seed.sql: all priced 2000, which must never
@@ -29,10 +29,12 @@ const gone = {
 
 let admin: SupabaseClient;
 let removeAdmin: () => Promise<void>;
+let ADMIN: { email: string; password: string };
 const productIds: string[] = [];
 
 test.beforeAll(async () => {
   const created = await createTestAdmin("empresas");
+  ADMIN = created;
   removeAdmin = created.remove;
   const { url, anonKey } = supabaseEnv();
   admin = createClient(url, anonKey, {
@@ -54,10 +56,13 @@ test.beforeAll(async () => {
     .single();
   if (p.error) throw new Error(p.error.message);
   productIds.push(p.data.id);
+  // The public pages are cached (spec 002, criteria 97 and 98): refresh them as the admin does.
+  await refreshCatalog(ADMIN);
 });
 
 test.afterAll(async () => {
   for (const id of productIds) await admin.from("product").delete().eq("id", id);
+  await refreshCatalog(ADMIN);
   await removeAdmin();
 });
 

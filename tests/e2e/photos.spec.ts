@@ -1,7 +1,7 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { ADMIN, supabaseEnv } from "./supabase";
+import { ADMIN, refreshCatalog, supabaseEnv } from "./supabase";
 
 // Spec 002, all of a product's photos on its card (criteria 46 to 51, issue #82).
 // Fake products and tiny generated PNGs, created as the admin and removed after.
@@ -70,6 +70,8 @@ test.beforeAll(async () => {
       if (img.error) throw new Error(img.error.message);
     }
   }
+  // The public page is cached (spec 002, criteria 97 and 98): refresh it as the admin does.
+  await refreshCatalog(ADMIN);
 });
 
 test.afterAll(async () => {
@@ -77,6 +79,7 @@ test.afterAll(async () => {
     .from("images")
     .remove(fixtures.flatMap((f) => f.photos.map((p) => p.path)));
   for (const id of productIds) await admin.from("product").delete().eq("id", id);
+  await refreshCatalog(ADMIN);
 });
 
 async function cardOf(page: Page, name: string): Promise<Locator> {

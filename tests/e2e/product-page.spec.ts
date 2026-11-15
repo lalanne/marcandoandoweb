@@ -1,7 +1,7 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
-import { createTestAdmin, supabaseEnv } from "./supabase";
+import { createTestAdmin, refreshCatalog, supabaseEnv } from "./supabase";
 
 // Spec 002, a page per product (criteria 56 to 62, 65). Fake
 // products and tiny generated PNGs, created as a throwaway admin and removed after.
@@ -75,10 +75,12 @@ const fixtures = [full, bare, unavailable, draft, pack];
 
 let admin: SupabaseClient;
 let removeAdmin: () => Promise<void>;
+let ADMIN: { email: string; password: string };
 const productIds: string[] = [];
 
 test.beforeAll(async () => {
   const created = await createTestAdmin("pagina");
+  ADMIN = created;
   removeAdmin = created.remove;
   const { url, anonKey } = supabaseEnv();
   admin = createClient(url, anonKey, {
@@ -120,6 +122,8 @@ test.beforeAll(async () => {
       if (img.error) throw new Error(img.error.message);
     }
   }
+  // The home page is cached (spec 002, criteria 97 and 98): refresh it as the admin does.
+  await refreshCatalog(ADMIN);
 });
 
 test.afterAll(async () => {
@@ -127,6 +131,7 @@ test.afterAll(async () => {
     .from("images")
     .remove(fixtures.flatMap((f) => f.photos.map((p) => p.path)));
   for (const id of productIds) await admin.from("product").delete().eq("id", id);
+  await refreshCatalog(ADMIN);
   await removeAdmin();
 });
 

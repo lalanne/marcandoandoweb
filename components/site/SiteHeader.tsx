@@ -7,7 +7,7 @@ import {
 } from "@/lib/auth/header-link";
 import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
-import { loadCatalog, loadCollectionView, type SearchParams } from "@/lib/catalog/load";
+import { loadCatalog, loadCollectionView } from "@/lib/catalog/load";
 import { KIND_SECTION } from "./CatalogSections";
 import { corpAccountLinkClass } from "../company/styles";
 import { createClient } from "@/lib/supabase/server";
@@ -33,15 +33,14 @@ const companyLinkClass = `${linkBase} flex items-center gap-1.5 border-2 border-
 // the sections of the page without `coleccion` (spec 002, criterion 89).
 async function CatalogLinks({
   base: pageBase,
-  searchParams,
+  collection,
 }: {
   base: string;
-  searchParams?: SearchParams;
+  collection?: string | null;
 }) {
   const { products, empresas } = await loadCatalog();
-  const onCollection = searchParams
-    ? (await loadCollectionView(searchParams)).collection !== null
-    : false;
+  const onCollection =
+    collection !== undefined && (await loadCollectionView(collection)).collection !== null;
   const base = onCollection ? "/" : pageBase;
   const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
   return (
@@ -106,13 +105,6 @@ function CompanyLogoLink() {
       </a>
     </div>
   );
-}
-
-// Holds the company logo's row below 768 px while the catalog loads, so the header
-// has the same height before and after it streams in (criterion 115). From 768 px the
-// logo shares the people's logo's row, so nothing is needed.
-function CompanyLogoSpace() {
-  return <div aria-hidden="true" className="h-11 md:hidden" />;
 }
 
 // Same box for both labels (fixed width, same classes), so the header does not
@@ -201,54 +193,28 @@ function HeaderBar({
   );
 }
 
-async function LoadedHeaderBar({
-  base,
-  searchParams,
+// `base` is "" on the home page (the links are anchors on the page) and "/" on
+// other pages (the links go to the home page's sections). The catalog is read from
+// the cache (lib/catalog/load.ts), so the header, links and company logo included,
+// is part of the prerendered page and has its final height from the first byte; only
+// the session link is per request (inside its own Suspense).
+export async function SiteHeader({
+  base = "",
+  collection,
 }: {
-  base: string;
-  searchParams?: SearchParams;
+  base?: string;
+  collection?: string | null;
 }) {
   const { empresas } = await loadCatalog();
   const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
   return (
-    <HeaderBar
-      base={base}
-      hasEmpresas={hasEmpresas}
-      companyLogo={hasEmpresas ? <CompanyLogoLink /> : null}
-      catalogLinks={
-        <Suspense fallback={null}>
-          <CatalogLinks base={base} searchParams={searchParams} />
-        </Suspense>
-      }
-    />
-  );
-}
-
-// `base` is "" on the home page (the links are anchors on the page) and "/" on
-// other pages (the links go to the home page's sections). Until the catalog loads,
-// the header shows the people's logo and the fixed links, laid out as it will be
-// with Empresas items (the usual case), so it keeps its height.
-export function SiteHeader({
-  base = "",
-  searchParams,
-}: {
-  base?: string;
-  searchParams?: SearchParams;
-}) {
-  return (
     <header className="border-b-2 border-brand-night bg-brand-cream">
-      <Suspense
-        fallback={
-          <HeaderBar
-            base={base}
-            hasEmpresas
-            companyLogo={<CompanyLogoSpace />}
-            catalogLinks={null}
-          />
-        }
-      >
-        <LoadedHeaderBar base={base} searchParams={searchParams} />
-      </Suspense>
+      <HeaderBar
+        base={base}
+        hasEmpresas={hasEmpresas}
+        companyLogo={hasEmpresas ? <CompanyLogoLink /> : null}
+        catalogLinks={<CatalogLinks base={base} collection={collection} />}
+      />
     </header>
   );
 }
