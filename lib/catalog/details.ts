@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { Audience } from "./audience";
+import { COMPANY_DESCRIPTION } from "./company-copy";
 import { priceLabel } from "./format";
 import { imageUrl } from "./images";
 import type { ProductKind } from "./kind";
@@ -51,6 +52,13 @@ export function productPageView(product: CatalogProduct) {
 /** The page of the company catalog (spec 002, "Catálogo empresa"). */
 export const EMPRESAS_PATH = "/empresas";
 
+/**
+ * The internal route that renders the page of an Empresas item. The proxy rewrites
+ * `/productos/<slug>` to it, so the address the visitor sees does not change; asked
+ * for directly it answers 404 (spec 002, criterion 104).
+ */
+export const COMPANY_PRODUCT_ROUTE = "/empresa-producto";
+
 export function productPath(slug: string): string {
   return `/productos/${encodeURIComponent(slug)}`;
 }
@@ -83,7 +91,7 @@ export function productMetadata(product: CatalogProduct, origin: string): Metada
   const what = product.kind === "pack" ? "pack" : "producto";
   const description = `${product.name}: ${what} personalizado en Marcando Ando.${
     price ? ` ${price}.` : ""
-  } Cotiza por WhatsApp.`;
+  } ${product.audience === "empresas" ? "Cotice" : "Cotiza"} por WhatsApp.`;
   const url = productUrl(origin, product.slug);
   const cover = product.images[0];
   return {
@@ -112,8 +120,7 @@ export function productMetadata(product: CatalogProduct, origin: string): Metada
 }
 
 const EMPRESAS_TITLE = "Catálogo empresa | Marcando Ando";
-const EMPRESAS_DESCRIPTION =
-  "Poleras, polerones, tazones, botellas y regalos con el logo de tu empresa. Cotiza por volumen por WhatsApp.";
+const EMPRESAS_DESCRIPTION = COMPANY_DESCRIPTION;
 
 /** Title, description, canonical address and Open Graph tags of /empresas (criterion 76). */
 export function empresasMetadata(origin: string): Metadata {

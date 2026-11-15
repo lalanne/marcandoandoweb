@@ -2,6 +2,7 @@ import Link from "next/link";
 import { backLink, productPageView } from "@/lib/catalog/details";
 import type { CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
+import { corpButtonClass } from "../company/styles";
 import { buttonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
 
@@ -12,21 +13,28 @@ const headingClass = "text-xl font-semibold";
 export function ProductDetail({ product }: { product: CatalogProduct }) {
   const view = productPageView(product);
   const back = backLink(product.kind, product.audience);
+  const company = product.audience === "empresas";
   return (
     <article className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
       <Link
         href={back.href}
-        className="inline-flex min-h-11 items-center self-start font-medium underline"
+        className={`inline-flex min-h-11 items-center self-start font-medium underline ${
+          company ? "text-corp-gold-text" : ""
+        }`}
       >
         {back.label}
       </Link>
       <div className="grid gap-6 md:grid-cols-2 md:items-start">
-        <ProductPhotos images={product.images} name={product.name} />
+        <ProductPhotos images={product.images} name={product.name} audience={product.audience} />
         <div className="flex flex-col gap-5">
           <h1 className="text-3xl font-bold sm:text-4xl">{product.name}</h1>
           {view.price ? <p className="text-xl font-medium">{view.price}</p> : null}
           {!product.isAvailable ? (
-            <p className="rounded-full bg-brand-night/10 px-4 py-2 text-center font-medium">
+            <p
+              className={`px-4 py-2 text-center font-medium ${
+                company ? "rounded-md bg-corp-gray text-corp-body" : "rounded-full bg-brand-night/10"
+              }`}
+            >
               no disponible por ahora
             </p>
           ) : null}
@@ -43,7 +51,9 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
                       aria-hidden="true"
                       data-testid="color-swatch"
                       style={{ backgroundColor: color.hex }}
-                      className="h-7 w-7 rounded-full border-2 border-brand-night"
+                      className={`h-7 w-7 rounded-full ${
+                        company ? "border border-corp-muted" : "border-2 border-brand-night"
+                      }`}
                     />
                     <span>{color.name}</span>
                   </li>
@@ -61,7 +71,11 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
                 {view.sizes.map((size, i) => (
                   <li
                     key={`${size}-${i}`}
-                    className="rounded-full border-2 border-brand-night bg-white px-4 py-1 font-medium"
+                    className={`bg-white px-4 py-1 font-medium ${
+                      company
+                        ? "rounded-md border border-corp-line"
+                        : "rounded-full border-2 border-brand-night"
+                    }`}
                   >
                     {size}
                   </li>
@@ -88,7 +102,7 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
           {product.isAvailable ? (
             <a
               href={productWhatsappUrl(product.name, product.audience)}
-              className={`${buttonClass} self-start text-center text-base`}
+              className={`${company ? corpButtonClass : buttonClass} self-start text-center text-base`}
             >
               Pedir por WhatsApp
             </a>

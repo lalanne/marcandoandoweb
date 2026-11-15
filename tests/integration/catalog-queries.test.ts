@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCatalog } from "@/lib/catalog/queries";
+import { getCatalog, getPublishedAudience } from "@/lib/catalog/queries";
 import { ADMIN, anonClient, ok, signedInClient, uniqueSlug } from "./helpers";
 
 // The public page reads through getCatalog as the anonymous role, against the
@@ -104,5 +104,18 @@ describe("getCatalog (anonymous, real database)", () => {
     } finally {
       await admin.from("product").delete().in("id", [p.id, d.id]);
     }
+  });
+});
+
+// The proxy sends the page of an Empresas item to the company route, the only one
+// that loads the company fonts (spec 002, criteria 103 and 104).
+describe("getPublishedAudience (anonymous, real database)", () => {
+  it("[002-AC103] gives the catalog of a published product, and null for a draft or an unknown slug", async () => {
+    const client = anonClient();
+    expect(await getPublishedAudience(client, "demo-empresa-polera")).toBe("empresas");
+    expect(await getPublishedAudience(client, "demo-empresa-pack")).toBe("empresas");
+    expect(await getPublishedAudience(client, "demo-botella-ejemplo")).toBe("personas");
+    expect(await getPublishedAudience(client, "demo-empresa-borrador")).toBeNull();
+    expect(await getPublishedAudience(client, "no-existe-e2e")).toBeNull();
   });
 });

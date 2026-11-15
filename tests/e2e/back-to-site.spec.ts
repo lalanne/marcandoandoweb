@@ -71,7 +71,9 @@ test("[002-AC45] the sign-in page has Volver al sitio above the form", async ({ 
   const link = page.getByRole("link", { name: "Volver al sitio" });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("href", "/");
-  // Above the sign-in form.
+  // Above the sign-in form. The form streams in after the link (the page shows
+  // "Cargando..." first), so wait for the field before reading its box (#151).
+  await expect(page.getByLabel("Correo")).toBeVisible();
   const linkBox = await link.boundingBox();
   const formBox = await page.getByLabel("Correo").boundingBox();
   expect(linkBox!.y).toBeLessThan(formBox!.y);

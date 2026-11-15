@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { Audience } from "./lib/catalog/audience";
+import { COMPANY_PRODUCT_ROUTE } from "./lib/catalog/details";
 import { isAdminUser } from "./lib/auth/admin";
-import { isPublishedSlug } from "./lib/catalog/queries";
+import { getPublishedAudience } from "./lib/catalog/queries";
 import { coldStart, serverTiming, timed } from "./lib/server-timing";
 import { createPublicClient } from "./lib/supabase/public";
 
@@ -19,15 +21,22 @@ async function productPageGuard(request: NextRequest): Promise<NextResponse> {
     // A malformed address is not a product.
   }
   const cold = coldStart();
-  let exists = true;
+  let audience: Audience | null = "personas";
   let ms: number | null = null;
   try {
-    [exists, ms] = await timed(() => isPublishedSlug(createPublicClient(), slug));
+    [audience, ms] = await timed(() => getPublishedAudience(createPublicClient(), slug));
   } catch {
     // The database could not be read: let the page report it.
   }
-  if (exists) {
-    const response = NextResponse.next();
+  if (audience !== null) {
+    // The page of an Empresas item is its own route, so that only the company
+    // pages load the company fonts (spec 002, criterion 104). The address stays.
+    let response = NextResponse.next();
+    if (audience === "empresas") {
+      const company = request.nextUrl.clone();
+      company.pathname = `${COMPANY_PRODUCT_ROUTE}/${encodeURIComponent(slug)}`;
+      response = NextResponse.rewrite(company);
+    }
     // Issue #134: the check's database time, only when it answered and the page
     // is let through, so a 404 reveals nothing more.
     if (ms !== null) response.headers.set("Server-Timing", serverTiming({ db: ms }, cold));
@@ -45,6 +54,13 @@ async function productPageGuard(request: NextRequest): Promise<NextResponse> {
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/productos/")) {
     return productPageGuard(request);
+  }
+  if (request.nextUrl.pathname.startsWith(`${COMPANY_PRODUCT_ROUTE}/`)) {
+    // Only the guard above may send a request here: asked for directly, it is a 404.
+    const url = request.nextUrl.clone();
+    url.pathname = "/producto-no-encontrado";
+    url.search = "";
+    return NextResponse.rewrite(url);
   }
 
   let response = NextResponse.next({ request });
@@ -88,6 +104,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
+// The matcher must be literal: "/empresa-producto" is COMPANY_PRODUCT_ROUTE.
 export const config = {
-  matcher: ["/panel", "/panel/:path*", "/productos/:slug"],
+  matcher: ["/panel", "/panel/:path*", "/productos/:slug", "/empresa-producto/:slug"],
 };

@@ -7,7 +7,7 @@ test("the header logo is transparent around the drawing and keeps its alt text",
   page,
 }) => {
   await page.goto("/");
-  const logo = page.locator("header").getByRole("img", { name: /Marcando Ando/ });
+  const logo = page.locator("header").getByRole("img", { name: /polera rosada/ });
   await expect(logo).toBeVisible();
   await expect(logo).toHaveAttribute(
     "alt",
@@ -48,7 +48,7 @@ test("[002-AC67] the header logo is large and sharp, and the header still fits",
   page,
 }) => {
   await page.goto("/");
-  const logo = page.locator("header").getByRole("img", { name: /Marcando Ando/ });
+  const logo = page.locator("header").getByRole("img", { name: /polera rosada/ });
   await expect(logo).toBeVisible();
   const viewport = page.viewportSize()!;
   const box = (await logo.boundingBox())!;

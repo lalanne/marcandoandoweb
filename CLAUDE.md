@@ -15,6 +15,7 @@ the marketplace's `main`. Use them on every change:
 - Once a spec is approved, delegate the implementation and PR to the
   `core-practices:coder` agent instead of implementing it in the main session.
 - The branch-guard hook blocks commits and pushes to `main`.
+- Ship settings (remotes, checks, labels, deploy) are in `.claude/ship.json`.
 
 Project-specific rules below override the plugin's defaults.
 
@@ -34,7 +35,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
 
 ## Rules
 
-- **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"). Code, class names and file names are in English.
+- **Language:** all visible site text is in **Chilean Spanish**, informal ("tú"), except the company pages (`/empresas` and the pages of Empresas items), which say "usted" (spec 002, issue #141). Code, class names and file names are in English.
 - **Currency:** Chilean pesos, with a dot as thousands separator (`$7.000`).
 - **Stack:** Next.js (App Router), React, TypeScript, Tailwind CSS, Supabase (Postgres, Auth, Storage, RLS) and Vercel, the same web stack as `duplaweb`. See `docs/adr/0001-web-stack.md`. Do not add other frameworks, services or providers without asking: the point is one stack across all projects.
 - **Main call to action:** WhatsApp. Every "order" button points to the WhatsApp link.
@@ -56,6 +57,7 @@ Website for **Marcando Ando**, a Chilean business that personalizes (prints) t-s
   - Cream `#FBF5E9`
 - **Style:** playful, rounded and hand-made. Use a chunky rounded typeface (for example Fredoka or Baloo from Google Fonts) and dark outlines like the logo's.
 - Define the colors as CSS variables on `:root`.
+- **Company pages** (`/empresas` and the pages of Empresas items) have their own corporate look instead: the logo `assets/logo-empresas.png` ("Marcando Ando · Soluciones corporativas"), navy `#0B1B3F` and gold `#B8862B` (`--corp-` variables), Montserrat and Inter, thin outlines and small corners. The brand rules above apply to the people's site. Details in spec 002 (2026-11-12 amendment, issue #141).
 
 ## Reference content (Instagram)
 
@@ -75,7 +77,7 @@ tests/unit/    Vitest tests
 tests/e2e/     Playwright tests
 specs/         specs (see specs/README.md)
 docs/          requirements and ADRs
-assets/        logo.png and Instagram screenshots (ig0-ig4.png, reference only)
+assets/        logo.png, logo-empresas.png and Instagram screenshots (ig0-ig4.png, reference only)
 public/img/    optimized images served by the site (create it when the first one is added)
 AGENTS.md, README.md, CLAUDE.md
 ```
@@ -345,6 +347,7 @@ because they become required checks (spec 003). Run each locally before opening 
 
 | Job | What it checks | Locally |
 |-----|----------------|---------|
+| `changes` | Decides "docs only" from the diff with the deploy check's rule (`scripts/docs-only.mjs`; empty or failed diff means not docs only) and sets the output the heavy jobs read | `CHANGED_FILES="$(git diff --name-only origin/main...HEAD)" node scripts/docs-only.mjs` |
 | `static` | Lint, typecheck, production build against local Supabase, and a build with an unreachable database that must fail (criterion 102) | `npx supabase start`, export the `NEXT_PUBLIC_SUPABASE_*` values of `npx supabase status -o env`, then `npm run lint && npm run build && npm run typecheck` (build first: it generates the Next types the typecheck needs on a clean checkout). The failing build: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:1 npm run build` must exit non-zero |
 | `unit` | Vitest, coverage reported, no threshold | `npm run test:coverage` |
 | `traceability` | Every criterion of an `implemented` or `verified` spec has a test titled with its ID (`[002-AC7]`), and every ID in a test exists in a spec. Exemptions with a reason: `specs/traceability-exemptions.txt` | `npm run traceability` |
@@ -354,6 +357,15 @@ because they become required checks (spec 003). Run each locally before opening 
 | `test-integrity` | A PR does not delete, rename, skip or weaken an existing test (deleted/renamed test file, removed or edited `expect(`/`assert`/`it(`/`test(`/`describe(` line, added `.skip`/`.only`/`.fixme`/`.todo`/`xit`/`xdescribe`/`xtest`), unless it has the label `test-change-reviewed` (the owner adds it). No-op on pushes to `main` | `git diff -U0 origin/main...HEAD \| LABELS='[]' node scripts/test-integrity.mjs` |
 
 | `e2e` | Production build started against local Supabase, Playwright at 360 and 1280 px with axe checks; traces uploaded on failure. **The owner must add `e2e` to the required checks of `main` after the PR that introduced it merges** | `npx supabase start && npx supabase db reset && npm run build && CI=1 npm run test:e2e` |
+
+**Docs-only changes (spec 003, #146).** When a PR or a push to `main` changes only
+docs (`docs/`, `specs/`, `assets/`, `.github/ISSUE_TEMPLATE/`, any `*.md`: the same rule
+as the deploy check), `static`, `unit`, `integration`, `migrations` and `e2e` are
+skipped by an `if:` on the `changes` job's output (skipped counts as passing for a
+required check, so the PR can merge in about a minute). `changes`, `traceability`
+(it reads the specs), `tests-with-changes` and `test-integrity` (cheap, they read the
+diff) still run. `static` is skipped because ESLint does not lint Markdown. Any other
+change, an empty diff or a diff that cannot be computed runs everything.
 
 `AGENTS.md` tells agents to read the bundled Next.js docs in
 `node_modules/next/dist/docs/` before writing code.

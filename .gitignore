@@ -46,3 +46,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local credential files kept in the repo root (never commit them)
+/github_*.txt
+/supabase_*.txt
+/vercel_*.txt

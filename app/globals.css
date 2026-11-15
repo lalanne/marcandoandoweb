@@ -13,6 +13,18 @@
   /* Brand yellow lightened: the chosen collection tab (spec 002, criterion 94). */
   --brand-yellow-soft: #fbebc8;
 
+  /* The company pages' corporate theme (spec 002, 2026-11-12 amendment, criterion
+     108). Gold is decoration only (3.2:1 on white); --corp-gold-text is for text. */
+  --corp-navy: #0B1B3F;
+  --corp-navy-deep: #07122B;
+  --corp-gold: #B8862B;
+  --corp-gold-text: #8A6417;
+  --corp-gold-light: #E2C07A;
+  --corp-gray: #F5F6F9;
+  --corp-line: #E4E7EE;
+  --corp-body: #3B4559;
+  --corp-muted: #5A6478;
+
   --background: var(--brand-cream);
   --foreground: var(--brand-night);
 }
@@ -29,6 +41,16 @@
   --color-brand-purple-deep: var(--brand-purple-deep);
   --color-brand-yellow-soft: var(--brand-yellow-soft);
   --font-sans: var(--font-fredoka);
+  --color-corp-navy: var(--corp-navy);
+  --color-corp-navy-deep: var(--corp-navy-deep);
+  --color-corp-gold: var(--corp-gold);
+  --color-corp-gold-text: var(--corp-gold-text);
+  --color-corp-gold-light: var(--corp-gold-light);
+  --color-corp-gray: var(--corp-gray);
+  --color-corp-line: var(--corp-line);
+  --color-corp-body: var(--corp-body);
+  --color-corp-muted: var(--corp-muted);
+  --font-heading: var(--font-montserrat);
 }
 
 /* Visible keyboard focus on every link and button (spec 002, criterion 18). */
@@ -46,4 +68,37 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-fredoka), system-ui, sans-serif;
+}
+
+/* The company pages (/empresas and the pages of Empresas items) wrap themselves
+   in .corp-theme (components/company/CompanyShell.tsx). The fonts come from
+   next/font and are only loaded there. */
+body:has(.corp-theme) {
+  background: #fff;
+}
+
+.corp-theme {
+  background: #fff;
+  color: var(--corp-body);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+:where(.corp-theme) :is(h1, h2, h3, h4, button) {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+}
+
+/* Headings are navy; a navy section sets --corp-heading to white (an unlayered
+   rule here would beat Tailwind's layered text-white, so the color is a variable). */
+:where(.corp-theme) :is(h1, h2, h3, h4) {
+  color: var(--corp-heading, var(--corp-navy));
+}
+
+.corp-theme :focus-visible {
+  outline: 3px solid var(--corp-navy);
+  outline-offset: 3px;
+}
+
+/* On navy backgrounds the focus ring is white. */
+.corp-theme .corp-on-navy:focus-visible {
+  outline-color: #fff;
 }
