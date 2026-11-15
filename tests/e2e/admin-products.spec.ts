@@ -440,6 +440,9 @@ test("the products screens have no serious or critical accessibility violations 
 }, testInfo) => {
   const name = productName("axe", testInfo.project.name);
   const check = async () => {
+    // Next sets the title from the page's metadata, after the URL changes on a
+    // client navigation: axe must not run before it is in (#167).
+    await expect(page).toHaveTitle(/ \| Marcando Ando$/);
     const { violations } = await new AxeBuilder({ page }).analyze();
     return violations.filter((v) => v.impact === "serious" || v.impact === "critical");
   };
