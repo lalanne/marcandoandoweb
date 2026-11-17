@@ -1,6 +1,6 @@
 # 006 — Shopping Cart ("Carrito")
 
-**Status:** draft
+**Status:** approved (by the owner, 2026-11-16)
 
 Sources: [Req §1 and §5](../docs/requirements.md) ("Solicitar productos
 personalizados (Carrito)"; "solo si no es complejo, carrito"), open question 5,
