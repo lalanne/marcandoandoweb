@@ -21,6 +21,7 @@ The client's own words live in [`../docs/requirements.md`](../docs/requirements.
 | 003 | [CI and testing policy](003-ci-and-testing.md) | approved (the amendment for #112, "Test integrity", criteria 13 to 18, was approved by the owner on 2026-11-04; implementation in #112, PR open). The amendment for #146, docs-only changes skip the heavy jobs, criteria 19 to 25, was approved by the owner on 2026-11-13; implemented in the PR for #146 (pending merge; criteria 22 and 24 are shown on the first docs-only PR and push after it merges) |
 | 004 | [Deployment pipeline](004-deployment.md) | approved |
 | 005 | [Google sign-in for the admin](005-google-sign-in.md) | approved |
+| 006 | [Shopping cart ("Carrito")](006-cart.md) | draft (issue #171) |
 
 Status values: `draft` → `approved` → `implemented` → `verified`.
 
