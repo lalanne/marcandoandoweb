@@ -64,7 +64,7 @@ and hosting are part of delivery (Req §4, §8).
 | **Search and filters** by product type and theme (Req §4) | Chatbot or AI assistant |
 | **Contact:** floating WhatsApp button, Instagram link, optional contact form (Req §6) | Automated order management |
 | **Admin panel:** add, edit and delete products; prices, photos and descriptions; ~~categories~~ each product's type, Producto or Pack (amended 2026-10-31); each product's catalog, Personas or Empresas (amended 2026-11-04, issue #107); highlighted products; ~~designs in the gallery~~ (postponed 2026-10-31, issue #69: no "Diseños" in the panel for now); available or temporarily unavailable (Req §7) | Roles beyond a single admin |
-| **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | **Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5) |
+| **Quality:** image optimization, basic SEO, responsive layout, SSL (Req §4, §8) | ~~**Cart** (decided by the owner, 2026-10-23): v1 is a catalog plus WhatsApp quotes; a cart is revisited after launch (Req §1, §5)~~ Revisited 2026-11-16 (issue #171): a cart that ends in WhatsApp, [spec 006](006-cart.md). Online payment stays out |
 | **Offers ("Ofertas"):** a product can be flagged "en oferta" with its old and new price, and appears in a filtered view reached from the menu (Req §3A; interpretation, see decisions) | |
 | **Delivery:** domain, hosting, forms, training for Javiera, handover of accounts and ownership, cost information (Req §8) | |
 
@@ -161,6 +161,10 @@ number refers to that document's numbering.
    (Carrito)", but Req §5 says the first stage is catalog plus quote and a cart
    "only if it is not complex". The WhatsApp quote flow is the v1 ordering path;
    a cart is revisited after launch.
+   **2026-11-16 amendment - the cart, revisited (issue #171).** After launch the owner
+   decided on a first version of the cart that ends in WhatsApp: no online payment,
+   no accounts, the cart kept in the visitor's browser, a total when every item has a
+   price and an estimate otherwise. See [spec 006](006-cart.md).
 2. **"Ofertas" (Q6): a product flag.** The menu in Req §3A lists offers, but
    nothing else describes it. A product can be flagged "en oferta" with its old
    and new price, shown in a filtered view. This is an interpretation, so it is

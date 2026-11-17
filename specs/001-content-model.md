@@ -246,6 +246,8 @@ An owner's first image by `position` is its cover image.
 - **Contact data** (WhatsApp, Instagram, email) lives in configuration, not the
   database: the admin list in Req §7 does not include editing it.
 - **Customers, orders, carts, reviews:** out of v1 (spec 000).
+  **2026-11-16 amendment (issue #171):** the cart of [spec 006](006-cart.md) lives in
+  the visitor's browser, so it adds no table. Customers, orders and reviews stay out.
 - **Admin users and roles:** spec 003. This spec assumes a function that says
   whether the current user is the admin.
 

@@ -98,6 +98,10 @@ related spec can be approved.
 5. **Cart.** She wants it "only if it is not complex". ~~Decide whether it is in
    the first release.~~ **Decided by the owner 2026-10-23:** not in v1; catalog
    plus WhatsApp quotes only, cart revisited after launch (spec 000).
+   **Revisited by the owner 2026-11-16 (issue #171):** a first version of the cart
+   that ends in WhatsApp, with no online payment; a total when every item has a
+   price, otherwise an estimate labelled as not the total; no image uploads; no cart
+   on the company pages; quantity discounts handled in WhatsApp. See spec 006.
 6. **"Ofertas" menu item.** The menu lists offers, but nothing else describes
    an offers section. **Working answer 2026-10-23 (owner):** a product flag
    with old and new price, shown in a filtered view (spec 000). Still needs
