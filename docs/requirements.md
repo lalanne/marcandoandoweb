@@ -246,6 +246,33 @@ light gray, navy and gold, Montserrat headings); the company pages address the v
 as "usted"; in the people's site, the "Catálogo empresa" link keeps its style and gains
 a navy briefcase icon and outline (option 3). Spec 002 carries the change.
 
+## Feedback from Javiera: inviting new Instagram followers (2026-11-15)
+
+Javiera sent this to the owner, who relayed it. Her words, verbatim:
+
+> Hice una campana de meta en instagram y eso me creo nuevos seguidores en instagram, necesito un sistema donde cada uno de esos nuevos seguidores reciba un mensage o un correo con invitandolos a la pagina web de marcando ando
+
+**Summary (English).** She ran a Meta ad campaign on Instagram that brought new
+followers to `@marcando_ando`. She wants a system that sends each new follower an
+Instagram message or an email inviting them to the Marcando Ando website.
+
+**What Meta allows (checked 2026-11-16, issue #162).** As asked, it cannot be built:
+Meta's Instagram API gives only a follower count (no list of followers and no "new
+follower" webhook), shares no email addresses, and lets a business message someone only
+after that person acts first (a DM, a comment, an ad click). Mass-DM tools that log into
+the account break Instagram's terms. What is allowed: an automatic reply with the link
+when someone writes; a DM with the link when someone comments a keyword; a next campaign
+that sends people to the site or to a DM; and the link in the bio, stories and a pinned
+post. The details, links and costs are in issue #162.
+
+**Open questions (for Javiera, through the owner):**
+
+1. What kind of campaign was it: followers (profile visits), messages, traffic or leads?
+2. Does she use Meta Business Suite (or the Instagram app's business tools) to answer DMs?
+3. Do people write to her by DM after following, or comment on posts?
+4. Which of the allowed options does she want, if any (the owner records the choice in
+   issue #162)?
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB
