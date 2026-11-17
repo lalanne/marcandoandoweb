@@ -8,6 +8,7 @@ import {
 import { EMPRESAS_PATH } from "@/lib/catalog/details";
 import { PRODUCT_KINDS } from "@/lib/catalog/kind";
 import { loadCatalog, loadCollectionView } from "@/lib/catalog/load";
+import { CartLink } from "../cart/CartLink";
 import { KIND_SECTION } from "./CatalogSections";
 import { corpAccountLinkClass } from "../company/styles";
 import { createClient } from "@/lib/supabase/server";
@@ -149,11 +150,13 @@ function HeaderBar({
   hasEmpresas,
   companyLogo,
   catalogLinks,
+  cartActive,
 }: {
   base: string;
   hasEmpresas: boolean;
   companyLogo: ReactNode;
   catalogLinks: ReactNode;
+  cartActive: boolean;
 }) {
   return (
     <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2">
@@ -169,7 +172,10 @@ function HeaderBar({
         </a>
         {companyLogo}
       </div>
-      <nav aria-label="Secciones" className={hasEmpresas ? "basis-full" : undefined}>
+      <nav
+        aria-label="Secciones"
+        className={`order-2 md:order-none ${hasEmpresas ? "basis-full" : ""}`}
+      >
         <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
           {catalogLinks}
           <li>
@@ -189,10 +195,16 @@ function HeaderBar({
           </li>
         </ul>
       </nav>
+      {/* Not in the "Secciones" menu: it is not a section of the page (spec 006). After the menu in the markup; on a phone it sits on the logo's row. */}
+      <div className="order-1 md:order-none">
+        <CartLink active={cartActive} />
+      </div>
     </div>
   );
 }
 
+// The cart button (spec 006) is on every page that uses this header, the people's
+// pages; the company pages have their own header. Its count is read in the browser.
 // `base` is "" on the home page (the links are anchors on the page) and "/" on
 // other pages (the links go to the home page's sections). The catalog is read from
 // the cache (lib/catalog/load.ts), so the header, links and company logo included,
@@ -201,9 +213,11 @@ function HeaderBar({
 export async function SiteHeader({
   base = "",
   collection,
+  cartActive = false,
 }: {
   base?: string;
   collection?: string | null;
+  cartActive?: boolean;
 }) {
   const { empresas } = await loadCatalog();
   const hasEmpresas = PRODUCT_KINDS.some((kind) => empresas[kind].length > 0);
@@ -214,6 +228,7 @@ export async function SiteHeader({
         hasEmpresas={hasEmpresas}
         companyLogo={hasEmpresas ? <CompanyLogoLink /> : null}
         catalogLinks={<CatalogLinks base={base} collection={collection} />}
+        cartActive={cartActive}
       />
     </header>
   );

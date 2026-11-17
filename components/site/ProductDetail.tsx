@@ -3,13 +3,15 @@ import { backLink, productPageView } from "@/lib/catalog/details";
 import type { CatalogProduct } from "@/lib/catalog/types";
 import { productWhatsappUrl } from "@/lib/catalog/whatsapp";
 import { corpButtonClass } from "../company/styles";
-import { buttonClass } from "./Hero";
+import { AddToCart } from "../cart/AddToCart";
+import { secondaryButtonClass } from "./Hero";
 import { ProductPhotos } from "./ProductPhotos";
 
 const headingClass = "text-xl font-semibold";
 
 // The page of one product (spec 002, criteria 57 to 59 and 65). A heading, list
-// or row shows only when it has content.
+// or row shows only when it has content. A Personas product that is available has
+// the cart box and then a white "Pedir por WhatsApp" for that product alone (spec 006).
 export function ProductDetail({ product }: { product: CatalogProduct }) {
   const view = productPageView(product);
   const back = backLink(product.kind, product.audience);
@@ -99,10 +101,24 @@ export function ProductDetail({ product }: { product: CatalogProduct }) {
 
           {product.description ? <p className="whitespace-pre-line">{product.description}</p> : null}
 
-          {product.isAvailable ? (
+          {product.isAvailable && !company ? (
+            <>
+              <AddToCart slug={product.slug} colors={product.colors} sizes={product.sizes} />
+              <div className="flex flex-col items-start gap-2">
+                <p className="font-medium">¿Solo quieres este producto?</p>
+                <a
+                  href={productWhatsappUrl(product.name, product.audience)}
+                  className={`${secondaryButtonClass} text-center text-base`}
+                >
+                  Pedir por WhatsApp
+                </a>
+              </div>
+            </>
+          ) : null}
+          {product.isAvailable && company ? (
             <a
               href={productWhatsappUrl(product.name, product.audience)}
-              className={`${company ? corpButtonClass : buttonClass} self-start text-center text-base`}
+              className={`${corpButtonClass} self-start text-center text-base`}
             >
               Pedir por WhatsApp
             </a>

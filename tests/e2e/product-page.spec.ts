@@ -353,7 +353,7 @@ test("[002-AC62] the public page has no 'Copiar enlace' button or link field, an
   });
   await expect(page.getByRole("button", { name: /Copiar enlace/ })).toHaveCount(0);
   await expect(page.getByText(/Copiar enlace|Enlace copiado/)).toHaveCount(0);
-  await expect(page.getByRole("textbox")).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: /enlace/i })).toHaveCount(0);
 });
 
 test("[002-AC65] the page has no horizontal scroll, Spanish text, nothing for axe, and the back link leads to the section", async ({
