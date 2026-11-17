@@ -256,6 +256,15 @@ date). So:
 
 Before this amendment a card showed a photo, name, price and "Cotizar", and nothing opened.
 
+**2026-11-16 amendment - the cart (issue #171, [spec 006](006-cart.md)).** On the
+page of an available Personas product or pack, an "Arma tu pedido" box with color,
+size, quantity, personalization and "Agregar al carrito" comes after the
+characteristics and the description; "Pedir por WhatsApp" follows it as a white
+secondary button (it was the yellow main button), with the same message. The header
+of the people's pages gets a cart link to `/carrito` after "Admin". Empresas pages,
+`/entrar` and `/panel` do not change. Spec 006 holds the details and the criteria;
+the criteria of this spec keep passing.
+
 **2026-10-31 amendment - prices without "desde", and a wholesale note (issue #85).**
 The owner asked to drop "desde" from the prices and to tell visitors that "al por
 mayor es otro precio". From the options on the design canvas
