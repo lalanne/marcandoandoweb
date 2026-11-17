@@ -1,6 +1,6 @@
 # 006 — Shopping Cart ("Carrito")
 
-**Status:** approved (by the owner, 2026-11-16)
+**Status:** implemented (approved by the owner on 2026-11-16; implemented in the PR for issue #171, every criterion 1 to 29 has a passing test)
 
 Sources: [Req §1 and §5](../docs/requirements.md) ("Solicitar productos
 personalizados (Carrito)"; "solo si no es complejo, carrito"), open question 5,
