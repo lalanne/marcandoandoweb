@@ -82,6 +82,11 @@ update public.product set
   characteristics = E'100% algodón (ejemplo)\nEstampado con vinilo (ejemplo)'
 where slug = 'demo-polera-ejemplo';
 
+-- Fake product with no price (spec 006, the cart's "por cotizar" cases). Personas,
+-- published, available, no colors or sizes.
+insert into public.product (slug, name, description, price_from_clp, kind, is_featured, is_available, is_published) values
+  ('demo-sin-precio', 'Gorro de ejemplo (sin precio)', 'Producto falso sin precio publicado.', null, 'producto', false, true, true);
+
 -- Fake image rows (the files do not exist in storage; the gallery shows nothing
 -- until real files are uploaded locally).
 insert into public.image (storage_path, alt_text, kind, position, product_id)

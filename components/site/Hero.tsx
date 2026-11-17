@@ -3,6 +3,11 @@ import { generalWhatsappUrl } from "@/lib/catalog/whatsapp";
 export const buttonClass =
   "inline-block rounded-full border-2 border-brand-night bg-brand-yellow px-6 py-3 text-lg font-semibold text-brand-night shadow-[3px_3px_0_var(--brand-night)] transition hover:-translate-y-0.5 hover:bg-brand-pink";
 
+// The white secondary button: same shape and outline as the main one (spec 006,
+// decision 7: "Pedir por WhatsApp" on a product page).
+export const secondaryButtonClass =
+  "inline-block rounded-full border-2 border-brand-night bg-white px-6 py-3 text-lg font-semibold text-brand-night shadow-[3px_3px_0_var(--brand-night)] transition hover:-translate-y-0.5 hover:bg-brand-yellow-soft";
+
 export function Hero() {
   return (
     <section
