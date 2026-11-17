@@ -172,7 +172,10 @@ function HeaderBar({
         </a>
         {companyLogo}
       </div>
-      <nav aria-label="Secciones" className={hasEmpresas ? "basis-full" : undefined}>
+      <nav
+        aria-label="Secciones"
+        className={`order-2 md:order-none ${hasEmpresas ? "basis-full" : ""}`}
+      >
         <ul className="flex min-h-14 flex-wrap items-center sm:min-h-0">
           {catalogLinks}
           <li>
@@ -192,8 +195,10 @@ function HeaderBar({
           </li>
         </ul>
       </nav>
-      {/* Not in the "Secciones" menu: it is not a section of the page (spec 006). */}
-      <CartLink active={cartActive} />
+      {/* Not in the "Secciones" menu: it is not a section of the page (spec 006). After the menu in the markup; on a phone it sits on the logo's row. */}
+      <div className="order-1 md:order-none">
+        <CartLink active={cartActive} />
+      </div>
     </div>
   );
 }

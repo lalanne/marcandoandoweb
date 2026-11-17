@@ -502,6 +502,16 @@ test("[006-AC8] the people's pages have the cart link with the count of every li
     await context.close();
   }
 
+  // On a phone the button is on the logo's row, not wrapped under the menu.
+  if ((page.viewportSize()?.width ?? 1280) < 768) {
+    await page.goto("/");
+    const logo = page.locator("header").getByRole("img", { name: /Marcando Ando, logo con una polera/ });
+    const logoBox = (await logo.boundingBox())!;
+    const cartBox = (await headerCart(page).boundingBox())!;
+    expect(cartBox.y).toBeLessThan(logoBox.y + logoBox.height);
+    expect(cartBox.y + cartBox.height).toBeGreaterThan(logoBox.y);
+  }
+
   // Empty cart and one unit.
   await page.evaluate((key) => window.localStorage.removeItem(key), STORAGE_KEY);
   await page.reload();
