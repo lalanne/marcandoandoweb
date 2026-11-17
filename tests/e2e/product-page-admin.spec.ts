@@ -241,5 +241,5 @@ test("[002-AC66] a link already shared still opens the product after the name, p
     page.getByRole("heading", { level: 1, name: `${name} renombrado` }),
   ).toBeVisible({ timeout: PAGE_TIMEOUT });
   await expect(page.getByText("$9.900 c/u")).toBeVisible();
-  await expect(page.getByText("Amarillo")).toBeVisible();
+  await expect(page.locator('section[aria-labelledby="colores-title"]').getByText("Amarillo")).toBeVisible();
 });
