@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) was approved by the owner on 2026-11-05. The 2026-11-19 amendment for issue #174 (a third collection, `casual`, and the label "Escolar"; criterion 33 amended, criterion 37 added) is a **draft**, waiting for the owner's approval.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) was approved by the owner on 2026-11-05. The 2026-11-19 amendment for issue #174 (a third collection, `casual`, and the label "Escolar"; criterion 33 amended, criterion 37 added) was approved by the owner on 2026-11-19.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -160,7 +160,7 @@ collections on the home page" in `docs/requirements.md`). The owner chose on
   site looks the same, and code that does not read the column keeps working.
 
 **2026-11-19 amendment - a third collection, `casual`, and the label "Escolar" (issue
-#174, draft).** Javiera wants a "Casual" section for everyday clothes, like the other
+#174, approved by the owner on 2026-11-19).** Javiera wants a "Casual" section for everyday clothes, like the other
 two, and "Especial Escolar" renamed "Escolar" (see "Feedback from Javiera: a «Casual»
 collection, and «Escolar»" in `docs/requirements.md`). This changes the fixed set above:
 
@@ -464,7 +464,7 @@ plan.
     including adding a product to a collection and taking it out again (criteria 18
     to 20 extended).
 
-**A third collection** (added 2026-11-19, issue #174, draft)
+**A third collection** (added 2026-11-19, issue #174, approved by the owner on 2026-11-19)
 
 37. Given a database with products in `navidad`, in `escolar`, in both and in none,
     when the migration that allows `casual` is applied, then every product keeps its

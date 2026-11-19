@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved; the 2026-11-19 amendment for issue #174, a "Casual" collection tab and the label "Escolar", criteria 121 to 128 and criteria 82, 83, 84, 88, 93 and 94 amended, is a **draft** waiting for the owner's approval (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #153 (criteria 111, 112 and 118 to 120 have passing tests); the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06 and is implemented in the PRs for issue #138 (home page, collection views, /empresas) and issue #139 (product pages, the proxy guards only /panel); the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved; the 2026-11-19 amendment for issue #174, a "Casual" collection tab and the label "Escolar", criteria 121 to 128 and criteria 82, 83, 84, 88, 93 and 94 amended, was approved by the owner on 2026-11-19 (implementation in the PR for issue #174) (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #153 (criteria 111, 112 and 118 to 120 have passing tests); the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06 and is implemented in the PRs for issue #138 (home page, collection views, /empresas) and issue #139 (product pages, the proxy guards only /panel); the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -473,7 +473,7 @@ Before this amendment the tabs were text-only pills and the chosen one was dark
 filled with white text.
 
 **2026-11-19 amendment - a "Casual" collection tab, and "Escolar" (issue #174,
-draft).** Javiera: "Necesito crear otra seccion que se llame casual, tal como especial
+approved by the owner on 2026-11-19).** Javiera: "Necesito crear otra seccion que se llame casual, tal como especial
 navidad y especial escolar, pero que diga casual, es para ropa casual para usar en el
 dia a dia, adicionalmente camba el especial escolar solo por escolar" (her words in
 `docs/requirements.md`). The owner decided on 2026-11-19 the order of the tabs, the
@@ -533,7 +533,7 @@ about the two collections holds for the three, except what is listed here.
   and in the database check), renaming "Especial Navidad", changing the address of an
   existing tab, collections on `/empresas`, and adding real Casual products (Javiera
   does that from the panel).
-- **Open question** (with the proposed default): Javiera says "seccion"; the default is
+- **Answered question** (the owner accepted the proposed default on 2026-11-19): Javiera says "seccion"; it is
   a tab like the other two, as she says "tal como especial navidad y especial
   escolar", and no new section heading on the page.
 
@@ -1486,7 +1486,7 @@ pages in their new look.
      answers 200 with a WebP image.
 
 **A "Casual" collection tab, and "Escolar" (amendment of 2026-11-19, issue #174,
-draft).** Criteria 82 to 89 and 93 to 102 still hold, with the amendments above.
+approved by the owner on 2026-11-19).** Criteria 82 to 89 and 93 to 102 still hold, with the amendments above.
 
 121. Given published Personas items in "Casual", in "Especial Navidad" and in
      "Escolar", when a visitor opens the home page with no `coleccion`, then the row
