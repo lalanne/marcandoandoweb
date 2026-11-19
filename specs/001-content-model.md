@@ -1,6 +1,6 @@
 # 001 — Content Model
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) was approved by the owner on 2026-11-05.
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-23). The 2026-10-31 amendment for issue #87 (colors, sizes, characteristics; criteria 24 to 28) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88. The 2026-11-04 amendment for issue #107 (`audience`, Personas or Empresas; criteria 29 to 32) was approved by the owner on 2026-11-04. The 2026-11-05 amendment for issue #120 (`collections`, the home page's special tabs; criteria 33 to 36) was approved by the owner on 2026-11-05. The 2026-11-19 amendment for issue #174 (a third collection, `casual`, and the label "Escolar"; criterion 33 amended, criterion 37 added) is a **draft**, waiting for the owner's approval.
 
 Sources: [spec 000](000-overview.md), [`docs/requirements.md`](../docs/requirements.md)
 ("Req §N"), [ADR-0001](../docs/adr/0001-web-stack.md). Interpretations and gaps
@@ -158,6 +158,25 @@ collections on the home page" in `docs/requirements.md`). The owner chose on
 - Migration ("expand then contract"): one migration adds the column with default
   the empty list and its check. Every existing row gets the empty list, so the live
   site looks the same, and code that does not read the column keeps working.
+
+**2026-11-19 amendment - a third collection, `casual`, and the label "Escolar" (issue
+#174, draft).** Javiera wants a "Casual" section for everyday clothes, like the other
+two, and "Especial Escolar" renamed "Escolar" (see "Feedback from Javiera: a «Casual»
+collection, and «Escolar»" in `docs/requirements.md`). This changes the fixed set above:
+
+- **`collections`** takes zero to three values from the fixed set, in this order:
+  `casual` ("Casual"), `navidad` ("Especial Navidad") and `escolar` ("Escolar"). Any
+  other value is still rejected. The order is the one of the home page tabs and the
+  admin checkboxes (spec 002).
+- **Only the label of `escolar` changes.** The stored value stays `escolar`, so no row
+  is rewritten and its address (`/?coleccion=escolar`) does not change.
+- **Migration ("expand then contract").** A new migration replaces the check
+  `product_collections_check` with one that also allows `casual`. It only widens what is
+  allowed: every existing row stays valid and unchanged, and the code that knows only
+  `navidad` and `escolar` keeps working (it ignores a value it does not know). The
+  merged migration that added the column is not edited.
+
+Criterion 33 is amended and criterion 37 is added below.
 
 **2026-10-31 amendment - colors, sizes and characteristics (issue #87, approved by
 the owner on 2026-10-31).** Javiera asked for a detail view that shows a product's
@@ -427,9 +446,12 @@ plan.
 **Special collections** (added 2026-11-05, issue #120)
 
 33. Given a product, when `collections` is set to a list with any value other than
-    `navidad` or `escolar`, or set to null, the write is rejected; when it is set to
-    `navidad`, to `escolar` or to both, it is saved as given; when it is not given,
-    the product is saved with the empty list.
+    `casual`, `navidad` or `escolar`, or set to null, the write is rejected; when it is
+    set to any one of them or to any combination of them, it is saved as given; when it
+    is not given, the product is saved with the empty list. The shared list in code is
+    `casual`, `navidad`, `escolar`, in that order, labelled "Casual", "Especial Navidad"
+    and "Escolar". *(Amended 2026-11-19, issue #174: `casual` added, and the label of
+    `escolar` is "Escolar"; before, only `navidad` and `escolar` were allowed.)*
 34. Given the migration that adds `collections` applied to a database with products,
     when the products are read, then every existing product has the empty list and
     its other fields are unchanged.
@@ -441,6 +463,14 @@ plan.
     or change `collections`, the write is rejected; the admin's write succeeds,
     including adding a product to a collection and taking it out again (criteria 18
     to 20 extended).
+
+**A third collection** (added 2026-11-19, issue #174, draft)
+
+37. Given a database with products in `navidad`, in `escolar`, in both and in none,
+    when the migration that allows `casual` is applied, then every product keeps its
+    `collections` and its other fields unchanged, a product can then be saved with
+    `casual` alone or with `casual` and the other two, and a value outside the three is
+    still rejected.
 
 ## Verification plan
 
@@ -466,6 +496,7 @@ a mock of the database.
 | 30 | Existing rows become `personas` | Integration: the `migrations` CI job resets from the migrations alone, and an integration test reads the seeded products after `db reset` and checks the default |
 | 33, 35, 36 | Collections: allowed values, default, public read, writes only by the admin | Integration (local Supabase), as anonymous, non-admin and admin; a unit test for the shared collection list and its guard |
 | 34 | Existing rows get the empty list | Integration: the `migrations` CI job resets from the migrations alone, and an integration test reads the seeded products after `db reset` and checks the default |
+| 33 (amended), 37 | `casual` allowed, existing rows unchanged, other values still rejected | Integration (local Supabase) as the admin, after `db reset` from the migrations; the `migrations` CI job resets from the migrations alone; the unit test for the shared collection list and its guard checks the three values, their order and labels |
 
 A criterion is checked off here when its test exists, failed first for the right
 reason, and now passes.
