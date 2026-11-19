@@ -825,4 +825,67 @@ describe("product collections", () => {
     );
     expect(removed[0].collections).toEqual([]);
   });
+
+  // Spec 001 criteria 33 and 37 (2026-11-19 amendment, issue #174): `casual` is the
+  // third value; the migration that allows it only widens the check.
+  it("[001-AC33] saves casual alone and with the other two, and still rejects a value outside the three", async () => {
+    expect((await newProduct({ collections: ["casual"] })).collections).toEqual(["casual"]);
+    expect(
+      (await newProduct({ collections: ["casual", "navidad", "escolar"] })).collections,
+    ).toEqual(["casual", "navidad", "escolar"]);
+    for (const collections of [["Casual"], ["casual", "otra"], ["casual", null]]) {
+      const { error } = await admin
+        .from("product")
+        .insert({ slug: uniqueSlug("p"), name: "Colección mala", collections });
+      expect(error?.code, JSON.stringify(collections)).toBe("23514");
+    }
+  });
+
+  it("[001-AC37] after the migration every product keeps its collections, casual can be saved alone and with the others, a value outside the three is rejected", async () => {
+    // Products in navidad, in escolar, in both and in none come from the seed.
+    const seeded = ok(
+      await admin
+        .from("product")
+        .select("slug, name, collections")
+        .in("slug", [
+          "demo-navidad-producto",
+          "demo-escolar-producto",
+          "demo-navidad-escolar-producto",
+          "demo-botella-ejemplo",
+        ])
+        .order("slug"),
+    );
+    expect(seeded).toEqual([
+      { slug: "demo-botella-ejemplo", name: "Botella de ejemplo", collections: [] },
+      {
+        slug: "demo-escolar-producto",
+        name: "Cuaderno escolar de ejemplo",
+        collections: ["escolar"],
+      },
+      {
+        slug: "demo-navidad-escolar-producto",
+        name: "Taza regalo de ejemplo",
+        collections: ["navidad", "escolar"],
+      },
+      {
+        slug: "demo-navidad-producto",
+        name: "Adorno navideño de ejemplo",
+        collections: ["navidad"],
+      },
+    ]);
+
+    // An existing product can be moved to casual and back, and to casual plus another.
+    const p = await newProduct({ collections: ["navidad"] });
+    for (const collections of [["casual"], ["casual", "navidad"], ["casual", "escolar"]]) {
+      const { data, error } = await admin
+        .from("product")
+        .update({ collections })
+        .eq("id", p.id)
+        .select("collections");
+      expect(error, JSON.stringify(collections)).toBeNull();
+      expect(data![0].collections).toEqual(collections);
+    }
+    const bad = await admin.from("product").update({ collections: ["casual", "otra"] }).eq("id", p.id);
+    expect(bad.error?.code).toBe("23514");
+  });
 });

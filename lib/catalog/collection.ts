@@ -1,17 +1,19 @@
 import type { ProductKind } from "./kind";
 import type { CatalogProduct } from "./types";
 
-// The special collections of the home page (spec 001 and 002, amendment of
-// 2026-11-05). Fixed in code and in the database check constraint: adding a third
-// is a spec change. "Todos" is not one of them: every published item is in it.
-export const COLLECTIONS = ["navidad", "escolar"] as const;
+// The special collections of the home page (spec 001 and 002, amendments of
+// 2026-11-05 and 2026-11-19), in the order of the tabs and the admin checkboxes.
+// Fixed in code and in the database check constraint: adding another is a spec
+// change. "Todos" is not one of them: every published item is in it.
+export const COLLECTIONS = ["casual", "navidad", "escolar"] as const;
 
 export type Collection = (typeof COLLECTIONS)[number];
 
 /** Spanish label of each collection: the tab and the admin checkbox. */
 export const COLLECTION_LABEL: Record<Collection, string> = {
+  casual: "Casual",
   navidad: "Especial Navidad",
-  escolar: "Especial Escolar",
+  escolar: "Escolar",
 };
 
 export function isCollection(value: unknown): value is Collection {

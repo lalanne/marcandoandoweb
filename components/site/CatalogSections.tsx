@@ -153,13 +153,14 @@ const tabClass =
 // on phones and 56 px from 640 px up, the same height in every tab.
 const TAB_IMAGE: Record<string, { src: string; width: number; height: number }> = {
   todos: { src: "/img/tab-todos.webp", width: 151, height: 112 },
+  casual: { src: "/img/tab-casual.svg", width: 150, height: 112 },
   navidad: { src: "/img/tab-navidad.webp", width: 150, height: 112 },
   escolar: { src: "/img/tab-escolar.webp", width: 152, height: 112 },
 };
 
 /**
- * The tabs "Todos", "Especial Navidad" and "Especial Escolar" above the Productos
- * and Packs sections (spec 002, criteria 82 to 87). Plain links that load the home
+ * The tabs "Todos", "Casual", "Especial Navidad" and "Escolar" above the Productos
+ * and Packs sections (spec 002, criteria 82 to 87 and 121 to 128). Plain links that load the home
  * page with the choice in the address, so they work without JavaScript and can be
  * shared. Not shown when no published Personas item is in a collection.
  */

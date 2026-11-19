@@ -47,11 +47,12 @@ const nonePack = prod("ninguna-pack", "pack", []);
 const all = [navidadProduct, navidadPack, escolarProduct, both, none, nonePack];
 
 describe("collections list", () => {
-  it("[001-AC33] has exactly navidad and escolar, in that order, with Spanish labels", () => {
-    expect(COLLECTIONS).toEqual(["navidad", "escolar"]);
+  it("[001-AC33] has exactly casual, navidad and escolar, in that order, with Spanish labels", () => {
+    expect(COLLECTIONS).toEqual(["casual", "navidad", "escolar"]);
     expect(COLLECTION_LABEL).toEqual({
+      casual: "Casual",
       navidad: "Especial Navidad",
-      escolar: "Especial Escolar",
+      escolar: "Escolar",
     });
   });
 
@@ -71,6 +72,39 @@ describe("collections list", () => {
     expect(parseCollections(null)).toEqual([]);
     expect(parseCollections("navidad")).toEqual([]);
     expect(parseCollections([])).toEqual([]);
+  });
+});
+
+describe("the casual collection", () => {
+  const casualProduct = prod("casual-producto", "producto", ["casual"]);
+  const casualPack = prod("casual-pack", "pack", ["casual", "navidad"]);
+
+  it("[001-AC33] isCollection accepts casual, and parseCollections orders it first", () => {
+    expect(isCollection("casual")).toBe(true);
+    expect(isCollection("Casual")).toBe(false);
+    expect(parseCollections(["escolar", "navidad", "casual", "casual"])).toEqual([
+      "casual",
+      "navidad",
+      "escolar",
+    ]);
+  });
+
+  it("[002-AC121] collectionsWithItems puts Casual first, and only when it has an item", () => {
+    expect(collectionsWithItems([...all, casualProduct])).toEqual(["casual", "navidad", "escolar"]);
+    expect(collectionsWithItems(all)).toEqual(["navidad", "escolar"]);
+    expect(pickCollection("casual", ["casual", "navidad"])).toBe("casual");
+  });
+
+  it("[002-AC122] listForCollection keeps only the Casual products and packs", () => {
+    const grouped = groupByKind([...all, casualProduct, casualPack]);
+    const casual = listForCollection(grouped, "casual");
+    expect(casual.producto.map((p) => p.slug)).toEqual(["casual-producto"]);
+    expect(casual.pack.map((p) => p.slug)).toEqual(["casual-pack"]);
+  });
+
+  it("[002-AC123] pickCollection treats casual with no items as Todos", () => {
+    expect(pickCollection("casual", ["navidad", "escolar"])).toBeNull();
+    expect(pickCollection("casual", [])).toBeNull();
   });
 });
 
