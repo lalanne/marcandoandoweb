@@ -250,6 +250,22 @@ light gray, navy and gold, Montserrat headings); the company pages address the v
 as "usted"; in the people's site, the "Catálogo empresa" link keeps its style and gains
 a navy briefcase icon and outline (option 3). Spec 002 carries the change.
 
+## Feedback from Javiera: a "Casual" collection, and "Escolar" (2026-11-19)
+
+Javiera sent this to the owner, who relayed it. Her words, verbatim:
+
+> "Necesito crear otra seccion que se llame casual, tal como especial navidad y especial escolar, pero que diga casual, es para ropa casual para usar en el dia a dia, adicionalmente camba el especial escolar solo por escolar"
+
+**Summary (English).** She needs another section called "Casual", like "Especial
+Navidad" and "Especial Escolar", for casual clothes to wear every day. She also wants
+"Especial Escolar" renamed to just "Escolar".
+
+Owner decisions on 2026-11-19 (issue #174): "Casual" is a collection tab like the other
+two, placed right after "Todos" (it is year-round): Todos, Casual, Especial Navidad,
+Escolar; "Escolar" replaces "Especial Escolar" everywhere the name is shown, and its
+address does not change; the Casual illustration is drawn as an SVG, option A of the
+mockups (a t-shirt, jeans and a cap). Specs 001 and 002 carry the change.
+
 ## Original text (Spanish, verbatim)
 
 REQUERIMIENTOS PARA EL DESARROLLO DE LA WEB

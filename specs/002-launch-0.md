@@ -1,6 +1,6 @@
 # 002 — Launch 0: first public release
 
-**Status:** approved (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #153 (criteria 111, 112 and 118 to 120 have passing tests); the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06 and is implemented in the PRs for issue #138 (home page, collection views, /empresas) and issue #139 (product pages, the proxy guards only /panel); the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
+**Status:** approved; the 2026-11-19 amendment for issue #174, a "Casual" collection tab and the label "Escolar", criteria 121 to 128 and criteria 82, 83, 84, 88, 93 and 94 amended, was approved by the owner on 2026-11-19 (implementation in the PR for issue #174) (the 2026-11-12 amendment for issue #153, the company logo as tall as the people's logo, stacked on phones, at a cache-safe address, criteria 118 to 120 and criteria 111 and 112 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #153 (criteria 111, 112 and 118 to 120 have passing tests); the 2026-11-12 amendment for issue #148, the company logo next to the people's logo, criteria 112 to 117 and criterion 111 amended, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #148; the 2026-11-12 amendment for issue #141, a corporate look for the company pages, criteria 103 to 111, was approved by the owner on 2026-11-12 and is implemented in the PR for issue #145; the 2026-11-06 amendment for issue #136, the catalog served from a cache refreshed when the admin saves, criteria 97 to 102, was approved by the owner on 2026-11-06 and is implemented in the PRs for issue #138 (home page, collection views, /empresas) and issue #139 (product pages, the proxy guards only /panel); the 2026-11-06 amendment for issue #126, illustrated collection tabs, criteria 93 to 96, was approved by the owner on 2026-11-06; the 2026-11-05 amendment for issue #120, collection tabs on the home page, criteria 82 to 89, was approved by the owner on 2026-11-05; the 2026-11-04 amendment for issue #107, a catalog for companies, criteria 68 to 81, was approved by the owner on 2026-11-04; before that, by the owner on 2026-10-31, with the amendments of that date for issues #63, #69, #72, #79, #82 and #85; first approved on 2026-10-23). The 2026-10-31 amendment for issue #87 (product page, colors, sizes, characteristics; criteria 56 to 66) was approved by the owner on 2026-10-31 and implemented in the PR for issue #88.
 
 Sources: [spec 000](000-overview.md), [spec 001](001-content-model.md) (draft, PR #14),
 [`docs/requirements.md`](../docs/requirements.md) ("Req §N"),
@@ -471,6 +471,75 @@ no-JavaScript behaviour, the hidden empty tab and criteria 82 to 89 do not chang
 
 Before this amendment the tabs were text-only pills and the chosen one was dark
 filled with white text.
+
+**2026-11-19 amendment - a "Casual" collection tab, and "Escolar" (issue #174,
+approved by the owner on 2026-11-19).** Javiera: "Necesito crear otra seccion que se llame casual, tal como especial
+navidad y especial escolar, pero que diga casual, es para ropa casual para usar en el
+dia a dia, adicionalmente camba el especial escolar solo por escolar" (her words in
+`docs/requirements.md`). The owner decided on 2026-11-19 the order of the tabs, the
+scope of the rename and that the Casual illustration is drawn, and chose option A of
+the mockups (https://claude.ai/artifact/1QBBf5FBgky8F5HYu8gy5Q). Spec 001 adds the
+value `casual` (its 2026-11-19 amendment). Everything the #120 and #126 amendments say
+about the two collections holds for the three, except what is listed here.
+
+- **The tabs.** In this order: **Todos**, **Casual**, **Especial Navidad**,
+  **Escolar** (Casual right after Todos because it is year-round, owner decision). As
+  today each special tab shows only when at least one published Personas item is in
+  it, and the row is not shown when none of the three has one.
+- **Casual.** Its address is `/?coleccion=casual` (the tab's link
+  `/?coleccion=casual#colecciones`). It shows only the published Personas items whose
+  `collections` contain `casual`, products under "Productos" and packs under "Packs",
+  with the same rules as the other two: an unknown or empty collection is "Todos", it
+  works without JavaScript, reloading or sharing shows the same view, and the title,
+  description, canonical address (`/`), Open Graph tags and sitemap are the home
+  page's. An item in Casual is also in "Todos", and an item may be in Casual and in
+  another collection.
+- **Served from the cache.** Like the other two views (the 2026-11-06 amendment for
+  issue #136, criteria 97 to 102), `/?coleccion=casual` is prerendered with the deploy
+  and served from the catalog cache, refreshed when the admin saves. It is rewritten to
+  a prerendered page for that collection that visitors never see **(interpretation:
+  the same mechanism as `navidad` and `escolar`, a rewrite in `next.config.ts` to
+  `app/colecciones/casual`)**.
+- **"Escolar".** The label "Escolar" replaces "Especial Escolar" in the tab, the admin
+  checkbox and every other place that shows the collection's name. The address
+  `/?coleccion=escolar`, the stored value `escolar`, the illustration and the items
+  in it do not change. "Especial Navidad" keeps its name. From now on criteria 82 to
+  89 and 93 to 96 read "Escolar" where they say "Especial escolar" or "Especial
+  Escolar".
+- **The Casual illustration** **(owner chose option A on 2026-11-19)**. Added to the
+  table of the #126 amendment:
+
+  | Tab | Illustration |
+  |-----|--------------|
+  | Casual | A teal t-shirt with a yellow star, blue jeans behind it and a pink cap in front, with night-blue spark strokes |
+
+  Unlike the other three it is not cut out of a mockup: it is drawn as an SVG (the
+  rule of the #126 amendment for a crop that does not look clean), with a night-blue outline
+  like the other illustrations, flat brand colours (teal `#4FB0B0`, yellow
+  `#F0B242`, pink `#E8647F`) and a blue for the jeans **(interpretation: `#5B86C9`, a
+  denim blue that is not in the palette, because jeans in a palette colour do not read
+  as jeans)**. It is saved as `public/img/tab-casual.svg`, at most 30 KB, with the same
+  aspect ratio as the others (150 by 112) so it is shown at the same height (about 44
+  px at 360 px and 56 px at 1280 px), with its width and height set and `alt=""`. It
+  is served as a file under `/img/` like the others.
+- **Admin.** The "Colecciones" field has three checkboxes in the tabs' order:
+  "Casual", "Especial Navidad", "Escolar", none checked for a new item, with the same
+  hint. Saving with "Casual" checked shows the item under that tab without a deploy,
+  and refreshes the catalog cache as every save does.
+- **Phones.** At 360 px the four pills wrap onto two lines (two per line in the
+  mockup), a two-word label may wrap inside its pill, and the row has no horizontal
+  scroll. At 1280 px the four tabs fit on one line.
+- **Out:** collections the admin creates, renames or deletes (they stay fixed in code
+  and in the database check), renaming "Especial Navidad", changing the address of an
+  existing tab, collections on `/empresas`, and adding real Casual products (Javiera
+  does that from the panel).
+- **Answered question** (the owner accepted the proposed default on 2026-11-19): Javiera says "seccion"; it is
+  a tab like the other two, as she says "tal como especial navidad y especial
+  escolar", and no new section heading on the page.
+
+Criteria 82, 83, 84, 88, 93 and 94 are amended and criteria 121 to 128 are added below.
+Existing tests that read the label "Especial Escolar" or the two checkboxes change
+with this amendment; they are listed in the implementation PR.
 
 **2026-11-06 amendment - the catalog is served from a cache, refreshed when the
 admin saves (issue #136, approved by the owner on 2026-11-06).** Javiera reported
@@ -1190,15 +1259,22 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     that order, between the hero and "Productos", "Todos" has `aria-current="page"`,
     and "Productos" and "Packs" list all five items as they did before this
     amendment.
+    *(Amended 2026-11-19, issue #174: the third tab reads "Escolar"; with no published
+    Personas item in "Casual" its tab is not shown, so the row is the same three tabs.
+    With Casual items, see criterion 121.)*
 83. Given the same items, when the visitor opens `/?coleccion=navidad`, then
     "Especial Navidad" has `aria-current="page"`, "Productos" lists only that
     collection's product and "Packs" only its pack; and when they open
     `/?coleccion=escolar`, then "Productos" lists only its product and the "Packs"
     section is hidden because it has none.
+    *(Amended 2026-11-19, issue #174: the tab reads "Escolar"; the Casual view is
+    criterion 122.)*
 84. Given an unknown value (`/?coleccion=otra`), or `/?coleccion=escolar` when no
     published Personas item is in "Especial escolar", when the home page opens, then
     it shows "Todos"; and given no published Personas item in either collection, then
     no row of tabs is shown and the page is the same as before this amendment.
+    *(Amended 2026-11-19, issue #174: "either collection" means any of the three; the
+    empty Casual case is criterion 123.)*
 85. Given an item in both collections, an item in none, an unpublished item in a
     collection, and an Empresas item in "Especial Navidad", when each view is opened,
     then the first appears in both tabs and in "Todos", the second only in "Todos",
@@ -1222,6 +1298,8 @@ Javiera: "el icono de la pagina es muy pequeno, necesita ser agrandado".
     with "Especial Navidad" checked, then it appears under that tab, and still under
     "Todos", without a deploy; and when they uncheck it and save, then it is gone
     from that tab and stays in "Todos".
+    *(Amended 2026-11-19, issue #174: the checkboxes are "Casual", "Especial Navidad"
+    and "Escolar", in that order; criterion 126.)*
 89. Given the header on the home page with a special tab chosen, when a visitor
     reads and uses it, then its links are those of criteria 35 and 69 and "Productos"
     and "Packs" point to `#productos` and `#packs` of the page without `coleccion`.
@@ -1254,11 +1332,16 @@ the owner on 2026-11-06).** Criteria 82 to 89 still hold; these add the look of 
     2026-11-06 amendment) to the left of its label, the three illustrations the same
     height, a white background when not chosen, and no tab, chosen or not, with a dark
     background.
+    *(Amended 2026-11-19, issue #174: with Casual items the tabs are "Todos", "Casual",
+    "Especial Navidad" and "Escolar", each with its illustration, all four the same
+    height.)*
 94. Given any tab chosen ("Todos" at `/`, "Especial Navidad" at `/?coleccion=navidad`,
     "Especial Escolar" at `/?coleccion=escolar`), when the visitor reads the row, then
     only that tab has `aria-current="page"`, the soft yellow background, the 3 px
     outline and the offset shadow, and the other tabs have a white background, the
     2 px outline and no shadow.
+    *(Amended 2026-11-19, issue #174: also "Casual" at `/?coleccion=casual`; the third
+    tab reads "Escolar".)*
 95. Given the tabs, when they are read by a screen reader or the accessibility tree,
     then each illustration has `alt=""`, the accessible name of each tab is exactly its
     label, and every illustration is a file under `/img/` of at most 30 KB with its
@@ -1402,6 +1485,53 @@ pages in their new look.
      `/_next/static/media/` whose file name carries a content hash, and that address
      answers 200 with a WebP image.
 
+**A "Casual" collection tab, and "Escolar" (amendment of 2026-11-19, issue #174,
+approved by the owner on 2026-11-19).** Criteria 82 to 89 and 93 to 102 still hold, with the amendments above.
+
+121. Given published Personas items in "Casual", in "Especial Navidad" and in
+     "Escolar", when a visitor opens the home page with no `coleccion`, then the row
+     "Colecciones" shows exactly the tabs "Todos", "Casual", "Especial Navidad" and
+     "Escolar", in that order, "Todos" has `aria-current="page"`, "Casual" links to
+     `/?coleccion=casual#colecciones`, "Escolar" links to
+     `/?coleccion=escolar#colecciones`, and no text on the page or in the panel reads
+     "Especial Escolar".
+122. Given a published Personas product and pack in "Casual", a product in "Casual"
+     and "Especial Navidad", and a product in no collection, when the visitor opens
+     `/?coleccion=casual`, then "Casual" has `aria-current="page"`, "Productos" lists
+     only the two Casual products and "Packs" only the Casual pack; the product in
+     both also shows at `/?coleccion=navidad`; and all of them show in "Todos".
+123. Given no published Personas item in "Casual" (an unpublished one and an Empresas
+     one in it), when the home page opens, then there is no "Casual" tab,
+     `/?coleccion=casual` shows "Todos", and neither item is listed on the home page.
+124. Given the tabs, when JavaScript is turned off and a visitor chooses "Casual", then
+     the address is `/?coleccion=casual#colecciones`, the view is that collection with
+     the tabs in view, loading the same address again shows the same view, and the
+     page's title, description, canonical address and the sitemap are those of the
+     home page.
+125. Given the production server, when `/?coleccion=casual` has been loaded once and
+     a Casual item is changed directly in the database, then the view does not show
+     the change (it is served from the cache, criterion 97); and when the admin saves a
+     published Personas item with "Casual" checked in the panel, then the next load of
+     `/?coleccion=casual` shows it (criterion 98).
+126. Given the admin creating or editing a product or pack, when they open the form,
+     then the "Colecciones" field has exactly the checkboxes "Casual", "Especial
+     Navidad" and "Escolar", in that order, none checked for a new item, with the hint
+     "Todos los productos salen siempre en «Todos»."; when they save a published
+     Personas item with "Casual" checked, then it appears under the "Casual" tab and in
+     "Todos" without a deploy; and when they uncheck it and save, then it is gone from
+     that tab and stays in "Todos".
+127. Given the "Casual" tab, when a visitor sees it at 360 px and at 1280 px, then it
+     is a pill like the others with the illustration `/img/tab-casual.svg` to the left
+     of its label, `alt=""` and its width and height set, the same height as the other
+     three illustrations, the file at most 30 KB and served as an SVG image; and when
+     it is chosen, it has the soft yellow background, the 3 px outline and the offset
+     shadow, and the other three do not.
+128. Given the four tabs at 360 px and at 1280 px, when the page is used with the
+     keyboard only, then each tab is at least 44 by 44 px with a visible focus, the
+     page has no horizontal scroll, the four tabs fit on one line at 1280 px, label
+     text contrast is at least 4.5:1 and the outlines at least 3:1, all visible text is
+     Spanish, and axe reports no serious or critical violation.
+
 
 | # | Criterion | Layer |
 |---|-----------|-------|
@@ -1478,6 +1608,12 @@ pages in their new look.
 | 117 | Company header logo size with the cropped file | End to end (Playwright) at 360 and 1280 px reading the `<img>` box |
 | 118, 119 | Company logo as tall as the people's logo from 768 px; stacked and as wide below | End to end (Playwright) at 360 and 1280 px against local Supabase, reading both logos' boxes and the line's display |
 | 120 | Content-hashed logo address in both headers | End to end (Playwright) reading the `src` of the `<img>` in the people's and the company header and requesting it |
+| 121, 122, 123 | Four tabs and their order, the Casual view, the empty and hidden cases | Unit test for the shared collection list (three values, order, labels) and the pure functions that pick and filter the collection; end to end (Playwright) at 360 and 1280 px against local Supabase with seeded fake Casual items, with axe; the empty case unpublishes them in the test and restores them (in `tests/e2e/isolated/`) |
+| 124 | Casual without JavaScript, shareable, home page metadata and sitemap | End to end (Playwright) with JavaScript disabled, reading the address, the tags and the sitemap of the running server |
+| 125 | Casual view served from the cache and refreshed on admin save | End to end (Playwright) on the production server (`CI=1`) against local Supabase, as a throwaway admin |
+| 126 | Three checkboxes in order, saving and removing Casual without a deploy | End to end (Playwright) against local Supabase as a throwaway admin; a unit test for the form input parser (the three values, none allowed) |
+| 127 | Casual illustration: file, size, height, `alt`, chosen look | End to end (Playwright) at 360 and 1280 px reading the image, its attributes, rendered height and the tab's computed style; the unit test that checks the size of the files in `public/img/` covers the SVG; screenshots attached to the PR |
+| 128 | Four tabs: keyboard, 44 px, no horizontal scroll, one line at 1280 px, contrast, axe | End to end (Playwright) at 360 and 1280 px with axe |
 
 Final check before announcing: on a real phone, sign in as the admin, add a product
 with a photo, see it on the public page, tap every button, and send one real WhatsApp
