@@ -10,7 +10,7 @@ const tabs = (page: Page) => page.getByRole("navigation", { name: "Colecciones" 
 const VIEWS = [
   { path: "/", chosen: "Todos", image: "/img/tab-todos.webp" },
   { path: "/?coleccion=navidad", chosen: "Especial Navidad", image: "/img/tab-navidad.webp" },
-  { path: "/?coleccion=escolar", chosen: "Especial Escolar", image: "/img/tab-escolar.webp" },
+  { path: "/?coleccion=escolar", chosen: "Escolar", image: "/img/tab-escolar.webp" },
 ] as const;
 const LABELS = VIEWS.map((v) => v.chosen);
 

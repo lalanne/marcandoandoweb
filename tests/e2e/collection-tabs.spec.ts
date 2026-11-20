@@ -56,7 +56,7 @@ test("[002-AC82] the home page shows the Colecciones row between the hero and Pr
   expect((await links.allInnerTexts()).map((t) => t.trim())).toEqual([
     "Todos",
     "Especial Navidad",
-    "Especial Escolar",
+    "Escolar",
   ]);
   await expect(tabs(page)).toHaveAttribute("id", "colecciones");
   await expect(tabs(page).locator('[aria-current="page"]')).toHaveCount(1);
@@ -68,7 +68,7 @@ test("[002-AC82] the home page shows the Colecciones row between the hero and Pr
     "href",
     "/?coleccion=navidad#colecciones",
   );
-  await expect(tabs(page).getByRole("link", { name: "Especial Escolar" })).toHaveAttribute(
+  await expect(tabs(page).getByRole("link", { name: "Escolar" })).toHaveAttribute(
     "href",
     "/?coleccion=escolar#colecciones",
   );
@@ -96,7 +96,7 @@ test("[002-AC82] the home page shows the Colecciones row between the hero and Pr
   await expect(card(productos(page), COMPANY)).toHaveCount(0);
 });
 
-test("[002-AC83] Especial Navidad lists only its products and its packs, and Especial Escolar hides Packs", async ({
+test("[002-AC83] Especial Navidad lists only its products and its packs, and Escolar hides Packs", async ({
   page,
 }) => {
   await open(page, "/?coleccion=navidad");
@@ -114,7 +114,7 @@ test("[002-AC83] Especial Navidad lists only its products and its packs, and Esp
   await expect(card(packs(page), NONE_PACK)).toHaveCount(0);
 
   await open(page, "/?coleccion=escolar");
-  await expect(tabs(page).getByRole("link", { name: "Especial Escolar" })).toHaveAttribute(
+  await expect(tabs(page).getByRole("link", { name: "Escolar" })).toHaveAttribute(
     "aria-current",
     "page",
   );
@@ -251,7 +251,7 @@ test("[002-AC87] the tabs work with the keyboard, are at least 44 px, wrap witho
   }
 
   // Reachable with the keyboard, with a visible focus.
-  const escolar = tabs(page).getByRole("link", { name: "Especial Escolar" });
+  const escolar = tabs(page).getByRole("link", { name: "Escolar" });
   await escolar.focus();
   expect(
     await escolar.evaluate((el) => {
@@ -261,14 +261,14 @@ test("[002-AC87] the tabs work with the keyboard, are at least 44 px, wrap witho
   ).toBe(true);
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\?coleccion=escolar#colecciones$/);
-  await expect(tabs(page).getByRole("link", { name: "Especial Escolar" })).toHaveAttribute(
+  await expect(tabs(page).getByRole("link", { name: "Escolar" })).toHaveAttribute(
     "aria-current",
     "page",
   );
   await expect(tabs(page).locator('[aria-current="page"]')).toHaveCount(1);
 
   // Contrast: the chosen tab and a not chosen one.
-  for (const name of ["Especial Escolar", "Todos"]) {
+  for (const name of ["Escolar", "Todos"]) {
     const colors = await tabs(page)
       .getByRole("link", { name })
       .evaluate((el) => {
@@ -382,9 +382,10 @@ test.describe("admin form", () => {
     await page.goto("/panel/productos/nuevo");
     await expect(group(page)).toBeVisible();
     const boxes = group(page).getByRole("checkbox");
-    await expect(boxes).toHaveCount(2);
+    await expect(boxes).toHaveCount(3);
+    await expect(group(page).getByRole("checkbox", { name: "Casual" })).not.toBeChecked();
     await expect(group(page).getByRole("checkbox", { name: "Especial Navidad" })).not.toBeChecked();
-    await expect(group(page).getByRole("checkbox", { name: "Especial Escolar" })).not.toBeChecked();
+    await expect(group(page).getByRole("checkbox", { name: "Escolar" })).not.toBeChecked();
     await expect(group(page).getByText("Todos los productos salen siempre en «Todos».")).toBeVisible();
 
     await page.getByLabel("Nombre", { exact: true }).fill(name);
@@ -396,7 +397,7 @@ test.describe("admin form", () => {
     });
     const edit = page.url();
     await expect(group(page).getByRole("checkbox", { name: "Especial Navidad" })).toBeChecked();
-    await expect(group(page).getByRole("checkbox", { name: "Especial Escolar" })).not.toBeChecked();
+    await expect(group(page).getByRole("checkbox", { name: "Escolar" })).not.toBeChecked();
 
     await open(page, "/?coleccion=navidad");
     await expect(card(productos(page), name)).toBeVisible();

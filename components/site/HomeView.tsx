@@ -17,9 +17,9 @@ import { HowToOrder, Schools } from "@/components/site/StaticSections";
  * header links and sections included, is built once and served without a database
  * read; only the header's session link is per request. The page cannot read
  * `?coleccion=` inside the cache, so each view is its own prerendered page:
- * `/` is "Todos" (`collection` null) and `/colecciones/navidad` and
- * `/colecciones/escolar` are the views `/?coleccion=navidad` and
- * `/?coleccion=escolar` are rewritten to (next.config.ts). The visitor only ever
+ * `/` is "Todos" (`collection` null) and `/colecciones/casual`,
+ * `/colecciones/navidad` and `/colecciones/escolar` are the views `/?coleccion=casual`,
+ * `/?coleccion=navidad` and `/?coleccion=escolar` are rewritten to (next.config.ts). The visitor only ever
  * sees the first addresses.
  */
 export function HomeView({ collection }: { collection: string | null }) {

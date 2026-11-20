@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   // rule and gets `/`. Not in the sitemap, and the page has the home page's tags.
   async rewrites() {
     return {
-      beforeFiles: ["navidad", "escolar"].map((collection) => ({
+      beforeFiles: ["casual", "navidad", "escolar"].map((collection) => ({
         source: "/",
         has: [{ type: "query" as const, key: "coleccion", value: collection }],
         destination: `/colecciones/${collection}`,
