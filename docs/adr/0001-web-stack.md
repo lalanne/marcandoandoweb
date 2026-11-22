@@ -166,6 +166,9 @@ quoting anything to the client:
 - The domain `marcandoando.cl` is registered at NIC Chile, in the client's name
   (bought by Javiera, 2026-10). `.cl` domains expire and must be renewed; check
   NIC Chile's current renewal period and price before quoting her.
+- Zoho Mail's Forever Free plan (chosen for email, action 7) is free for up to 5
+  users; its availability varies by region, so confirm it is offered when signing
+  up from Chile.
 
 ## Action Items
 
@@ -186,3 +189,22 @@ quoting anything to the client:
        email records when editing the website's. The owner handles access to
        the NIC Chile account; never put registrar credentials in the repo or
        in chat.
+       - **Email provider (decided 2026-11-22, #106): Zoho Mail, Forever Free
+         plan.** It is the only free option compared (Zoho, ImprovMX, Cloudflare
+         Email Routing) that gives a real mailbox that sends as
+         `@marcandoando.cl` with DKIM on the domain, so replies pass SPF, DKIM
+         and DMARC instead of going out signed as gmail.com. Cloudflare was ruled
+         out because, per third-party guides, it needs the nameservers moved to
+         Cloudflare, which would touch the website's records. Known limits: up to 5
+         users with 5 GB each; no IMAP, POP or ActiveSync on the free plan, so
+         Javiera reads and sends with the Zoho Mail app, not Gmail or iPhone Mail; a
+         6th user requires a paid plan for everyone. Upgrade path if needed: Zoho Mail
+         Lite (paid, adds IMAP), with no change of MX records.
+       - **Address:** to be chosen by the owner (for example `contacto@`).
+       - **Records:** MX, SPF (TXT), DKIM (TXT) and DMARC (TXT on `_dmarc`), with
+         the exact values copied from Zoho's admin console when the domain is
+         added. Start DMARC at `p=none` and tighten it once mail flows. Do not touch
+         the Vercel records (`@` and `www`).
+       - **Where the DNS records are kept:** _to be confirmed by the owner_ (NIC
+         Chile's DNS or Vercel's, whichever the nameservers point to). Record it
+         here when the records are added. No credentials in this file.
