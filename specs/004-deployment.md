@@ -1,6 +1,6 @@
 # 004 — Deployment Pipeline
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25)
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25). The amendment for #130, Vercel Web Analytics (criteria 19 to 21, criterion 13 amended), was approved by the owner on 2026-11-22
 
 Sources: [spec 002](002-launch-0.md) (criteria 20 and 24),
 [spec 003](003-ci-and-testing.md), [ADR-0001](../docs/adr/0001-web-stack.md). Issue
@@ -171,6 +171,51 @@ browser and a small health route.
   fails the run so the owner sees it, and rollback stays manual.
 - `/api/health` is public and returns only `ok` or `error`, so it reveals nothing
   an attacker could use.
+
+## Amendment: Vercel Web Analytics
+
+**2026-11-22 amendment - visit counts (issue #130). Approved by the owner on
+2026-11-22.** The owner wants to see how many people visit the site and which pages
+they view. Vercel Web Analytics counts page views without cookies, so no consent
+banner is needed. It is part of Vercel, already in the stack (ADR-0001), so it adds no
+provider. Turning it on in the Vercel dashboard is not enough: the page must load
+Vercel's script, which the `<Analytics />` component of `@vercel/analytics` adds.
+
+Criteria 19 to 21 are added and criterion 13 is amended:
+
+19. Given any page of the site (the public pages, `/entrar` and `/panel`), when a
+    production build renders it, then it loads the Vercel Web Analytics script
+    (`/_vercel/insights/script.js`) exactly once. It comes from `<Analytics />` of
+    `@vercel/analytics/next`, rendered once in the root layout, with the package
+    pinned to an exact version. Page views are counted for the admin's visits too
+    **(interpretation)**: the issue asks for every page, and the panel's are few.
+20. Given the script outside Vercel (local development, the CI production build) or
+    on Vercel before the owner enables Analytics, when it is requested, then it
+    answers 404. That 404 does not break the site and does not fail the end-to-end
+    tests or the smoke test (criterion 13 below).
+21. Given the repository, when read, then `CLAUDE.md` (Deploy) says the owner enables
+    Web Analytics in the Vercel project (Analytics tab, "Enable"), that visits are
+    counted from the next accepted deploy, and where to read them.
+
+**Criterion 13, amended.** Requests under `/_vercel/insights/` are left out of the
+smoke test's "no request fails" check, and so is the console error the browser
+prints for them ("Failed to load resource" naming that URL). Nothing else is left
+out: any other failed request, HTTP status of 400 or more or console error still
+fails the check. Reason: the script is Vercel's, it is 404 until the owner enables
+Analytics, and a missing visit counter must not mark a working deploy as failed.
+The smoke test therefore does not check that Analytics works; the owner sees that in
+the Analytics tab.
+
+Out of scope: Speed Insights, custom events (for example clicks on the WhatsApp
+button), any other analytics provider, and cookie banners or privacy text.
+
+Verification:
+
+| # | Criterion | How |
+|---|-----------|-----|
+| 19 | Script on every page | End to end against the production build at 360 and 1280 px: `/`, a product page, `/empresas`, `/entrar` and `/panel` (signed in as the seeded admin) each have exactly one script whose `src` ends in `/_vercel/insights/script.js` |
+| 20 | 404 is harmless | End to end: the smoke spec run against the local production build (where the script is 404) still passes, and a unit test of the smoke test's filter shows only `/_vercel/insights/` URLs are ignored (a 404 or console error for any other URL still counts) |
+| 21 | Docs | Read `CLAUDE.md` |
 
 ## Open questions
 
