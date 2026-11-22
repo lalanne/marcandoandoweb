@@ -1,6 +1,6 @@
 # 004 — Deployment Pipeline
 
-**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25). The amendment for #130, Vercel Web Analytics (criteria 19 to 21, criterion 13 amended), is a draft awaiting the owner's approval
+**Status:** approved (by the owner, 2026-10-31, with the amendment of that date, issue #63; first approved by the owner on 2026-10-25). The amendment for #130, Vercel Web Analytics (criteria 19 to 21, criterion 13 amended), was approved by the owner on 2026-11-22
 
 Sources: [spec 002](002-launch-0.md) (criteria 20 and 24),
 [spec 003](003-ci-and-testing.md), [ADR-0001](../docs/adr/0001-web-stack.md). Issue
@@ -174,8 +174,8 @@ browser and a small health route.
 
 ## Amendment: Vercel Web Analytics
 
-**2026-11-22 amendment - visit counts (issue #130). Draft, awaiting the owner's
-approval.** The owner wants to see how many people visit the site and which pages
+**2026-11-22 amendment - visit counts (issue #130). Approved by the owner on
+2026-11-22.** The owner wants to see how many people visit the site and which pages
 they view. Vercel Web Analytics counts page views without cookies, so no consent
 banner is needed. It is part of Vercel, already in the stack (ADR-0001), so it adds no
 provider. Turning it on in the Vercel dashboard is not enough: the page must load
