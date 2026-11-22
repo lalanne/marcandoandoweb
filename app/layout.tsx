@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -36,7 +37,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${fredoka.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {/* Vercel Web Analytics (spec 004, criterion 19): counts page views without cookies. */}
+        <Analytics />
+      </body>
     </html>
   );
 }

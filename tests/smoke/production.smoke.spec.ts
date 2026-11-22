@@ -5,6 +5,7 @@ import {
   type BrowserContext,
   type Page,
 } from "@playwright/test";
+import { isIgnoredConsoleError, isIgnoredRequest } from "./analytics-filter";
 
 // Spec 004, criteria 12 to 16: the post-deploy smoke test of the live site.
 //
@@ -58,14 +59,17 @@ test("[004-AC13] the home page loads without errors", async ({
     const page = await context.newPage();
     const problems: string[] = [];
     page.on("console", (m) => {
-      if (m.type() === "error") problems.push(`console error: ${m.text()}`);
+      // Only Vercel Web Analytics' script is left out (criterion 13, amended).
+      if (m.type() === "error" && !isIgnoredConsoleError(m.text(), m.location().url))
+        problems.push(`console error: ${m.text()}`);
     });
     page.on("pageerror", (e) => problems.push(`page error: ${e.message}`));
-    page.on("requestfailed", (r) =>
-      problems.push(`request failed: ${r.url()}`),
-    );
+    page.on("requestfailed", (r) => {
+      if (!isIgnoredRequest(r.url())) problems.push(`request failed: ${r.url()}`);
+    });
     page.on("response", (r) => {
-      if (r.status() >= 400) problems.push(`HTTP ${r.status()}: ${r.url()}`);
+      if (r.status() >= 400 && !isIgnoredRequest(r.url()))
+        problems.push(`HTTP ${r.status()}: ${r.url()}`);
     });
     try {
       const response = await page.goto("/");

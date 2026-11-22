@@ -96,6 +96,10 @@ supersedes an older pending one.
     then the response is 200, the hero and the "Cotizar por WhatsApp" button are
     visible, none of the known error texts ("Reload to try again", "A server error
     occurred") appear, the console has no errors, and no request fails.
+
+    **2026-11-22 amendment (issue #130).** Requests under `/_vercel/insights/` and
+    the browser's console error for them are left out of this check, and nothing
+    else; see "Amendment: Vercel Web Analytics" below.
 14. Given a visitor who is not signed in, when the smoke test requests `/panel`, then
     it is redirected to `/entrar`.
 15. Given `GET /api/health` with a working database connection and correct Supabase
@@ -118,6 +122,22 @@ supersedes an older pending one.
 18. Given a passing smoke test, when the run ends, then the summary says so, next to
     the production URL and the commit.
 
+    **2026-11-22 amendment (issue #130).** Criteria 19 to 21 are added; see
+    "Amendment: Vercel Web Analytics" below.
+19. Given any page of the site (the public pages, `/entrar` and `/panel`), when a
+    production build renders it, then it loads the Vercel Web Analytics script
+    (`/_vercel/insights/script.js`) exactly once. It comes from `<Analytics />` of
+    `@vercel/analytics/next`, rendered once in the root layout, with the package
+    pinned to an exact version. Page views are counted for the admin's visits too
+    **(interpretation)**: the issue asks for every page, and the panel's are few.
+20. Given the script outside Vercel (local development, the CI production build) or
+    on Vercel before the owner enables Analytics, when it is requested, then it
+    answers 404. That 404 does not break the site and does not fail the end-to-end
+    tests or the smoke test (criterion 13 above).
+21. Given the repository, when read, then `CLAUDE.md` (Deploy) says the owner enables
+    Web Analytics in the Vercel project (Analytics tab, "Enable"), that visits are
+    counted from the next accepted deploy, and where to read them.
+
 ## Verification plan
 
 Run on the demo project (free plans), not on a customer's production.
@@ -134,6 +154,9 @@ Run on the demo project (free plans), not on a customer's production.
 | 15 | Health route | Integration tests against local Supabase: 200 with correct settings; 503 and no detail with a wrong URL and with a wrong key; headers |
 | 12, 13, 14, 16 | Smoke test behavior | A Playwright smoke spec with a configurable base URL, run in CI against the local production build, including a failing case (misconfigured Supabase URL) that must fail with the page-crash text; the spec sends only GET requests (asserted in the spec) |
 | 17, 18 | Run result | The first real accepted deploy after the build, plus one deliberately failing run against a throwaway deployment where the smoke test is pointed at a broken URL |
+| 19 | Script on every page | End to end against the production build at 360 and 1280 px: `/`, a product page, `/empresas`, `/entrar` and `/panel` (signed in as the seeded admin) each have exactly one script whose `src` ends in `/_vercel/insights/script.js` |
+| 20 | 404 is harmless | End to end: the smoke spec run against the local production build (where the script is 404) still passes, and a unit test of the smoke test's filter shows only `/_vercel/insights/` URLs are ignored (a 404 or console error for any other URL still counts) |
+| 21 | Docs | Read `CLAUDE.md` |
 
 The workflow's shell logic that can be tested without GitHub (the path filter that
 decides whether a deploy is needed) gets unit tests first, per spec 003.
@@ -181,21 +204,7 @@ banner is needed. It is part of Vercel, already in the stack (ADR-0001), so it a
 provider. Turning it on in the Vercel dashboard is not enough: the page must load
 Vercel's script, which the `<Analytics />` component of `@vercel/analytics` adds.
 
-Criteria 19 to 21 are added and criterion 13 is amended:
-
-19. Given any page of the site (the public pages, `/entrar` and `/panel`), when a
-    production build renders it, then it loads the Vercel Web Analytics script
-    (`/_vercel/insights/script.js`) exactly once. It comes from `<Analytics />` of
-    `@vercel/analytics/next`, rendered once in the root layout, with the package
-    pinned to an exact version. Page views are counted for the admin's visits too
-    **(interpretation)**: the issue asks for every page, and the panel's are few.
-20. Given the script outside Vercel (local development, the CI production build) or
-    on Vercel before the owner enables Analytics, when it is requested, then it
-    answers 404. That 404 does not break the site and does not fail the end-to-end
-    tests or the smoke test (criterion 13 below).
-21. Given the repository, when read, then `CLAUDE.md` (Deploy) says the owner enables
-    Web Analytics in the Vercel project (Analytics tab, "Enable"), that visits are
-    counted from the next accepted deploy, and where to read them.
+Criteria 19 to 21 are added to the acceptance criteria above, and criterion 13 is amended:
 
 **Criterion 13, amended.** Requests under `/_vercel/insights/` are left out of the
 smoke test's "no request fails" check, and so is the console error the browser
@@ -209,13 +218,7 @@ the Analytics tab.
 Out of scope: Speed Insights, custom events (for example clicks on the WhatsApp
 button), any other analytics provider, and cookie banners or privacy text.
 
-Verification:
-
-| # | Criterion | How |
-|---|-----------|-----|
-| 19 | Script on every page | End to end against the production build at 360 and 1280 px: `/`, a product page, `/empresas`, `/entrar` and `/panel` (signed in as the seeded admin) each have exactly one script whose `src` ends in `/_vercel/insights/script.js` |
-| 20 | 404 is harmless | End to end: the smoke spec run against the local production build (where the script is 404) still passes, and a unit test of the smoke test's filter shows only `/_vercel/insights/` URLs are ignored (a 404 or console error for any other URL still counts) |
-| 21 | Docs | Read `CLAUDE.md` |
+Verification: criteria 19 to 21 are in the Verification plan above.
 
 ## Open questions
 
