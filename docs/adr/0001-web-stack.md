@@ -149,8 +149,8 @@ The price of A is paid hosting. The owner accepts this in return for one stack.
 
 **To revisit**
 - Cart and online payment (out of the first stage).
-- Moving DNS to Vercel and away from the registrar's DNS, as `duplaweb`'s README
-  suggests.
+- ~~Moving DNS to Vercel and away from the registrar's DNS, as `duplaweb`'s README
+  suggests.~~ Done: the DNS lives on Vercel (owner, 2026-11-22; see action 7).
 - Whether a lighter admin (or Supabase's own table editor) is enough for the first
   release.
 
@@ -205,6 +205,7 @@ quoting anything to the client:
          the exact values copied from Zoho's admin console when the domain is
          added. Start DMARC at `p=none` and tighten it once mail flows. Do not touch
          the Vercel records (`@` and `www`).
-       - **Where the DNS records are kept:** _to be confirmed by the owner_ (NIC
-         Chile's DNS or Vercel's, whichever the nameservers point to). Record it
-         here when the records are added. No credentials in this file.
+       - **Where the DNS records are kept:** Vercel DNS (owner, 2026-11-22). The
+         email records are added in the Vercel dashboard (the domain's DNS
+         Records), next to the website's records but never edited together with
+         them. No credentials in this file.
