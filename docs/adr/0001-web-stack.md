@@ -200,7 +200,7 @@ quoting anything to the client:
          Javiera reads and sends with the Zoho Mail app, not Gmail or iPhone Mail; a
          6th user requires a paid plan for everyone. Upgrade path if needed: Zoho Mail
          Lite (paid, adds IMAP), with no change of MX records.
-       - **Address:** to be chosen by the owner (for example `contacto@`).
+       - **Address:** `contacto@marcandoando.cl` (owner, 2026-11-22).
        - **Records:** MX, SPF (TXT), DKIM (TXT) and DMARC (TXT on `_dmarc`), with
          the exact values copied from Zoho's admin console when the domain is
          added. Start DMARC at `p=none` and tighten it once mail flows. Do not touch
