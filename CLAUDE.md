@@ -421,7 +421,8 @@ installs Chromium and runs `npm run test:smoke` (`tests/smoke/`,
 occurred", has no console errors or failed requests; that `/panel` signed out goes
 to `/entrar`; and that `/api/health` answers `{"status":"ok"}` (it reads the
 products with the public client; 503 `{"status":"error"}` and nothing else
-otherwise). It only sends GET requests and uses no credentials or secrets. Each
+otherwise). Requests under `/_vercel/insights/` (Web Analytics, 404 until enabled) and
+the console error for them are left out of that check, nothing else. It only sends GET requests and uses no credentials or secrets. Each
 check retries for up to 60 seconds while the new deployment goes live.
 - **The owner sets `PRODUCTION_URL`** once as a variable of the `production`
   environment: `https://marcandoandoweb.vercel.app` today, `https://marcandoando.cl`
@@ -456,6 +457,19 @@ just started. Read it with `curl -sI <url> | grep -i server-timing` or in the
 browser's Network tab. Durations and the cold flag only (`lib/server-timing.ts`); a
 404 or 503 carries none, so it reveals nothing. Product pages carry none: nothing
 reads the database before they start (criterion 101).
+
+**Web Analytics (#130, spec 004 criteria 19 to 21).** `<Analytics />` from
+`@vercel/analytics/next` (pinned in `package.json`) is rendered once in
+`app/layout.tsx`, so every page, `/panel` included, loads Vercel's script
+`/_vercel/insights/script.js`; it counts page views without cookies. The owner enables
+it once in the Vercel project (Analytics tab, "Enable"). Visits are counted from the
+next accepted deploy, and are read in the Vercel dashboard's Analytics tab. The script
+is 404 outside Vercel (local development, the CI production build) and on Vercel until
+Analytics is enabled; the site works the same, and the smoke test ignores only
+`/_vercel/insights/` (`tests/smoke/analytics-filter.ts`), so it does not check that
+Analytics works: the owner sees that in the Analytics tab. The e2e check
+(`tests/e2e/web-analytics.spec.ts`) runs against the production build only (`CI=1`),
+because development loads a debug script from another host.
 
 **Migration rule.** Migrations are forward-only and run before the new code, and the
 old code keeps serving if the deploy fails afterwards. So each migration must work
