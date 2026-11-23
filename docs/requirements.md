@@ -86,11 +86,15 @@ These need an answer from Javiera or a decision by the developer before the
 related spec can be approved.
 
 1. **Contact email.** She says she does not have one yet. Needed for the
-   footer and the optional contact form.
+   footer and the optional contact form. **Update 2026-11-22:** a mailbox on
+   `@marcandoando.cl` now exists (Zoho Mail, #106). Showing an address on the
+   site is a follow-up, once the owner confirms which one (spec 002,
+   criterion 15).
 2. **Domain name.** ~~Which one, and who registers it?~~ **Resolved
    2026-10-23:** Javiera registered `marcandoando.cl` at NIC Chile, in her
-   name. Still open: where its DNS is hosted and which email provider to use
-   (see ADR-0001, action item 7).
+   name. ~~Still open: where its DNS is hosted and which email provider to
+   use.~~ **Resolved 2026-11-22:** DNS is hosted on Vercel and email is Zoho
+   Mail (see ADR-0001, action item 7, and #106).
 3. **WhatsApp link.** The requirements give `wa.me/56982661835`; Instagram
    uses a `w.app/VMJF8o` short link. Confirm which is the canonical one.
 4. **Price example.** "Botella metálica, 600 mil" is probably a typo
